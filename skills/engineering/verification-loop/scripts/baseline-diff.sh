@@ -22,27 +22,52 @@
 #   PRE   両方で出ている      = 元から赤。そう述べて先へ進む。
 #   FIXED 基点だけで出ていた  = この変更が直したもの。
 #
-# 終了コード: NEW が1件でもあれば 1、なければ 0。
+# 終了コード:
+#   0  NEW なし
+#   1  NEW あり
+#   2  比較できなかった(使い方の誤り、ゲートを実行できない、比較対象がない、
+#      作業ツリーを戻せなかった)。1 と 2 は必ず区別すること。
 #
-# 作業ツリーは stash / detach で一時的に動かし、EXIT trap で必ず元へ戻す。
+# 注意: 作業ツリーは `git stash --include-untracked` と detach で一時的に動かし、
+# EXIT trap で必ず元へ戻す。未追跡ファイルも退避するので、ゲートが未追跡の
+# ファイル(.env、生成済みフィクスチャなど)に依存している場合、基点側の実行が
+# その不在で落ちて偽の NEW になりうる。そういうゲートには使わない。
 
 set -uo pipefail
+
+usage() {
+  printf 'usage: baseline-diff.sh [--base <ref>] [--extract <regex>] -- <gate-command...>\n' >&2
+}
 
 BASE="HEAD"
 EXTRACT=""
 while [ $# -gt 0 ]; do
   case "$1" in
-    --base) BASE="$2"; shift 2 ;;
-    --extract) EXTRACT="$2"; shift 2 ;;
+    --base) [ $# -ge 2 ] || { printf -- '--base に ref がない\n' >&2; usage; exit 2; }; BASE="$2"; shift 2 ;;
+    --extract) [ $# -ge 2 ] || { printf -- '--extract に regex がない\n' >&2; usage; exit 2; }; EXTRACT="$2"; shift 2 ;;
     --) shift; break ;;
-    *) printf 'unknown option: %s\n' "$1" >&2; exit 2 ;;
+    *) printf 'unknown option: %s\n' "$1" >&2; usage; exit 2 ;;
   esac
 done
 
-[ $# -gt 0 ] || { printf 'usage: baseline-diff.sh [--base <ref>] [--extract <regex>] -- <gate-command...>\n' >&2; exit 2; }
+[ $# -gt 0 ] || { printf 'ゲートのコマンドがない\n' >&2; usage; exit 2; }
+GATE=("$@")
 
 git rev-parse --git-dir >/dev/null 2>&1 || { printf 'not a git repository\n' >&2; exit 2; }
 git rev-parse --verify --quiet "$BASE" >/dev/null || { printf 'cannot resolve base: %s\n' "$BASE" >&2; exit 2; }
+command -v "${GATE[0]}" >/dev/null 2>&1 || { printf 'ゲートのコマンドが見つからない: %s\n' "${GATE[0]}" >&2; exit 2; }
+
+# 何かを走らせる前に、そもそも比較になるかを確かめる。ここを通さないと、
+# クリーンなツリーを自分自身と比べて「NEW なし」という無意味な緑が出る。
+DIRTY=0
+if ! git diff --quiet HEAD 2>/dev/null || [ -n "$(git ls-files --others --exclude-standard)" ]; then
+  DIRTY=1
+fi
+if [ "$(git rev-parse "$BASE")" = "$(git rev-parse HEAD)" ] && [ "$DIRTY" -eq 0 ]; then
+  printf '比較対象がない: 作業ツリーはクリーンで、基点も HEAD である。\n' >&2
+  printf 'コミット済みの基点と比べるなら --base <ref> を渡すこと。\n' >&2
+  exit 2
+fi
 
 WORK="$(mktemp -d)"
 STASHED=0
@@ -78,22 +103,34 @@ collect() {
   fi
 }
 
-"$@" 2>&1 | collect > "$WORK/now"
+# ゲートが「問題を見つけた」のと「そもそも実行できなかった」のを混ぜない。
+# 混ぜると、実行できなかったときのエラーメッセージが差分として現れ、偽の
+# NEW になる。
+run_gate() {
+  local out="$1" rc
+  "${GATE[@]}" 2>&1 | collect > "$out"
+  rc="${PIPESTATUS[0]}"
+  if [ "$rc" -eq 126 ] || [ "$rc" -eq 127 ]; then
+    printf 'ゲートを実行できなかった(終了コード %s): %s\n' "$rc" "${GATE[*]}" >&2
+    return 1
+  fi
+}
 
-if ! git diff --quiet HEAD 2>/dev/null || [ -n "$(git ls-files --others --exclude-standard)" ]; then
+run_gate "$WORK/now" || exit 2
+
+if [ "$DIRTY" -eq 1 ]; then
   git stash push --quiet --include-untracked --message "baseline-diff.sh" || {
-    printf 'could not stash the working tree; aborting without running the base\n' >&2
+    printf '作業ツリーを stash できなかった。基点を走らせずに中止する。\n' >&2
     exit 2
   }
   STASHED=1
 fi
 
-[ "$(git rev-parse "$BASE")" = "$(git rev-parse HEAD)" ] || git checkout --quiet --detach "$BASE" || {
-  printf 'could not check out base: %s\n' "$BASE" >&2
-  exit 2
-}
+if [ "$(git rev-parse "$BASE")" != "$(git rev-parse HEAD)" ]; then
+  git checkout --quiet --detach "$BASE" || { printf 'cannot check out base: %s\n' "$BASE" >&2; exit 2; }
+fi
 
-"$@" 2>&1 | collect > "$WORK/base"
+run_gate "$WORK/base" || exit 2
 
 restore || exit 2
 

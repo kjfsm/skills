@@ -11,6 +11,7 @@ disable-model-invocation: true
 - **イシュートラッカー** — イシューがどこにあるか(デフォルトは GitHub。ローカルの markdown もそのまま対応)
 - **トリアージラベル** — 5つの正規のトリアージロールに使われる文字列
 - **ドメインドキュメント** — `CONTEXT.md` と ADR がどこにあり、それらを読む側のルールは何か
+- **検証ゲート** — 変更が動くと確かめるために、どのコマンドをどの順で走らせるか
 
 これはプロンプト駆動のスキルであり、決定的なスクリプトではない。探索し、見つけたものを提示し、ユーザーと確認し、それから書く。
 
@@ -26,6 +27,7 @@ disable-model-invocation: true
 - `docs/adr/` とあらゆる `src/*/docs/adr/` ディレクトリ
 - `docs/agents/` — このスキルの過去の出力がすでに存在するか?
 - `.scratch/` — ローカル markdown のイシュートラッカー規約がすでに使われている印
+- `package.json` の scripts、`Makefile`、`Taskfile`、`turbo.json`、`.github/workflows/*.yml` などの CI 設定 — このリポジトリが実際に使っている検証コマンド。加えて、アプリを起動する手段(開発サーバー、CLI のエントリ、E2E のランナー)
 - `triage` スキルはインストールされているか?(このスキルの隣にある `triage` スキルのフォルダ、または利用可能なスキルの中に `triage` があるか)これによって Section B をそもそも実行するかどうかが決まる。
 - モノレポの兆候 — `pnpm-workspace.yaml`、`package.json` の `workspaces` フィールド、または独自の `src/` を持つ中身のある `packages/*`。本当に大きな複数パッケージのリポジトリにのみ存在する。これらがなければ単一コンテキストであり、それがほぼすべてのリポジトリに当てはまる。
 
@@ -60,12 +62,22 @@ disable-model-invocation: true
 
 **複数コンテキスト** — コンテキストごとの `CONTEXT.md` ファイルを指すルートの `CONTEXT-MAP.md` — は、探索でモノレポの兆候が見つかったときにだけ提案する。そのうえで、どちらの配置を望むか確認する。
 
+**Section D — 検証ゲート。** 変更が本当に動くと確かめる方法 — `/verification-loop` が上から順に走らせるコマンド列。
+
+探索で **実際に見つけたコマンドだけ** から提案する。慣習から推測して埋めない。そのうえで1問だけ尋ねる:
+
+> この順序でよいですか?(推奨: 速いものから — 型チェック → lint → テスト → ビルド → 観測)
+
+**観測** の行は他と違う。これはアプリを起動して、変更した経路を実際に1度通す手段である(開発サーバーの起動コマンドと叩く URL、Playwright スクリプト、CLI の呼び出しなど)。駆動できるものが何もないリポジトリでは空のままにし、その理由を書く。
+
+**カスタムチェック** — 汎用のリンターが見逃す、このリポジトリ固有の決定的なルール。デフォルトは **なし** であり、こちらから捻り出さない。`/verification-loop` のラチェットが、実際に手作業で捕まえた不具合からここを埋めていく。
+
 ### 3. 確認して編集する
 
 ユーザーに次の下書きを見せる:
 
 - 編集対象となる `CLAUDE.md` / `AGENTS.md` のどちらかに追加する `## Agent skills` ブロック(選び方は手順4を参照)
-- `docs/agents/issue-tracker.md`、`docs/agents/domain.md`、`docs/agents/triage-labels.md` の内容(最後のものは `triage` がインストールされている場合のみ)
+- `docs/agents/issue-tracker.md`、`docs/agents/domain.md`、`docs/agents/verification.md`、`docs/agents/triage-labels.md` の内容(最後のものは `triage` がインストールされている場合のみ)
 
 書く前に、ユーザーに編集させる。
 
@@ -97,6 +109,10 @@ disable-model-invocation: true
 ### Domain docs
 
 [one-line summary of layout — "single-context" or "multi-context"]. See `docs/agents/domain.md`.
+
+### Verification gates
+
+[one-line summary of the gate chain]. See `docs/agents/verification.md`.
 ```
 
 `### Triage labels` サブブロックの記載と `docs/agents/triage-labels.md` の作成は、`triage` がインストールされていて Section B が実行された場合にのみ行う。そうでない場合は、両方とも省略する。
@@ -108,6 +124,7 @@ disable-model-invocation: true
 - [issue-tracker-local.md](./issue-tracker-local.md) — ローカル markdown イシュートラッカー
 - [triage-labels.md](./triage-labels.md) — ラベルの対応付け(`triage` がインストールされている場合のみ)
 - [domain.md](./domain.md) — ドメインドキュメントを読む側のルール+配置
+- [verification.md](./verification.md) — 検証ゲート、観測の手段、カスタムチェック
 
 「その他」のイシュートラッカーについては、ユーザーの説明を使ってゼロから `docs/agents/issue-tracker.md` を書く。
 

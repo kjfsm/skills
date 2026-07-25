@@ -1,0 +1,3 @@
+interface:
+  display_name: "Verification Loop"
+  short_description: "Take a clean run before calling it done"

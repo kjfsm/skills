@@ -1,0 +1,3 @@
+interface:
+  display_name: "Setup CF App"
+  short_description: "Scaffold a Cloudflare Workers full-stack app"

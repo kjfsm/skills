@@ -1,0 +1,3 @@
+# 改行コードを LF に統一（OS 差での差分ノイズを防ぐ）
+* text=auto eol=lf
+*.sh text eol=lf

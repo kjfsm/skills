@@ -1,0 +1,3 @@
+interface:
+  display_name: "AI Efficiency"
+  short_description: "Mechanical bulk file move/rename strategy"

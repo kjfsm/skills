@@ -1,0 +1,23 @@
+{
+  "name": "kjfsm",
+  "owner": {
+    "name": "kjfsm",
+    "url": "https://github.com/kjfsm"
+  },
+  "description": "実務のエンジニアリングのための kjfsm のスキル集を、インストール可能な Claude Code プラグインとして提供する。",
+  "plugins": [
+    {
+      "name": "kjfsm-skills",
+      "source": "./",
+      "description": "実務のエンジニアリングのための kjfsm のエージェントスキル集 — グリリング、スペック/チケットフロー、TDD、コードレビュー、ドメインモデリングなど。",
+      "category": "engineering",
+      "keywords": [
+        "engineering",
+        "skills",
+        "tdd",
+        "code-review",
+        "grilling"
+      ]
+    }
+  ]
+}

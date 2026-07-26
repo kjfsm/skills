@@ -1,0 +1,3 @@
+interface:
+  display_name: "Delegation"
+  short_description: "Push verbose work into subagents, match the model tier"

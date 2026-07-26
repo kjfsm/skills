@@ -80,6 +80,7 @@ claude plugin install kjfsm-skills@kjfsm
 - **[tdd](./skills/engineering/tdd/SKILL.md)** — レッド・グリーン・リファクタリングのループによるテスト駆動開発。機能を作るのもバグを直すのも、一度に1つの垂直スライスずつ進める。
 - **[domain-modeling](./skills/engineering/domain-modeling/SKILL.md)** — プロジェクトのドメインモデルを能動的に構築し研ぎ澄ます — 用語集に照らして用語に異議を唱え、エッジケースのシナリオでストレステストし、`CONTEXT.md` と ADR をその場で更新する。
 - **[codebase-design](./skills/engineering/codebase-design/SKILL.md)** — 深いモジュールを設計するための共有された規律と語彙: 小さなインターフェースの裏に多くの振る舞いを隠し、きれいなシームに置き、そのインターフェースを通してテスト可能にする。
+- **[delegation](./skills/engineering/delegation/SKILL.md)** — 作業をどこで走らせるかの共有された語彙: 出力が大量で後から読み返さない作業をサブエージェントの子コンテキストへ押し出し、探索や事実確認は下位モデルに、設計判断は上位モデルに回す。
 - **[verification-loop](./skills/engineering/verification-loop/SKILL.md)** — 変更が本当に動くことを **クリーンラン** で確かめる: 記録された検証ゲートを中断なく1回で通し、そのうえで変更した経路を実際に駆動して観測の証拠を残す。
 - **[code-review](./skills/engineering/code-review/SKILL.md)** — 固定した基点からの差分に対する二軸レビュー: **Standards**(リポジトリのコーディング標準に従っているか、加えて Fowler のコードスメルの基準を満たしているか)と **Spec**(元になったイシュー/PRD を忠実に実装しているか)。互いを汚染しないよう並列のサブエージェントとして実行する。
 - **[resolving-merge-conflicts](./skills/engineering/resolving-merge-conflicts/SKILL.md)** — 進行中の git マージやリベースのコンフリクトを、ハンクごとに、双方の一次情報源にたどれる意図に基づいて解決し、そのうえで操作を完了させる — `--abort` は決して使わない。

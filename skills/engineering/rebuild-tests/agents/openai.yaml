@@ -1,0 +1,3 @@
+interface:
+  display_name: "Rebuild Tests"
+  short_description: "Rebuild a test suite that has gone bad"

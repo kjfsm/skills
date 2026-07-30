@@ -55,7 +55,7 @@ env の受け取り方は経路ごとに決めておく。
 `@cloudflare/vitest-pool-workers` を上げたとき、あるいは古いスイートを復元したときに当たるもの。
 
 - **`cloudflare:test` の `env` / `SELF` は非推奨** → `cloudflare:workers` の `env` / `exports.default.fetch()`。ドキュメントのページにはまだ非推奨の記載がないので、型定義を見て判断する
-- **`defineWorkersProject` は `cloudflare_test()` プラグインに置き換わった**（v0.13）。`plugins: [cloudflareTest({ wrangler: { configPath } })]` の形になる
+- **`defineWorkersProject` は `cloudflareTest()` プラグインに置き換わった**（v0.13）。`plugins: [cloudflareTest({ wrangler: { configPath } })]` の形になる
 - **ストレージと Durable Object の分離が「テストごと」から「テストファイルごと」に変わった**（v0.13）。同じ `idFromName` を使い回すと前のテストの状態が残る。公式 fixture と同じく `crypto.randomUUID()` を混ぜて毎回別のインスタンスを引くか、`afterEach` で `reset()`（全バインディングのデータを削除）/ `abortAllDurableObjects()`（インスタンスのみリセット・永続データは残す）を呼ぶ
 - **request-scoped なストアの中身が変わっていれば、テスト用ヘルパーの引数も直す**（`AsyncLocalStorage` に env を積むのをやめた、など）
 

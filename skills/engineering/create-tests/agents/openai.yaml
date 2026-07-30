@@ -1,0 +1,3 @@
+interface:
+  display_name: "Create Tests"
+  short_description: "Start a test suite from zero"

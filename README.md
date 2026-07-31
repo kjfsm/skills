@@ -16,7 +16,7 @@ Claude Code に次の1行を貼れば、あとはエージェントが[セット
 Fetch https://raw.githubusercontent.com/kjfsm/skills/main/setup.md
 ```
 
-自分の手で入れたい場合は、以下のどちらかを選ぶ。
+自分の手で入れたい場合は、以下から選ぶ。
 
 ### 選択肢 A: ローカルのハーネススキルディレクトリへシンボリックリンクする
 
@@ -44,7 +44,20 @@ claude plugin marketplace add kjfsm/skills
 claude plugin install kjfsm-skills@kjfsm
 ```
 
-どちらの方法でも、他のエンジニアリング系スキルを使う前にリポジトリごとに一度 **`/setup-skills`** を実行すること。これは次のことを行う:
+### 選択肢 C: `npx skills` でコピーとして入れる
+
+スキルの **実体** を手元に置きたい場合(このリポジトリを clone せずに使いたい、プロジェクトに同梱したい、など):
+
+```bash
+npx -y skills add kjfsm/skills
+```
+
+- 何が入るかを先に見るには `--list`、個別に選ぶには `--skill tdd,code-review`、対象ハーネスを決め打ちするには `--agent claude-code` を付ける。
+- プロジェクト内で実行するとそのプロジェクトのスキルディレクトリ(`.claude/skills/` など)へ**実ファイルとしてコピー**され、`skills-lock.json` が作られる。`--global` を付けるとユーザーレベル(`~/.claude/skills`)に入る。
+- コピーなので `git pull` では追随しない。更新は `npx skills update`、`skills-lock.json` からの復元は `npx skills experimental_install`。
+- この CLI はリポジトリ全体を走査するため、`--skill '*'` は `deprecated/` や `in-progress/` まで含めて全スキルを入れてしまう。昇格済みの集合だけが欲しいなら選択肢 B を使うか、`--skill` で名前を挙げること。
+
+どの方法でも、他のエンジニアリング系スキルを使う前にリポジトリごとに一度 **`/setup-skills`** を実行すること。これは次のことを行う:
 
 - どのイシュートラッカーを使うか尋ねる(GitHub、Linear、ローカルファイル)
 - チケットをトリアージするときに適用するラベルを尋ねる(`/triage` がラベルを使う)

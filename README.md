@@ -8,6 +8,16 @@ Claude Code、Codex、その他 Agent-Skills 標準に準拠したハーネス�
 
 ## インストール
 
+### いちばん手っ取り早い方法: Claude に貼る
+
+Claude Code に次の1行を貼れば、あとはエージェントが[セットアップ手順](./setup.md)を読んでインストールまで済ませる:
+
+```
+Fetch https://raw.githubusercontent.com/kjfsm/skills/main/setup.md
+```
+
+自分の手で入れたい場合は、以下のどちらかを選ぶ。
+
 ### 選択肢 A: ローカルのハーネススキルディレクトリへシンボリックリンクする
 
 リポジトリのルートから:

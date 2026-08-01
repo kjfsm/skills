@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+
+      - name: Check repository invariants
+        run: scripts/check-invariants.sh
+
+      # `--strict` is deliberately omitted: it escalates "no version specified"
+      # to an error, and this plugin intentionally ships without a `version` so
+      # that the commit SHA drives updates. See CLAUDE.md.
+      - name: Validate marketplace and plugin manifests
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          claude plugin validate .
+
+      - name: Check formatting
+        run: |
+          npm install
+          npm run format:check

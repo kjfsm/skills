@@ -1,0 +1,5 @@
+interface:
+  display_name: "Tend CLAUDE.md"
+  short_description: "Write or trim a CLAUDE.md"
+policy:
+  allow_implicit_invocation: false

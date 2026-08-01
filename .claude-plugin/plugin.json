@@ -25,6 +25,7 @@
     "./skills/engineering/triage",
     "./skills/engineering/improve-codebase-architecture",
     "./skills/engineering/setup-skills",
+    "./skills/engineering/tend-claude-md",
     "./skills/engineering/tdd",
     "./skills/engineering/to-spec",
     "./skills/engineering/to-tickets",

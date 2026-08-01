@@ -11,9 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
+          cache: pnpm
 
       - name: Check repository invariants
         run: scripts/check-invariants.sh
@@ -22,11 +25,9 @@ jobs:
       # to an error, and this plugin intentionally ships without a `version` so
       # that the commit SHA drives updates. See CLAUDE.md.
       - name: Validate marketplace and plugin manifests
-        run: |
-          npm install -g @anthropic-ai/claude-code
-          claude plugin validate .
+        run: pnpm dlx @anthropic-ai/claude-code plugin validate .
 
       - name: Check formatting
         run: |
-          npm install
-          npm run format:check
+          pnpm install --frozen-lockfile
+          pnpm format:check

@@ -6,6 +6,7 @@
       "Bash(find:*)",
       "Bash(sort:*)",
       "Bash(grep:*)",
+      "Bash(cd:*)",
       "Bash(git status:*)",
       "Bash(git branch:*)",
       "Bash(git diff:*)",
@@ -14,7 +15,7 @@
       "Bash(scripts/check-invariants.sh)",
       "Bash(scripts/list-skills.sh)",
       "Bash(claude plugin validate:*)",
-      "Bash(npm run format:check)"
+      "Bash(pnpm format:check)"
     ]
   }
 }

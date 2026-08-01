@@ -55,8 +55,11 @@ while IFS= read -r skill_md; do
 
   # 3. the two harnesses agree on who may invoke the skill
   if [ -f "$yaml" ]; then
+    # Read the frontmatter only — a skill body may quote these fields as an example.
     claude_user_invoked=no
-    grep -qi '^disable-model-invocation:[[:space:]]*\(true\|yes\|on\|1\)[[:space:]]*$' "$skill_md" && claude_user_invoked=yes
+    frontmatter "$skill_md" |
+      grep -qi '^disable-model-invocation:[[:space:]]*"\?\(true\|yes\|on\|1\)"\?[[:space:]]*$' &&
+      claude_user_invoked=yes
     codex_user_invoked=no
     grep -q 'allow_implicit_invocation:[[:space:]]*false' "$yaml" && codex_user_invoked=yes
     [ "$claude_user_invoked" = "$codex_user_invoked" ] ||

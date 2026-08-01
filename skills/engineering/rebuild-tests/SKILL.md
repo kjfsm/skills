@@ -1,7 +1,6 @@
 ---
 name: rebuild-tests
-description: Cloudflare Workers のプロジェクトで、既存のテストスイートを立て直すときの規律。
-when_to_use: vitest.config が複雑すぎる、テストが遅い・OOM する、vi.mock だらけで信用できない、@cloudflare/vitest-pool-workers を上げたら壊れた、テストを消して作り直したい、というときに使う。
+description: Cloudflare Workers のプロジェクトで、既存のテストスイートを立て直すときの規律。vitest.config が複雑すぎる、テストが遅い・OOM する、vi.mock だらけで信用できない、@cloudflare/vitest-pool-workers を上げたら壊れた、テストを消して作り直したい、というときに使う。
 ---
 
 # テストスイートを立て直す（Cloudflare Workers）

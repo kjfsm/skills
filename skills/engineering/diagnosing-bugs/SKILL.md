@@ -1,7 +1,6 @@
 ---
 name: diagnosing-bugs
-description: 手強いバグやパフォーマンスのリグレッションのための診断ループ。
-when_to_use: 'ユーザーが "diagnose"/"debug this" と言ったとき、あるいは何かが壊れている/例外を投げている/失敗している/遅いと報告したときに使う。'
+description: '手強いバグやパフォーマンスのリグレッションのための診断ループ。ユーザーが "diagnose"/"debug this" と言ったとき、あるいは何かが壊れている/例外を投げている/失敗している/遅いと報告したときに使う。'
 ---
 
 # Diagnosing Bugs

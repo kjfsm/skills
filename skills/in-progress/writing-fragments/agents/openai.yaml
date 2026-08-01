@@ -1,5 +1,5 @@
 interface:
-  display_name: "Writing Fragments"
-  short_description: "Mine raw writing fragments"
+  display_name: "フラグメントを掘り出す"
+  short_description: "生の書き物の断片を掘り出す"
 policy:
   allow_implicit_invocation: false

@@ -1,0 +1,3 @@
+interface:
+  display_name: "二軸レビュー"
+  short_description: "差分を Standards と Spec の二軸でレビューする"

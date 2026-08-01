@@ -1,5 +1,5 @@
 interface:
-  display_name: "Tend CLAUDE.md"
-  short_description: "Write or trim a CLAUDE.md"
+  display_name: "CLAUDE.md の手入れ"
+  short_description: "CLAUDE.md を書く、またはトリムする"
 policy:
   allow_implicit_invocation: false

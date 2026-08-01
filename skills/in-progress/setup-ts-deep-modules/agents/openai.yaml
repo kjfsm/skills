@@ -1,5 +1,5 @@
 interface:
-  display_name: "Setup TS Deep Modules"
-  short_description: "Enforce deep TypeScript modules"
+  display_name: "TS 深いモジュールのセットアップ"
+  short_description: "TypeScript の深いモジュール境界を強制する"
 policy:
   allow_implicit_invocation: false

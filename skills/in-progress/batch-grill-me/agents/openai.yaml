@@ -1,5 +1,5 @@
 interface:
-  display_name: "Batch Grill Me"
-  short_description: "Sharpen a plan a round of questions at a time"
+  display_name: "バッチグリリング"
+  short_description: "ラウンド単位の質問で計画を研ぎ澄ます"
 policy:
   allow_implicit_invocation: false

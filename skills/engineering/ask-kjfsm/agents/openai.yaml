@@ -1,5 +1,5 @@
 interface:
   display_name: "Ask kjfsm"
-  short_description: "Find the right skill or workflow"
+  short_description: "自分の状況に合うスキルとフローを探す"
 policy:
   allow_implicit_invocation: false

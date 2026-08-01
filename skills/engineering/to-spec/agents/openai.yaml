@@ -1,5 +1,5 @@
 interface:
-  display_name: "To Spec"
-  short_description: "Turn a conversation into a spec"
+  display_name: "スペックにする"
+  short_description: "会話をスペックに変換する"
 policy:
   allow_implicit_invocation: false

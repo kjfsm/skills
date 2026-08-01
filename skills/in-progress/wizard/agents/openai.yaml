@@ -1,5 +1,5 @@
 interface:
-  display_name: "Wizard"
-  short_description: "Generate an interactive setup wizard"
+  display_name: "ウィザード"
+  short_description: "対話式のセットアップウィザードを生成する"
 policy:
   allow_implicit_invocation: false

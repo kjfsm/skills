@@ -11,13 +11,7 @@
       "source": "./",
       "description": "実務のエンジニアリングのための kjfsm のエージェントスキル集 — グリリング、スペック/チケットフロー、TDD、コードレビュー、ドメインモデリングなど。",
       "category": "engineering",
-      "keywords": [
-        "engineering",
-        "skills",
-        "tdd",
-        "code-review",
-        "grilling"
-      ]
+      "keywords": ["engineering", "skills", "tdd", "code-review", "grilling"]
     }
   ]
 }

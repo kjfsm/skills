@@ -28,17 +28,17 @@ disable-model-invocation: true
 
 ## Order lifecycle
 
-| Term        | Definition                                              | Aliases to avoid      |
-| ----------- | -------------------------------------------------------- | --------------------- |
-| **Order**   | 顧客が1つ以上の商品を購入したいという要求      | Purchase, transaction |
-| **Invoice** | 配送後に顧客へ送られる支払い請求 | Bill, payment request |
+| Term        | Definition                                | Aliases to avoid      |
+| ----------- | ----------------------------------------- | --------------------- |
+| **Order**   | 顧客が1つ以上の商品を購入したいという要求 | Purchase, transaction |
+| **Invoice** | 配送後に顧客へ送られる支払い請求          | Bill, payment request |
 
 ## People
 
-| Term         | Definition                                  | Aliases to avoid       |
-| ------------ | -------------------------------------------- | ---------------------- |
-| **Customer** | 注文を行う個人または組織 | Client, buyer, account |
-| **User**     | システム内の認証アイデンティティ    | Login, account         |
+| Term         | Definition                       | Aliases to avoid       |
+| ------------ | -------------------------------- | ---------------------- |
+| **Customer** | 注文を行う個人または組織         | Client, buyer, account |
+| **User**     | システム内の認証アイデンティティ | Login, account         |
 
 ## Relationships
 

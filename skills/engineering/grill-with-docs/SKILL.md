@@ -4,4 +4,6 @@ description: 計画やデザインを研ぎ澄ますための容赦ないイン�
 disable-model-invocation: true
 ---
 
+# ドキュメント付きグリリング
+
 `/domain-modeling` スキルを使って `/grilling` セッションを実行する。

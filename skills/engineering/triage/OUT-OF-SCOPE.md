@@ -20,7 +20,7 @@
 
 このファイルは、データベースのエントリというより短い設計ドキュメントのような、肩の力を抜いた読みやすいスタイルで書くべきである。段落、コードサンプル、例を使い、初めてそれに出会う人にとって理由が明快で役立つようにする。
 
-```markdown
+````markdown
 # Dark Mode
 
 This project does not support dark mode or user-facing theming.
@@ -45,12 +45,14 @@ interface ThemeConfig {
   fonts: FontStack;
 }
 ```
+````
 
 ## Prior requests
 
 - #42 — "Add dark mode support"
 - #87 — "Night theme for accessibility"
 - #134 — "Dark theme option"
+
 ```
 
 ### ファイルの名付け方
@@ -103,3 +105,4 @@ interface ThemeConfig {
 - `.out-of-scope/` ファイルを削除する
 - このスキルは古いイシューを再オープンする必要はない — それらは過去の記録である
 - 再検討のきっかけとなった新しいイシューは、通常のトリアージを進む
+```

@@ -1,6 +1,6 @@
 {
   "name": "kjfsm-skills",
-  "version": "0.1.0",
+  "displayName": "kjfsm Skills",
   "description": "実務のエンジニアリングのための kjfsm のエージェントスキル集 — グリリング、スペック/チケットフロー、TDD、コードレビュー、ドメインモデリングなど。差し込んですぐ使える、雰囲気で書くものではない。",
   "author": {
     "name": "kjfsm",
@@ -27,6 +27,8 @@
     "./skills/engineering/setup-skills",
     "./skills/engineering/tend-claude-md",
     "./skills/engineering/tdd",
+    "./skills/engineering/create-tests",
+    "./skills/engineering/rebuild-tests",
     "./skills/engineering/to-spec",
     "./skills/engineering/to-tickets",
     "./skills/engineering/wayfinder",
@@ -37,7 +39,7 @@
     "./skills/engineering/codebase-design",
     "./skills/engineering/delegation",
     "./skills/engineering/verification-loop",
-    "./skills/engineering/code-review",
+    "./skills/engineering/two-axis-review",
     "./skills/engineering/resolving-merge-conflicts",
     "./skills/productivity/grill-me",
     "./skills/productivity/grilling",

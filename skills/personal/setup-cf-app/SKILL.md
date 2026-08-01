@@ -9,20 +9,20 @@ description: 新規の Cloudflare Workers フルスタックアプリを、い�
 
 ## 標準ライブラリ構成
 
-| 分類 | 採用 |
-| --- | --- |
-| パッケージ管理 | pnpm |
-| フレームワーク | React Router(framework mode / SSR)+ React |
-| ランタイム/配備 | Cloudflare Workers(wrangler + `@cloudflare/vite-plugin`) |
-| ビルド | Vite |
-| DB | Cloudflare D1 + Drizzle ORM |
-| 認証 | better-auth(email/password + `socialProviders`。未対応のみ arctic で補完) |
-| UI | Tailwind CSS + shadcn/ui |
-| 検証 | zod |
-| ID / 日付 | nanoid / date-fns + `@date-fns/tz` |
-| Lint / Format | oxlint + oxfmt |
-| テスト | Vitest(+ `@cloudflare/vitest-pool-workers`)+ Playwright(E2E) |
-| 型 | `wrangler types` + `react-router typegen` + `tsc -b` |
+| 分類            | 採用                                                                      |
+| --------------- | ------------------------------------------------------------------------- |
+| パッケージ管理  | pnpm                                                                      |
+| フレームワーク  | React Router(framework mode / SSR)+ React                                 |
+| ランタイム/配備 | Cloudflare Workers(wrangler + `@cloudflare/vite-plugin`)                  |
+| ビルド          | Vite                                                                      |
+| DB              | Cloudflare D1 + Drizzle ORM                                               |
+| 認証            | better-auth(email/password + `socialProviders`。未対応のみ arctic で補完) |
+| UI              | Tailwind CSS + shadcn/ui                                                  |
+| 検証            | zod                                                                       |
+| ID / 日付       | nanoid / date-fns + `@date-fns/tz`                                        |
+| Lint / Format   | oxlint + oxfmt                                                            |
+| テスト          | Vitest(+ `@cloudflare/vitest-pool-workers`)+ Playwright(E2E)              |
+| 型              | `wrangler types` + `react-router typegen` + `tsc -b`                      |
 
 ## 準備・設定の参照先
 

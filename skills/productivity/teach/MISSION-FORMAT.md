@@ -1,5 +1,7 @@
 # MISSION.md の形式
 
+テンプレートは **形** の見本である。書く言語はリポジトリの既存文書に合わせる — 見本が英語であることは、英語で書く理由にならない。
+
 `MISSION.md` はワークスペースのルートに置かれる。ユーザーがこのトピックを学んでいる _理由_ を記録する。何を次に教えるか、どのリソースを提示するか、どんな演習を設計するかといった、あらゆる指導上の決定は、このドキュメントにたどれるべきである。
 
 ## テンプレート
@@ -8,17 +10,21 @@
 # Mission: {Topic}
 
 ## Why
+
 {1-3 sentences. The concrete real-world goal the user is chasing. What changes in their life or work when they have this skill? Avoid abstract framings like "to understand X" — push for the underlying outcome.}
 
 ## Success looks like
+
 - {A specific, observable thing the user will be able to do}
 - {Another specific thing}
 - {…}
 
 ## Constraints
+
 - {Time, budget, prior commitments, learning preferences, anything that bounds the approach}
 
 ## Out of scope
+
 - {Adjacent topics the user explicitly does not want to chase right now — protects the zone of proximal development}
 ```
 

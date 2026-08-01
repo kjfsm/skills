@@ -90,6 +90,7 @@ npx -y skills add kjfsm/skills
 - **[triage](./skills/engineering/triage/SKILL.md)** — トリアージロールのステートマシンに沿ってイシューを進める。
 - **[improve-codebase-architecture](./skills/engineering/improve-codebase-architecture/SKILL.md)** — コードベースをスキャンして深化の機会を見つけ、視覚的な HTML レポートとして提示し、選んだものについてグリリングする。
 - **[setup-skills](./skills/engineering/setup-skills/SKILL.md)** — このリポジトリをエンジニアリング系スキル向けに設定する(イシュートラッカー、トリアージラベル、ドメインドキュメントの配置)。他のエンジニアリング系スキルを使う前にリポジトリごとに一度実行する。
+- **[tend-claude-md](./skills/engineering/tend-claude-md/SKILL.md)** — CLAUDE.mdを新規に書く、または既存のものを監査してトリムする。200行未満を目安に、具体的で矛盾のない指示だけを残す。
 - **[to-spec](./skills/engineering/to-spec/SKILL.md)** — 今の会話をスペックに変換し、イシュートラッカーへ公開する。インタビューはせず、すでに話し合った内容をまとめるだけ。
 - **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — どんな計画・スペック・会話も、それぞれがブロッキングエッジを宣言するトレーサーバレット方式のチケットの集合へ分割する — ローカルファイルへのテキストとして、あるいは実際のトラッカー上のネイティブなブロッキングリンクとして書かれる。
 - **[implement](./skills/engineering/implement/SKILL.md)** — スペックやチケットの集合が記述する作業をビルドする。事前に合意したシームで `/tdd` を駆動し、`/verification-loop` でクリーンランを取り、コミット前に `/code-review` で締めくくる。

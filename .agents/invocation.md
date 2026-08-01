@@ -5,6 +5,8 @@
 - **ユーザー呼び出し型** — **人間がその名前を入力したときだけ**到達できる。frontmatter で `disable-model-invocation: true`(Claude Code)、`agents/openai.yaml` で `policy.allow_implicit_invocation: false`(Codex)を設定する。`description` は **人間向け**: スラッシュコマンドを眺める人が読む1行の要約。トリガー文のリスト("Use when the user says…")は取り除く。
 - **モデル呼び出し型** — **モデルからもユーザーからも**到達できる。デフォルトはこちら: `disable-model-invocation` と `agents/openai.yaml` の `policy` ブロックを省略する。`description` は **モデル向け** であり、自動呼び出しが働くよう豊富なトリガー表現("Use when the user wants…, mentions…, asks for…")を保つ。あるスキルをモデル呼び出し型のままにすべきかどうかの判定基準は: _モデルがこれを自律的に使いこなせるか?_ である(再利用性はスキルを切り出す理由ではあっても、この判定基準ではない)。
 
+  トリガー表現は `description` の中に置き、`when_to_use` には **分けない**。あれは Claude Code の独自拡張であり、[Agent Skills 標準](https://agentskills.io/specification)の frontmatter は `name` / `description` / `license` / `compatibility` / `metadata` / `allowed-tools` だけを定めている — 標準は「そのスキルが何をするか」と「いつ使うか」を両方 `description` に書くことを前提にしている。分けると、Claude Code 以外のハーネスではトリガー表現がまるごと読み飛ばされる。
+
 各ハーネスはそれぞれ独自のやり方でユーザー呼び出し型のスキルをモデルの到達範囲から除外するので、人間以外にはそれを発火できない — 他のどのスキルにもできない。ユーザー呼び出し型のスキルはモデル呼び出し型のスキルを呼び出せるが、別のユーザー呼び出し型のスキルには決して到達できない。
 
 すべてのスキルは、その `SKILL.md` のそばに `agents/openai.yaml` も持つ。そこには Codex の UI メタデータ — スキルピッカー用の `interface.display_name` と `interface.short_description` — と、ユーザー呼び出し型のスキルについては `disable-model-invocation` と対になる `policy.allow_implicit_invocation: false` が入る。この2つは同期させておくこと: あるスキルは両方のハーネスでユーザー呼び出し型か、どちらでもないかのいずれかである。

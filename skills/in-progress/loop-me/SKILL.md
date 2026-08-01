@@ -5,6 +5,8 @@ disable-model-invocation: true
 argument-hint: "A workflow to design, or nothing to go find one"
 ---
 
+# ワークフローを設計する
+
 出力が**ワークフロー**仕様のみとなる、ステートフルな `/grilling` セッションを実行する。グリリングの規律 — 容赦なく、一度に一問ずつ、それぞれに推奨回答を添える — を、以下の語彙とゴールに向けて用いる。グリリングが物事を解決していくにつれて、仕様を作成・編集・削除する。
 
 ## ループのレンズ

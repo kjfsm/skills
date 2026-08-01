@@ -52,10 +52,12 @@ claude plugin install kjfsm-skills@kjfsm
 npx -y skills add kjfsm/skills
 ```
 
-- 何が入るかを先に見るには `--list`、個別に選ぶには `--skill tdd,code-review`、対象ハーネスを決め打ちするには `--agent claude-code` を付ける。
+- 何が入るかを先に見るには `--list`、個別に選ぶには `--skill tdd,two-axis-review`、対象ハーネスを決め打ちするには `--agent claude-code` を付ける。
 - プロジェクト内で実行するとそのプロジェクトのスキルディレクトリ(`.claude/skills/` など)へ**実ファイルとしてコピー**され、`skills-lock.json` が作られる。`--global` を付けるとユーザーレベル(`~/.claude/skills`)に入る。
 - コピーなので `git pull` では追随しない。更新は `npx skills update`、`skills-lock.json` からの復元は `npx skills experimental_install`。
 - この CLI はリポジトリ全体を走査するため、`--skill '*'` は `deprecated/` や `in-progress/` まで含めて全スキルを入れてしまう。昇格済みの集合だけが欲しいなら選択肢 B を使うか、`--skill` で名前を挙げること。
+
+**3つの方法は併用しない。** 同じスキルが2系統で入ると、スラッシュコマンドが重複し、常時読み込まれる description も二重に数えられる。このリポジトリを開発するなら選択肢 A、使うだけなら選択肢 B を選ぶ。
 
 どの方法でも、他のエンジニアリング系スキルを使う前にリポジトリごとに一度 **`/setup-skills`** を実行すること。これは次のことを行う:
 
@@ -93,7 +95,7 @@ npx -y skills add kjfsm/skills
 - **[tend-claude-md](./skills/engineering/tend-claude-md/SKILL.md)** — CLAUDE.mdを新規に書く、または既存のものを監査してトリムする。行数の目安に収め、具体的で矛盾のない指示だけを残す。
 - **[to-spec](./skills/engineering/to-spec/SKILL.md)** — 今の会話をスペックに変換し、イシュートラッカーへ公開する。インタビューはせず、すでに話し合った内容をまとめるだけ。
 - **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — どんな計画・スペック・会話も、それぞれがブロッキングエッジを宣言するトレーサーバレット方式のチケットの集合へ分割する — ローカルファイルへのテキストとして、あるいは実際のトラッカー上のネイティブなブロッキングリンクとして書かれる。
-- **[implement](./skills/engineering/implement/SKILL.md)** — スペックやチケットの集合が記述する作業をビルドする。事前に合意したシームで `/tdd` を駆動し、`/verification-loop` でクリーンランを取り、コミット前に `/code-review` で締めくくる。
+- **[implement](./skills/engineering/implement/SKILL.md)** — スペックやチケットの集合が記述する作業をビルドする。事前に合意したシームで `/tdd` を駆動し、`/verification-loop` でクリーンランを取り、コミット前に `/two-axis-review` で締めくくる。
 - **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — 1つのエージェントセッションには収まらない巨大な作業のかたまりを、イシュートラッカー上の調査チケットの共有マップとして計画する — 目的地までの道が明らかになるまで、1つずつ解決していく。
 
 **モデル呼び出し型**
@@ -102,11 +104,13 @@ npx -y skills add kjfsm/skills
 - **[diagnosing-bugs](./skills/engineering/diagnosing-bugs/SKILL.md)** — 手強いバグやパフォーマンスのリグレッションのための規律ある診断ループ: 再現 → 最小化 → 仮説立て → 計測 → 修正 → リグレッションテスト。
 - **[research](./skills/engineering/research/SKILL.md)** — 信頼度の高い一次情報源に対してある問いを調査し、その発見を引用付きのマークダウンファイルとしてリポジトリに残す。バックグラウンドエージェントとして実行される。
 - **[tdd](./skills/engineering/tdd/SKILL.md)** — レッド・グリーン・リファクタリングのループによるテスト駆動開発。機能を作るのもバグを直すのも、一度に1つの垂直スライスずつ進める。
+- **[create-tests](./skills/engineering/create-tests/SKILL.md)** — Cloudflare Workers のプロジェクトで、テストが1本も無いところから作り始める。何が壊れると困るかから始め、node と workerd の2プロジェクトに分けて、依存の内側から積む。
+- **[rebuild-tests](./skills/engineering/rebuild-tests/SKILL.md)** — Cloudflare Workers のテストスイートを立て直す。vitest.config の複雑さを `vi.mock` の本数の問題として読み替え、消す前に棚卸しし、履歴から復元し、書いたテストは壊して実効性を確かめる。
 - **[domain-modeling](./skills/engineering/domain-modeling/SKILL.md)** — プロジェクトのドメインモデルを能動的に構築し研ぎ澄ます — 用語集に照らして用語に異議を唱え、エッジケースのシナリオでストレステストし、`CONTEXT.md` と ADR をその場で更新する。
 - **[codebase-design](./skills/engineering/codebase-design/SKILL.md)** — 深いモジュールを設計するための共有された規律と語彙: 小さなインターフェースの裏に多くの振る舞いを隠し、きれいなシームに置き、そのインターフェースを通してテスト可能にする。
 - **[delegation](./skills/engineering/delegation/SKILL.md)** — 作業をどこで走らせるかの共有された語彙: 出力が大量で後から読み返さない作業をサブエージェントの子コンテキストへ押し出し、探索や事実確認は下位モデルに、設計判断は上位モデルに回す。
 - **[verification-loop](./skills/engineering/verification-loop/SKILL.md)** — 変更が本当に動くことを **クリーンラン** で確かめる: 記録された検証ゲートを中断なく1回で通し、そのうえで変更した経路を実際に駆動して観測の証拠を残す。
-- **[code-review](./skills/engineering/code-review/SKILL.md)** — 固定した基点からの差分に対する二軸レビュー: **Standards**(リポジトリのコーディング標準に従っているか、加えて Fowler のコードスメルの基準を満たしているか)と **Spec**(元になったイシュー/PRD を忠実に実装しているか)。互いを汚染しないよう並列のサブエージェントとして実行する。
+- **[two-axis-review](./skills/engineering/two-axis-review/SKILL.md)** — 固定した基点からの差分に対する二軸レビュー: **Standards**(リポジトリのコーディング標準に従っているか、加えて Fowler のコードスメルの基準を満たしているか)と **Spec**(元になったイシュー/PRD を忠実に実装しているか)。互いを汚染しないよう並列のサブエージェントとして実行する。
 - **[resolving-merge-conflicts](./skills/engineering/resolving-merge-conflicts/SKILL.md)** — 進行中の git マージやリベースのコンフリクトを、ハンクごとに、双方の一次情報源にたどれる意図に基づいて解決し、そのうえで操作を完了させる — `--abort` は決して使わない。
 
 ### Productivity

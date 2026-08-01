@@ -1,3 +1,3 @@
 interface:
-  display_name: "Create Tests"
-  short_description: "Start a test suite from zero"
+  display_name: "テストを作り始める"
+  short_description: "テストがゼロの状態からテストスイートを立ち上げる"

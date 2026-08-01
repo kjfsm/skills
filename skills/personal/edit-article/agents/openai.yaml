@@ -1,5 +1,5 @@
 interface:
-  display_name: "Edit Article"
-  short_description: "Restructure and tighten a draft"
+  display_name: "記事を編集する"
+  short_description: "下書きを再構成し、引き締める"
 policy:
   allow_implicit_invocation: false

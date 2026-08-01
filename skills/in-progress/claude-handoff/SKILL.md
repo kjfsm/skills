@@ -5,6 +5,8 @@ argument-hint: "What will the next session be used for?"
 disable-model-invocation: true
 ---
 
+# Claude ハンドオフ
+
 新しいエージェントが作業を継続できるよう、現在の会話の引き継ぎサマリーを書く。保存する代わりに、そのサマリーをプロンプトとして与えたバックグラウンドエージェントを起動する: `claude --bg --name "<descriptive name>" "<handoff summary>"`。現在の作業ディレクトリで開始し、即座に制御を返す。ユーザーは `claude agents` でそれを管理する。
 
 常に `-n`/`--name` に説明的な名前を渡す(例: `--name "Fix login bug"`) — これがジョブ一覧、セッション選択、ターミナルタイトルに表示される名前になる。

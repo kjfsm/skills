@@ -1,5 +1,5 @@
 interface:
-  display_name: "Setup Skills"
-  short_description: "Configure a repo for the skills"
+  display_name: "スキルのセットアップ"
+  short_description: "このリポジトリをスキル向けに設定する"
 policy:
   allow_implicit_invocation: false

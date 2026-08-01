@@ -43,7 +43,7 @@ function processPayment(order) {
 const api = {
   getUser: (id) => fetch(`/users/${id}`),
   getOrders: (userId) => fetch(`/users/${userId}/orders`),
-  createOrder: (data) => fetch('/orders', { method: 'POST', body: data }),
+  createOrder: (data) => fetch("/orders", { method: "POST", body: data }),
 };
 
 // BAD: Mocking requires conditional logic inside the mock
@@ -53,6 +53,7 @@ const api = {
 ```
 
 SDK スタイルの意味するところ:
+
 - 各モックが1つの具体的な形だけを返す
 - テストのセットアップに条件分岐がない
 - どのテストがどのエンドポイントを使っているか見分けやすい

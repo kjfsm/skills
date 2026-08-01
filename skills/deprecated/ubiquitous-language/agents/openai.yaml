@@ -1,5 +1,5 @@
 interface:
-  display_name: "Ubiquitous Language"
-  short_description: "Build a shared domain glossary"
+  display_name: "ユビキタス言語"
+  short_description: "共有のドメイン用語集を作る"
 policy:
   allow_implicit_invocation: false

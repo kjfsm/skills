@@ -1,6 +1,6 @@
 ---
 name: create-tests
-description: Cloudflare Workers のプロジェクトで、テストが 1 本も無いところからテストを作り始めるときの規律。Workers / D1 / Durable Objects / Queues にテストを入れたい、@cloudflare/vitest-pool-workers をどう設定するか決めたい、何からテストすればいいか分からない、というときに使う。
+description: Cloudflare Workers のプロジェクトで、テストが1本も無いところからテストを作り始めるときの規律。Workers / D1 / Durable Objects / Queues にテストを入れたいとき、@cloudflare/vitest-pool-workers をどう設定するか決めたいとき、何からテストすればいいか分からないときに使う。
 ---
 
 # ゼロからテストを作り始める（Cloudflare Workers）

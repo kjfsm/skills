@@ -9,7 +9,13 @@
 
 `engineering/` または `productivity/`(**昇格済み**バケット)にあるすべてのスキルは、トップレベルの `README.md` への参照と、`.claude-plugin/plugin.json` の `skills` 配列へのエントリを持たなければならない(Claude Code プラグインは昇格済みの集合だけを出荷する)。`misc/`、`personal/`、`in-progress/`、`deprecated/` のスキルはどちらにも現れてはならない。
 
-このリポジトリ自体が単一プラグインの Claude Code マーケットプレイスでもある: `.claude-plugin/marketplace.json` は `kjfsm-skills` プラグインを1つだけ列挙している。リリースバージョンを上げるときは `.claude-plugin/plugin.json` の `version` を `package.json` のものと同期させること — Claude はプラグインの `version` を見て、インストール済みユーザーにいつ更新を表示するか決める。どちらかのマニフェストを触ったあとは `claude plugin validate . --strict` を実行する。Claude プラグインとして出荷し、(今のところ)Codex プラグインとして出荷しない理由は [.agents/adr/0002-ship-as-a-claude-code-plugin.md](./.agents/adr/0002-ship-as-a-claude-code-plugin.md) にある。
+このリポジトリ自体が単一プラグインの Claude Code マーケットプレイスでもある: `.claude-plugin/marketplace.json` は `kjfsm-skills` プラグインを1つだけ列挙している。Claude プラグインとして出荷し、(今のところ)Codex プラグインとして出荷しない理由は [.agents/adr/0002-ship-as-a-claude-code-plugin.md](./.agents/adr/0002-ship-as-a-claude-code-plugin.md) にある。
+
+`plugin.json` に `version` を **置かない**。Claude Code は version が無いとき git のコミット SHA をバージョンとして扱うので、push するたびにインストール済みユーザーへ更新が届く。`version` を書くとその文字列が固定のキャッシュキーになり、手で上げない限り更新が一切届かなくなる。リリースの刻みを持つと決めるまで、このフィールドは空けておく。
+
+`plugin.json` の `skills` 配列は、既定の `skills/` スキャンに **追加** されるのが原則で、`marketplace.json` の `source` がマーケットプレイスのルート(`"./"`)に解決される場合に限り **置き換え** になる。昇格していないバケットがプラグインに載らないのはこの例外に乗っているからなので、`source` を変えるときは `deprecated/` や `in-progress/` が出荷対象に混ざらないか確認する。
+
+マニフェストを触ったあとは `scripts/check-invariants.sh` を実行する。`claude plugin validate .` も走らせてよいが、リポジトリルートを渡すと `marketplace.json` しか検証せず `plugin.json` の壊れたパスを見逃すこと、`--strict` は `version` 不在を error に格上げしてしまうこと(上記の通り、これは意図的な状態である)に注意する。
 
 トップレベルの `README.md` にある各スキルのエントリは、スキル名をその `SKILL.md` へリンクしなければならない。
 

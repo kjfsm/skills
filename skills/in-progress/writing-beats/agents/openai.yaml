@@ -1,5 +1,5 @@
 interface:
-  display_name: "Writing Beats"
-  short_description: "Assemble raw material into beats"
+  display_name: "ビートで書く"
+  short_description: "素材をビートの旅として組み立てる"
 policy:
   allow_implicit_invocation: false

@@ -1,5 +1,5 @@
 interface:
-  display_name: "Grill Me"
-  short_description: "Sharpen a plan through interview"
+  display_name: "グリリングを受ける"
+  short_description: "インタビューで計画を研ぎ澄ます"
 policy:
   allow_implicit_invocation: false

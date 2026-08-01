@@ -19,7 +19,7 @@ UI プロトタイプは、**アプリの他の部分に隣接している** と
 
 そのルートはすでに存在する。バリアントは `?variant=` の URL クエリパラメータによって切り替えられ、**同じルート上に** 描画される。既存のデータ取得、パラメータ、認証はすべてそのまま残り、描画だけが入れ替わる。これがデフォルトである。そうしない特別な理由がない限り、これを選ぶ。
 
-プロトタイプの対象がまだページを持たないが *自然にどこかのページの中に収まる* もの(ダッシュボードの新しいセクション、設定画面の新しいカード、既存フローの新しいステップ)であっても、それは下位分類 A である。バリアントをホストとなるページの中にマウントする。
+プロトタイプの対象がまだページを持たないが _自然にどこかのページの中に収まる_ もの(ダッシュボードの新しいセクション、設定画面の新しいカード、既存フローの新しいステップ)であっても、それは下位分類 A である。バリアントをホストとなるページの中にマウントする。
 
 ### 下位分類 B — 新しいページ(最後の手段)
 
@@ -59,13 +59,13 @@ UI プロトタイプは、**アプリの他の部分に隣接している** と
 
 ```tsx
 // pseudo-code — adapt to the project's framework
-const variant = searchParams.get('variant') ?? 'A';
+const variant = searchParams.get("variant") ?? "A";
 return (
   <>
-    {variant === 'A' && <VariantA {...data} />}
-    {variant === 'B' && <VariantB {...data} />}
-    {variant === 'C' && <VariantC {...data} />}
-    <PrototypeSwitcher variants={['A','B','C']} current={variant} />
+    {variant === "A" && <VariantA {...data} />}
+    {variant === "B" && <VariantB {...data} />}
+    {variant === "C" && <VariantC {...data} />}
+    <PrototypeSwitcher variants={["A", "B", "C"]} current={variant} />
   </>
 );
 ```

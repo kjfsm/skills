@@ -18,12 +18,12 @@ export に、サーバの仕事とクライアントの仕事を同居させる�
 node -e "console.log(require('react-router/package.json').version)"
 ```
 
-| 何を知りたいか                           | 見る場所                                               |
-| ---------------------------------------- | ------------------------------------------------------ |
-| middleware の実行順・引数・`next()`      | https://reactrouter.com/how-to/middleware              |
-| route module が持てる export の一覧      | https://reactrouter.com/start/framework/route-module   |
-| `<Outlet context>` / `useOutletContext`  | https://reactrouter.com/api/hooks/useOutletContext     |
-| `useRouteLoaderData`                     | https://reactrouter.com/api/hooks/useRouteLoaderData   |
+| 何を知りたいか                          | 見る場所                                             |
+| --------------------------------------- | ---------------------------------------------------- |
+| middleware の実行順・引数・`next()`     | https://reactrouter.com/how-to/middleware            |
+| route module が持てる export の一覧     | https://reactrouter.com/start/framework/route-module |
+| `<Outlet context>` / `useOutletContext` | https://reactrouter.com/api/hooks/useOutletContext   |
+| `useRouteLoaderData`                    | https://reactrouter.com/api/hooks/useRouteLoaderData |
 
 ## 認可の強制点は middleware
 

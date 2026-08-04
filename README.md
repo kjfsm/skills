@@ -112,6 +112,7 @@ npx -y skills add kjfsm/skills
 - **[verification-loop](./skills/engineering/verification-loop/SKILL.md)** — 変更が本当に動くことを **クリーンラン** で確かめる: 記録された検証ゲートを中断なく1回で通し、そのうえで変更した経路を実際に駆動して観測の証拠を残す。
 - **[two-axis-review](./skills/engineering/two-axis-review/SKILL.md)** — 固定した基点からの差分に対する二軸レビュー: **Standards**(リポジトリのコーディング標準に従っているか、加えて Fowler のコードスメルの基準を満たしているか)と **Spec**(元になったイシュー/PRD を忠実に実装しているか)。互いを汚染しないよう並列のサブエージェントとして実行する。
 - **[resolving-merge-conflicts](./skills/engineering/resolving-merge-conflicts/SKILL.md)** — 進行中の git マージやリベースのコンフリクトを、ハンクごとに、双方の一次情報源にたどれる意図に基づいて解決し、そのうえで操作を完了させる — `--abort` は決して使わない。
+- **[react-router-route-module](./skills/engineering/react-router-route-module/SKILL.md)** — React Router（framework mode）の route module に何をどの export へ置くかの規律: 認可の強制点は `middleware`（loader と action の両方の手前を通る）、レイアウトが持つ値は `<Outlet context>` で配る。
 
 ### Productivity
 

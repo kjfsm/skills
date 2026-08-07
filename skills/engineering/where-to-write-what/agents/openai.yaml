@@ -1,0 +1,3 @@
+interface:
+  display_name: "何をどこに書くか"
+  short_description: "コメント・コミット・PR・ADR への情報のルーティング"

@@ -3,11 +3,14 @@
 - `engineering/` — 日々のコード作業
 - `productivity/` — 日々の非コード系ワークフローツール
 - `misc/` — 残してあるがほとんど使われない、昇格していない
+- `emdash/` — EmDash CMS のサイト専用。EmDash を使わないプロジェクトでは無価値なので昇格していない
 - `personal/` — この端末固有のセットアップに紐づく、昇格していない
 - `in-progress/` — まだ出荷準備が整っていない下書き
 - `deprecated/` — もう使われていない
 
-`engineering/` または `productivity/`(**昇格済み**バケット)にあるすべてのスキルは、トップレベルの `README.md` への参照と、`.claude-plugin/plugin.json` の `skills` 配列へのエントリを持たなければならない(Claude Code プラグインは昇格済みの集合だけを出荷する)。`misc/`、`personal/`、`in-progress/`、`deprecated/` のスキルはどちらにも現れてはならない。
+`engineering/` または `productivity/`(**昇格済み**バケット)にあるすべてのスキルは、トップレベルの `README.md` への参照と、`.claude-plugin/plugin.json` の `skills` 配列へのエントリを持たなければならない(Claude Code プラグインは昇格済みの集合だけを出荷する)。`misc/`、`emdash/`、`personal/`、`in-progress/`、`deprecated/` のスキルはどちらにも現れてはならない。
+
+昇格していないバケットのスキルは、プラグインではなく利用側リポジトリでの `npx skills` による実体配置で配る(`skills-lock.json` に載り、`npx skills update` で追随できる)。`emdash/` がこの経路の主な利用者である。
 
 このリポジトリ自体が単一プラグインの Claude Code マーケットプレイスでもある: `.claude-plugin/marketplace.json` は `kjfsm-skills` プラグインを1つだけ列挙している。Claude プラグインとして出荷し、(今のところ)Codex プラグインとして出荷しない理由は [.agents/adr/0002-ship-as-a-claude-code-plugin.md](./.agents/adr/0002-ship-as-a-claude-code-plugin.md) にある。
 

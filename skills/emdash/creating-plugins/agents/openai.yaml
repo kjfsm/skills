@@ -1,0 +1,3 @@
+interface:
+  display_name: "EmDash プラグインの作成"
+  short_description: "npm 配布の standard ディスクリプタ形式と、公式に載っていない Block Kit の差分"

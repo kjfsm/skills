@@ -1,0 +1,3 @@
+interface:
+  display_name: "EmDash サイトの構築"
+  short_description: "Astro 上の EmDash CMS サイトを構築・カスタマイズする"

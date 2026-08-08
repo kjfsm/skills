@@ -1,0 +1,3 @@
+interface:
+  display_name: "ローカル EmDash への MCP アクセス"
+  short_description: "ローカル dev サーバーの MCP エンドポイントをブラウザなしで叩く"

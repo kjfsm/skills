@@ -1,0 +1,3 @@
+interface:
+  display_name: "EmDash プラグインの作成"
+  short_description: "hooks・storage・管理UI・API ルートを備えた EmDash プラグインを作る"

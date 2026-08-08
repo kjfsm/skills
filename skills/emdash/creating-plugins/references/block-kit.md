@@ -131,7 +131,12 @@
 ### `date_input`
 
 ```json
-{ "type": "date_input", "action_id": "starts_at", "label": "Starts at", "placeholder": "YYYY-MM-DD" }
+{
+  "type": "date_input",
+  "action_id": "starts_at",
+  "label": "Starts at",
+  "placeholder": "YYYY-MM-DD"
+}
 ```
 
 ### `combobox`
@@ -147,7 +152,12 @@
 メディアライブラリから選ばせる。`mime_type_filter`はMIMEタイプのプレフィックス(既定`"image/"`)。
 
 ```json
-{ "type": "media_picker", "action_id": "og_image", "label": "OG Image", "mime_type_filter": "image/" }
+{
+  "type": "media_picker",
+  "action_id": "og_image",
+  "label": "OG Image",
+  "mime_type_filter": "image/"
+}
 ```
 
 ### `repeater`

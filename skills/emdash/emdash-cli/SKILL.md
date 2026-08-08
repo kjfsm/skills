@@ -42,15 +42,15 @@ npx emdash content get posts 01ABC123 --raw         # Portable Text→markdown�
 `update`は`get`で得た`_rev`トークンを要求する(楽観的並行性制御。読まずに上書きさせないための仕組み)。
 それ以外のコマンドは冪等か非破壊なので不要。
 
-| コマンド            | `--rev` | 理由                             |
-| ------------------- | ------- | -------------------------------- |
-| `content create`    | 不要    | まだ何も存在しないため           |
-| `content update`    | **必要**| 既存データを上書きするため       |
-| `content delete`    | 不要    | ソフトデリートで戻せるため       |
-| `content publish`   | 不要    | 冪等なステータス変更             |
-| `content unpublish` | 不要    | 冪等なステータス変更             |
-| `content schedule`  | 不要    | メタデータのみを変更するため     |
-| `content restore`   | 不要    | ゴミ箱から復元するため           |
+| コマンド            | `--rev`  | 理由                         |
+| ------------------- | -------- | ---------------------------- |
+| `content create`    | 不要     | まだ何も存在しないため       |
+| `content update`    | **必要** | 既存データを上書きするため   |
+| `content delete`    | 不要     | ソフトデリートで戻せるため   |
+| `content publish`   | 不要     | 冪等なステータス変更         |
+| `content unpublish` | 不要     | 冪等なステータス変更         |
+| `content schedule`  | 不要     | メタデータのみを変更するため |
+| `content restore`   | 不要     | ゴミ箱から復元するため       |
 
 競合すると`409 CONFLICT`が返る。`get`で読み直し、新しい`_rev`で`update`し直す。
 

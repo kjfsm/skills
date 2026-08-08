@@ -21,19 +21,19 @@ description: フック、ストレージ、設定、管理UI、APIルート、Po
 
 ## 公式ドキュメントの該当ページ
 
-| 調べたいこと                     | 公式ページ                                                                                             |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| プラグイン形式の選択             | [creating-plugins/choosing-a-format](https://docs.emdashcms.com/plugins/creating-plugins/choosing-a-format/) |
-| 最初のプラグイン                 | [creating-plugins/your-first-plugin](https://docs.emdashcms.com/plugins/creating-plugins/your-first-plugin/) |
-| マニフェスト(`emdash-plugin.jsonc`) | [creating-plugins/manifest](https://docs.emdashcms.com/plugins/creating-plugins/manifest/)             |
-| フック(全種類・シグネチャ・設定) | [reference/hooks](https://docs.emdashcms.com/reference/hooks/)                                          |
-| APIルート                        | [creating-plugins/api-routes](https://docs.emdashcms.com/plugins/creating-plugins/api-routes/)          |
-| ストレージ / KV / 設定           | [creating-plugins/storage](https://docs.emdashcms.com/plugins/creating-plugins/storage/) ・ [settings](https://docs.emdashcms.com/plugins/creating-plugins/settings/) |
-| Block Kit                        | [creating-plugins/block-kit](https://docs.emdashcms.com/plugins/creating-plugins/block-kit/)            |
-| Capabilities とセキュリティ      | [creating-plugins/capabilities](https://docs.emdashcms.com/plugins/creating-plugins/capabilities/)      |
-| バンドルと公開                   | [creating-plugins/publishing](https://docs.emdashcms.com/plugins/creating-plugins/publishing/)          |
-| React管理UI(native限定)          | [creating-native-plugins/react-admin](https://docs.emdashcms.com/plugins/creating-native-plugins/react-admin/) |
-| Portable Textブロック            | [creating-native-plugins/portable-text-components](https://docs.emdashcms.com/plugins/creating-native-plugins/portable-text-components/) |
+| 調べたいこと                        | 公式ページ                                                                                                                                                            |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| プラグイン形式の選択                | [creating-plugins/choosing-a-format](https://docs.emdashcms.com/plugins/creating-plugins/choosing-a-format/)                                                          |
+| 最初のプラグイン                    | [creating-plugins/your-first-plugin](https://docs.emdashcms.com/plugins/creating-plugins/your-first-plugin/)                                                          |
+| マニフェスト(`emdash-plugin.jsonc`) | [creating-plugins/manifest](https://docs.emdashcms.com/plugins/creating-plugins/manifest/)                                                                            |
+| フック(全種類・シグネチャ・設定)    | [reference/hooks](https://docs.emdashcms.com/reference/hooks/)                                                                                                        |
+| APIルート                           | [creating-plugins/api-routes](https://docs.emdashcms.com/plugins/creating-plugins/api-routes/)                                                                        |
+| ストレージ / KV / 設定              | [creating-plugins/storage](https://docs.emdashcms.com/plugins/creating-plugins/storage/) ・ [settings](https://docs.emdashcms.com/plugins/creating-plugins/settings/) |
+| Block Kit                           | [creating-plugins/block-kit](https://docs.emdashcms.com/plugins/creating-plugins/block-kit/)                                                                          |
+| Capabilities とセキュリティ         | [creating-plugins/capabilities](https://docs.emdashcms.com/plugins/creating-plugins/capabilities/)                                                                    |
+| バンドルと公開                      | [creating-plugins/publishing](https://docs.emdashcms.com/plugins/creating-plugins/publishing/)                                                                        |
+| React管理UI(native限定)             | [creating-native-plugins/react-admin](https://docs.emdashcms.com/plugins/creating-native-plugins/react-admin/)                                                        |
+| Portable Textブロック               | [creating-native-plugins/portable-text-components](https://docs.emdashcms.com/plugins/creating-native-plugins/portable-text-components/)                              |
 
 ## 公式が扱っていない第3の形式: npm配布の`format: "standard"`
 
@@ -44,12 +44,12 @@ CLIでバンドルしてマーケットプレイスに公開)と **native**(`def
 実装にはもう1つ、両者の中間にあたる`format: "standard"`のディスクリプタがある。**マーケットプレイスに
 出さず、npmパッケージ(あるいはワークスペース内のパッケージ)として自分のサイトに配りたいときはこれを使う。**
 
-| | 公式のsandboxed | **standard(この形式)** | 公式のnative |
-| --- | --- | --- | --- |
-| 宣言 | `emdash-plugin.jsonc` | `PluginDescriptor` + `format: "standard"` | `PluginDescriptor`(既定) |
-| 実装 | `src/plugin.ts` | `definePlugin({ hooks, routes })`をdefault export | `createPlugin(options)` |
-| 配布 | マーケットプレイス(.tar.gz) | npm | npm |
-| 置き場所 | `sandboxed: []` | `plugins: []`・`sandboxed: []`のどちらでも可 | `plugins: []`のみ |
+|          | 公式のsandboxed             | **standard(この形式)**                            | 公式のnative             |
+| -------- | --------------------------- | ------------------------------------------------- | ------------------------ |
+| 宣言     | `emdash-plugin.jsonc`       | `PluginDescriptor` + `format: "standard"`         | `PluginDescriptor`(既定) |
+| 実装     | `src/plugin.ts`             | `definePlugin({ hooks, routes })`をdefault export | `createPlugin(options)`  |
+| 配布     | マーケットプレイス(.tar.gz) | npm                                               | npm                      |
+| 置き場所 | `sandboxed: []`             | `plugins: []`・`sandboxed: []`のどちらでも可      | `plugins: []`のみ        |
 
 ハンドラの中身のコードは公式のsandboxedとまったく同じ(同じ`SandboxedPlugin`型、同じフック名、同じ
 `PluginContext`)。**したがってフック・ルート・ストレージの書き方は公式のsandboxed向けドキュメントを

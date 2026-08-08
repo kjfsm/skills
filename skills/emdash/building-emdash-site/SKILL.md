@@ -22,20 +22,20 @@ APIの使い方を調べたいなら、まず公式を読むこと。
 
 ## 公式ドキュメントの該当ページ
 
-| やりたいこと                       | 公式ページ                                                                              |
-| ---------------------------------- | --------------------------------------------------------------------------------------- |
-| プロジェクト設定・`emdash()`の設定 | [reference/configuration](https://docs.emdashcms.com/reference/configuration/)           |
-| Cloudflareへのデプロイ             | [deployment/cloudflare](https://docs.emdashcms.com/deployment/cloudflare/)               |
-| コンテンツのクエリ                 | [guides/querying-content](https://docs.emdashcms.com/guides/querying-content/)           |
-| JS API全体(クエリ・メニュー・検索) | [reference/api](https://docs.emdashcms.com/reference/api/)                               |
-| フィールドタイプ                   | [reference/field-types](https://docs.emdashcms.com/reference/field-types/)               |
-| シードファイルの形式               | [themes/seed-files](https://docs.emdashcms.com/themes/seed-files/)                       |
+| やりたいこと                         | 公式ページ                                                                                                                                                                                 |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| プロジェクト設定・`emdash()`の設定   | [reference/configuration](https://docs.emdashcms.com/reference/configuration/)                                                                                                             |
+| Cloudflareへのデプロイ               | [deployment/cloudflare](https://docs.emdashcms.com/deployment/cloudflare/)                                                                                                                 |
+| コンテンツのクエリ                   | [guides/querying-content](https://docs.emdashcms.com/guides/querying-content/)                                                                                                             |
+| JS API全体(クエリ・メニュー・検索)   | [reference/api](https://docs.emdashcms.com/reference/api/)                                                                                                                                 |
+| フィールドタイプ                     | [reference/field-types](https://docs.emdashcms.com/reference/field-types/)                                                                                                                 |
+| シードファイルの形式                 | [themes/seed-files](https://docs.emdashcms.com/themes/seed-files/)                                                                                                                         |
 | メニュー / ウィジェット / セクション | [guides/menus](https://docs.emdashcms.com/guides/menus/) ・ [guides/widgets](https://docs.emdashcms.com/guides/widgets/) ・ [guides/sections](https://docs.emdashcms.com/guides/sections/) |
-| タクソノミー                       | [guides/taxonomies](https://docs.emdashcms.com/guides/taxonomies/)                       |
-| サイト設定                         | [guides/site-settings](https://docs.emdashcms.com/guides/site-settings/)                 |
-| 稼働中サイトのスキーマ変更         | [deployment/schema-evolution](https://docs.emdashcms.com/deployment/schema-evolution/)   |
-| CLI                                | [reference/cli](https://docs.emdashcms.com/reference/cli/) — 詳細は`emdash-cli`スキル    |
-| プラグイン開発                     | [plugins/overview](https://docs.emdashcms.com/plugins/overview/) — 詳細は`creating-plugins`スキル |
+| タクソノミー                         | [guides/taxonomies](https://docs.emdashcms.com/guides/taxonomies/)                                                                                                                         |
+| サイト設定                           | [guides/site-settings](https://docs.emdashcms.com/guides/site-settings/)                                                                                                                   |
+| 稼働中サイトのスキーマ変更           | [deployment/schema-evolution](https://docs.emdashcms.com/deployment/schema-evolution/)                                                                                                     |
+| CLI                                  | [reference/cli](https://docs.emdashcms.com/reference/cli/) — 詳細は`emdash-cli`スキル                                                                                                      |
+| プラグイン開発                       | [plugins/overview](https://docs.emdashcms.com/plugins/overview/) — 詳細は`creating-plugins`スキル                                                                                          |
 
 ## 公式ドキュメントが実装と食い違う点
 
@@ -118,10 +118,10 @@ npx emdash dev          # devサーバー起動(マイグレーション+シー�
 
 いずれも「公式との差分」だけを書いている。今のタスクに関係するファイルだけを読むこと。
 
-| ファイル                                                                     | 内容                                                                             |
-| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| [references/configuration.md](references/configuration.md)                   | Cloudflare前提の`astro.config.mjs` / `wrangler.jsonc`の実例、型生成の実際         |
-| [references/schema-and-seed.md](references/schema-and-seed.md)               | シードの適用タイミングの罠、`supports`、フィールドタイプの実際の形状             |
-| [references/querying-and-rendering.md](references/querying-and-rendering.md) | `cacheHint`、`orderBy`、事前ロードされる`bylines`/`terms`、`edit`属性             |
-| [references/site-features.md](references/site-features.md)                   | バイライン、検索の前提条件、ページコントリビューション、レイアウトの型            |
-| [references/astro-react-interop.md](references/astro-react-interop.md)       | shadcn/ui(React)を`.astro`から使う際の子要素の制約(EmDashではなくAstro側の話)     |
+| ファイル                                                                     | 内容                                                                          |
+| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| [references/configuration.md](references/configuration.md)                   | Cloudflare前提の`astro.config.mjs` / `wrangler.jsonc`の実例、型生成の実際     |
+| [references/schema-and-seed.md](references/schema-and-seed.md)               | シードの適用タイミングの罠、`supports`、フィールドタイプの実際の形状          |
+| [references/querying-and-rendering.md](references/querying-and-rendering.md) | `cacheHint`、`orderBy`、事前ロードされる`bylines`/`terms`、`edit`属性         |
+| [references/site-features.md](references/site-features.md)                   | バイライン、検索の前提条件、ページコントリビューション、レイアウトの型        |
+| [references/astro-react-interop.md](references/astro-react-interop.md)       | shadcn/ui(React)を`.astro`から使う際の子要素の制約(EmDashではなくAstro側の話) |

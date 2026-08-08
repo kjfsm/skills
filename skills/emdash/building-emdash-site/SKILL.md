@@ -1,151 +1,127 @@
 ---
 name: building-emdash-site
-description: AstroでEmDash CMSサイトを構築・カスタマイズする。ページ作成、コレクション定義、シードファイル作成、コンテンツクエリ、Portable Textのレンダリング、メニュー/タクソノミー/ウィジェットのセットアップ、デプロイ設定など、EmDash搭載Astroサイトに関するあらゆるタスクで使用する。基本的なAstroの知識は前提とし、EmDash固有のパターンをすべて提供する。
+description: AstroでEmDash CMSサイトを構築・カスタマイズする。ページ作成、コレクション定義、シードファイル作成、コンテンツクエリ、Portable Textのレンダリング、メニュー/タクソノミー/ウィジェットのセットアップ、デプロイ設定など、EmDash搭載Astroサイトに関するあらゆるタスクで使用する。APIの一次情報源は公式ドキュメントで、このスキルは公式に載っていない落とし穴と公式と食い違う挙動を扱う。
 ---
 
 # EmDashサイトの構築
 
-EmDashはAstro上に構築されたCMSです。スキーマをコード内ではなくデータベースに保存し、ライブコンテンツコレクション経由でコンテンツを配信し、`/_emdash/admin`にフル機能の管理UIを提供します。サイトは`emdash`インテグレーションを備えた標準的なAstroプロジェクトです。
+EmDashはAstro上に構築されたCMS。スキーマをコード内ではなくデータベースに保存し、ライブコンテンツコレクション経由でコンテンツを配信し、`/_emdash/admin`にフル機能の管理UIを提供する。サイトは`emdash`インテグレーションを備えた標準的なAstroプロジェクト。
+
+## このスキルの読み方
+
+**一次情報源は公式ドキュメント <https://docs.emdashcms.com/> である。** APIの一覧・シグネチャ・
+設定項目・シードファイルの全形式は公式にある。MCPサーバー(`https://docs.emdashcms.com/mcp`)を
+接続していれば`search_docs`でも引ける。
+
+このスキルに書いてあるのは次の2つだけ:
+
+1. **公式に書かれていないこと** — 実地で踏んだ落とし穴、このサイト群の構成方針
+2. **公式と食い違うこと** — 公式の記述が実装と合っていない箇所(下記)
+
+APIの使い方を調べたいなら、まず公式を読むこと。
+
+## 公式ドキュメントの該当ページ
+
+| やりたいこと                       | 公式ページ                                                                              |
+| ---------------------------------- | --------------------------------------------------------------------------------------- |
+| プロジェクト設定・`emdash()`の設定 | [reference/configuration](https://docs.emdashcms.com/reference/configuration/)           |
+| Cloudflareへのデプロイ             | [deployment/cloudflare](https://docs.emdashcms.com/deployment/cloudflare/)               |
+| コンテンツのクエリ                 | [guides/querying-content](https://docs.emdashcms.com/guides/querying-content/)           |
+| JS API全体(クエリ・メニュー・検索) | [reference/api](https://docs.emdashcms.com/reference/api/)                               |
+| フィールドタイプ                   | [reference/field-types](https://docs.emdashcms.com/reference/field-types/)               |
+| シードファイルの形式               | [themes/seed-files](https://docs.emdashcms.com/themes/seed-files/)                       |
+| メニュー / ウィジェット / セクション | [guides/menus](https://docs.emdashcms.com/guides/menus/) ・ [guides/widgets](https://docs.emdashcms.com/guides/widgets/) ・ [guides/sections](https://docs.emdashcms.com/guides/sections/) |
+| タクソノミー                       | [guides/taxonomies](https://docs.emdashcms.com/guides/taxonomies/)                       |
+| サイト設定                         | [guides/site-settings](https://docs.emdashcms.com/guides/site-settings/)                 |
+| 稼働中サイトのスキーマ変更         | [deployment/schema-evolution](https://docs.emdashcms.com/deployment/schema-evolution/)   |
+| CLI                                | [reference/cli](https://docs.emdashcms.com/reference/cli/) — 詳細は`emdash-cli`スキル    |
+| プラグイン開発                     | [plugins/overview](https://docs.emdashcms.com/plugins/overview/) — 詳細は`creating-plugins`スキル |
+
+## 公式ドキュメントが実装と食い違う点
+
+そのまま信じると壊れる。実装(`emdash`パッケージ)側が正しい。
+
+1. **画像フィールドの値は`src`であって`url`ではない。** 公式のField Types Referenceは
+   `{ id, url, alt, width, height }`と書いているが、ランタイムで返るのは
+   `{ id, src?, alt?, width?, height?, provider?, previewUrl?, meta? }`。`post.data.featured_image.url`は
+   常に`undefined`になる。
+
+2. **`getEmDashCollection`は`orderBy`を受け取る。** 公式のAPI Referenceの`CollectionFilter`には
+   `orderBy`が載っておらず、Querying Contentは「並び順は保証しないのでテンプレート側でsortしろ」と
+   書いているが、実際には`orderBy: { published_at: "desc" }`(複数フィールド可、既定は
+   `{ created_at: "desc" }`)がクエリ側で効く。
+
+3. **クエリ結果には`cacheHint`が付く。** 公式は`Astro.response.headers.set("Cache-Control", ...)`を
+   勧めているが、EmDashはAstroのRoute Caching用の`cacheHint`を返す。詳細は
+   [references/querying-and-rendering.md](references/querying-and-rendering.md)。
+
+4. **コレクションの`supports`は6種類ある。** 公式のSeed File Formatは`"drafts"`と`"revisions"`しか
+   挙げていないが、実際は`drafts` / `revisions` / `preview` / `scheduling` / `search` / `seo`。
 
 ## よくある落とし穴
 
-これらはサイトを静かに壊すものです。着手する前に知っておいてください。
+公式には書かれていない。着手する前に知っておくこと。
 
-1. **画像フィールドは文字列ではなくオブジェクトです。** `post.data.featured_image`は`{ id, src, alt }`です。`<img src={post.data.featured_image} />`と書くと`[object Object]`がレンダリングされます。`"emdash/ui"`の`<Image image={post.data.featured_image} />`を使ってください。
+1. **画像フィールドは文字列ではなくオブジェクト。** `<img src={post.data.featured_image} />`と書くと
+   `[object Object]`がレンダリングされる。`"emdash/ui"`の`<Image image={post.data.featured_image} />`を
+   使う(生の`<img>`を使うなら`.src`。上記の食い違い1も参照)。
 
-2. **`entry.id`と`entry.data.id`は別物です。** `entry.id`はスラッグ(URLで使用)です。`entry.data.id`はデータベースのULID(`getEntryTerms`、`Comments`など、実際のIDを必要とするAPI呼び出しで使用)です。取り違えると結果が静かに空になります。
+2. **`entry.id`と`entry.data.id`は別物。** `entry.id`はスラッグ(URLで使用)。`entry.data.id`は
+   データベースのULID(`getEntryTerms`、`Comments`など、実際のIDを必要とするAPI呼び出しで使用)。
+   取り違えると結果が静かに空になる。
 
-3. **タクソノミー名はシードと完全に一致させる必要があります。** シードで`"name": "category"`と定義していれば、`getTerm("category", slug)`のようにクエリする必要があります -- `"categories"`ではありません。名前を間違えるとエラーなしで空の結果が返ります。
+3. **タクソノミー名はシードと完全に一致させる必要がある。** シードで`"name": "category"`と定義して
+   いれば`getTerm("category", slug)`とクエリする —— `"categories"`ではない。名前を間違えると
+   エラーなしで空の結果が返る。
 
-4. **`Astro.cache.set()`には必ず`cacheHint`を渡してください。** すべてのクエリは`cacheHint`を返します。コンテンツをクエリするすべてのページで`Astro.cache.set(cacheHint)`を呼び出してください。そうしないと、編集者が変更を公開してもキャッシュの無効化が機能しません。
+4. **`Astro.cache.set(cacheHint)`を忘れない。** コンテンツをクエリするすべてのページで呼ぶこと。
+   そうしないと、編集者が変更を公開してもキャッシュの無効化が機能しない。
 
-5. **CMSコンテンツには`getStaticPaths`を使いません。** EmDashのコンテンツは動的です。ページはサーバーレンダリング(`astro.config.mjs`で`output: "server"`)にする必要があります。
+5. **CMSコンテンツには`getStaticPaths`を使わない。** 公式は静的生成も選択肢として挙げているが、
+   これらのサイトはコンテンツが動的なのでサーバーレンダリング(`astro.config.mjs`で
+   `output: "server"`)に統一している。
 
-6. **`.astro`からReactコンポーネントへ渡した子要素は文字列化されます。** Radix UIの`asChild`(`Slot`)パターンのように子要素のpropsを書き換える実装は、エラーなく静かに効かなくなります。shadcn/uiコンポーネントをこのサイトで使う際の詳細は**[references/astro-react-tailwind.md](references/astro-react-tailwind.md)**を参照してください。
+6. **`.astro`からReactコンポーネントへ渡した子要素は文字列化される。** Radix UIの`asChild`(`Slot`)
+   パターンのように子要素のpropsを書き換える実装は、エラーなく静かに効かなくなる。詳細は
+   **[references/astro-react-interop.md](references/astro-react-interop.md)**。
+
+7. **`seed/seed.json`は稼働中サイトのマイグレーション手段ではない。** シードはDBが空のときの
+   最初のリクエストでのみ適用される。詳細は
+   [references/schema-and-seed.md](references/schema-and-seed.md)。
 
 ## ファイル構成
-
-すべてのEmDashサイトには、以下の主要ファイルがあります。
 
 ```
 my-site/
 ├── astro.config.mjs          # emdash()インテグレーションを含むAstro設定
+├── wrangler.jsonc            # D1 / R2 / KV のバインディング
 ├── src/
 │   ├── live.config.ts         # EmDashローダー登録(定型コード)
 │   ├── pages/                 # Astroページ(すべてサーバーレンダリング)
-│   ├── layouts/               # レイアウトコンポーネント
-│   └── components/            # 再利用可能なコンポーネント
+│   ├── layouts/
+│   └── components/
 ├── seed/
 │   └── seed.json              # スキーマ + デモコンテンツ
-├── emdash-env.d.ts          # 生成された型(`emdash types`から)
+├── emdash-env.d.ts            # 生成された型(devサーバー起動時に自動生成)
 └── package.json
 ```
 
-## ワークフロー
-
-### 1. プロジェクトを設定する
-
-`astro.config.mjs`、`live.config.ts`、デプロイ対象(Node vs Cloudflare)、型生成については**[references/configuration.md](references/configuration.md)**を参照してください。
-
-### 2. スキーマを設計する
-
-コレクション定義、フィールドタイプ、タクソノミー、メニュー、ウィジェットエリア、セクション、バイライン、シードファイルの完全な形式については**[references/schema-and-seed.md](references/schema-and-seed.md)**を参照してください。
-
-### 3. ページを構築する
-
-コンテンツクエリ、Portable Textのレンダリング、Imageコンポーネント、ビジュアル編集属性、キャッシュ、よくあるページパターン(一覧、詳細、タクソノミーアーカイブ、RSS、検索、404)については**[references/querying-and-rendering.md](references/querying-and-rendering.md)**を参照してください。
-
-### 4. サイト機能を組み込む
-
-サイト設定、ナビゲーションメニュー、タクソノミー、ウィジェットエリア、検索、SEOメタ情報、コメント、ページコントリビューションについては**[references/site-features.md](references/site-features.md)**を参照してください。
-
-### 5. シードファイルを作成する
-
-コレクション、フィールド、タクソノミー、メニュー、ウィジェット、サンプルコンテンツを含む`seed/seed.json`を作成します。
-
-### 6. 実行して検証する
+## 実行と検証
 
 ```bash
-npx emdash dev          # devサーバーを起動(マイグレーション+シード適用、型生成を実行)
+npx emdash dev          # devサーバー起動(マイグレーション+シード適用、型生成)
 ```
 
-管理UIは`http://localhost:4321/_emdash/admin`にあります。
-
-## クイックAPIチートシート
-
-```typescript
-// コンテンツ(エントリには.data.bylines(著者クレジットの配列)が事前ロードされている)
-import { getEmDashCollection, getEmDashEntry } from "emdash";
-const { entries, nextCursor, cacheHint } = await getEmDashCollection("posts", {
-  limit: 10,
-  cursor,
-  orderBy: { published_at: "desc" },
-});
-const { entry: post, cacheHint } = await getEmDashEntry("posts", slug);
-
-// サイト機能
-import {
-  getSiteSettings,
-  getMenu,
-  getTaxonomyTerms,
-  getTerm,
-  getEntryTerms,
-  getEntriesByTerm,
-  getWidgetArea,
-  search,
-  getSection,
-  getSeoMeta,
-} from "emdash";
-
-// バイライン(単独クエリ -- エントリにバイラインが付属しているため通常は不要)
-import { getByline, getBylineBySlug } from "emdash";
-
-// UIコンポーネント
-import {
-  PortableText,
-  Image,
-  Comments,
-  CommentForm,
-  WidgetArea,
-  EmDashHead,
-  EmDashBodyStart,
-  EmDashBodyEnd,
-} from "emdash/ui";
-import LiveSearch from "emdash/ui/search";
-
-// ページコンテキスト(プラグインのコントリビューション用)
-import { createPublicPageContext } from "emdash/page";
-```
-
-## プラグイン
-
-EmDashは、フック、ストレージ、設定、管理UI、APIルート、カスタムPortable TextブロックタイプでCMSを拡張するプラグインをサポートしています。次のような場合にプラグインを検討してください。
-
-- コンテンツのライフサイクルイベントに反応させたい場合(例: 公開時に通知を送る、外部サービスに同期する)
-- カスタム管理ページやダッシュボードウィジェットを追加したい場合
-- Portable Textエディタにカスタムブロックタイプを追加したい場合(例: 埋め込み地図、コードプレイグラウンド、CTA)
-- 再利用可能なサービスを提供したい場合(例: アナリティクス、フォーム、サードパーティ経由のコメント)
-
-プラグインは`astro.config.mjs`で登録します。
-
-```javascript
-emdash({
-	database: sqlite({ url: "file:./data.db" }),
-	storage: local({ directory: "./uploads", baseUrl: "/_emdash/api/media/file" }),
-	plugins: [myPlugin()],
-}),
-```
-
-**プラグインを構築するには、`creating-plugins`スキル**(`.agents/skills/creating-plugins/`内)を読み込んでください。プラグインの構造、フック、ストレージ、管理UI、APIルート、Portable Textブロック、ケーパビリティ、そして`definePlugin()`APIの全体を扱っています。
+管理UIは`http://localhost:4321/_emdash/admin`。
 
 ## リファレンスドキュメント
 
-今のタスクに関係するファイルだけを読むこと(全referenceを一括で読み込まない)。
+いずれも「公式との差分」だけを書いている。今のタスクに関係するファイルだけを読むこと。
 
 | ファイル                                                                     | 内容                                                                             |
 | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| [references/configuration.md](references/configuration.md)                   | プロジェクト設定、astro.config、live.config、デプロイ、型                        |
-| [references/schema-and-seed.md](references/schema-and-seed.md)               | コレクション、フィールド、タクソノミー、メニュー、ウィジェット、シード形式       |
-| [references/querying-and-rendering.md](references/querying-and-rendering.md) | コンテンツAPI、PortableText、Image、キャッシュ、ページパターン                   |
-| [references/site-features.md](references/site-features.md)                   | 設定、メニュー、ウィジェット、検索、SEO、コメント、ページコントリビューション    |
-| [references/astro-react-tailwind.md](references/astro-react-tailwind.md)     | shadcn/ui(React)を`.astro`から使う際の子要素の制約、Tailwind v4のCSS変数参照構文 |
+| [references/configuration.md](references/configuration.md)                   | Cloudflare前提の`astro.config.mjs` / `wrangler.jsonc`の実例、型生成の実際         |
+| [references/schema-and-seed.md](references/schema-and-seed.md)               | シードの適用タイミングの罠、`supports`、フィールドタイプの実際の形状             |
+| [references/querying-and-rendering.md](references/querying-and-rendering.md) | `cacheHint`、`orderBy`、事前ロードされる`bylines`/`terms`、`edit`属性             |
+| [references/site-features.md](references/site-features.md)                   | バイライン、検索の前提条件、ページコントリビューション、レイアウトの型            |
+| [references/astro-react-interop.md](references/astro-react-interop.md)       | shadcn/ui(React)を`.astro`から使う際の子要素の制約(EmDashではなくAstro側の話)     |

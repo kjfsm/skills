@@ -1,3 +1,3 @@
 interface:
   display_name: "EmDash サイトの構築"
-  short_description: "Astro 上の EmDash CMS サイトを構築・カスタマイズする"
+  short_description: "EmDash サイト構築時の落とし穴と、公式ドキュメントが実装とズレている箇所"

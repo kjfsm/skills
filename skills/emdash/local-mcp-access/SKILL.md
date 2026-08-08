@@ -5,16 +5,26 @@ description: ローカルのEmDash devサーバーのMCPエンドポイント(/_
 
 # ローカルMCPアクセス(ブラウザ不要)
 
+> MCPサーバーの一次情報源は
+> [reference/mcp-server](https://docs.emdashcms.com/reference/mcp-server/)(エンドポイント、
+> 認証方式、OAuthディスカバリ、スコープ表、全ツールのパラメータ)と
+> [guides/ai-tools](https://docs.emdashcms.com/guides/ai-tools/)。ツールの一覧や引数を知りたいなら
+> そちらを読むこと。
+>
+> ここに書くのは、**公式と食い違う認証の実際**と、公式に載っていない回避手順だけ。
+
 用途別ナビゲーション: PAT発行が目的なら「手順」節だけ、プラグイン設定の読み書きが
 目的なら該当節だけ、D1の直接参照が目的なら最後の節だけ読めばよい。全文を読む必要はない。
 
-`/_emdash/api/mcp` は設計上**Bearerトークン専用**である(emdashのソース内
+## 公式の「セッションクッキーも使える」は信じないこと
+
+`/_emdash/api/mcp` は実際には**Bearerトークン専用**である(emdashのソース内
 `packages/core/src/astro/middleware/auth.ts` を確認して判明: このミドルウェアは
 MCPエンドポイントに対してセッション/クッキー認証を明示的に参照せず、有効な管理者の
 セッションクッキーがあっても `401 NOT_AUTHENTICATED` を返す)。そのためブラウザログイン
 や dev-bypass セッションだけでは**不十分**——Personal Access Token(PAT、`ec_pat_*`)が必要になる。
-EmDashのドキュメントにある「セッションクッキーもMCPで使える」という記述はこの
-ミドルウェアのバージョンには当てはまらない——信用しないこと。
+公式のMCP Server Referenceには「Session cookies (from the admin UI) also work」と書かれているが、
+このミドルウェアのバージョンには当てはまらない。
 
 朗報としては、認証プロバイダーが設定されていない `localhost`/`127.0.0.1` 上であれば、
 そのPATは素のHTTP呼び出しだけで自分で発行できる——ブラウザも人間によるOAuth承認も不要。
@@ -150,9 +160,6 @@ curl -s \
   場合は `DELETE /_emdash/api/admin/api-tokens/:id`(作成レスポンスからトークンの
   `id` を得るか、同じセッションで `GET` して一覧取得する)で無効化できる——
   使い捨てのローカルサンドボックスであれば任意。
-- MCPツールの完全なリファレンス: `docs.emdashcms.com/reference/mcp-server`
-  (スコープ表、全ツール一覧)。上記の理由により「セッションクッキーも使える」という
-  記述は無視すること。
 - devサーバーのローカル状態が消去された場合(例: ローカルのD1/SQLiteデータを
   保持する `.wrangler/` の削除)、以前発行したPATは動作しなくなる
   (`401 INVALID_TOKEN`——セッションだけでなくトークンの行自体が消えている)。

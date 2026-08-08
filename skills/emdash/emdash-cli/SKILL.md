@@ -1,202 +1,67 @@
 ---
 name: emdash-cli
-description: コンテンツ、スキーマ、メディアなどを管理するためにEmDash CLIを使用します。実行中のEmDashインスタンスとコマンドラインからやり取りする必要があるとき——コンテンツの作成、コレクションの管理、メディアのアップロード、型の生成、CMS操作のスクリプト化など——にこのスキルを使用してください。
+description: コンテンツ、スキーマ、メディアなどを管理するためにEmDash CLIを使用します。実行中のEmDashインスタンスとコマンドラインからやり取りする必要があるとき——コンテンツの作成、コレクションの管理、メディアのアップロード、型の生成、CMS操作のスクリプト化など——にこのスキルを使用してください。コマンドの一覧は公式ドキュメントにあり、このスキルはエージェントから使う際の挙動の差分を扱います。
 ---
 
 # EmDash CLI
 
-EmDash CLI(`emdash`、通常は`npx emdash`で実行)はEmDash CMSインスタンスを管理します。コマンドは2つのカテゴリに分かれます。
+> **コマンドとフラグの一覧は公式にある。**
+> [reference/cli](https://docs.emdashcms.com/reference/cli/) —— `dev` / `types` / `login` / `whoami` /
+> `content` / `schema` / `media` / `search` / `taxonomy` / `menu` / `export-seed` / `secrets`、認証の
+> 解決順序、共通フラグ、環境変数、終了コード。MCPサーバー(`https://docs.emdashcms.com/mcp`)を
+> 接続していれば`search_docs`でも引ける。
+>
+> ここに書くのは、**公式に載っていない挙動**と、エージェントから叩くときに効いてくる差分だけ。
 
-- **ローカルコマンド** — SQLiteファイルを直接操作し、サーバーの起動は不要: `init`、`dev`、`seed`、`export-seed`、`secrets`、`doctor`
-- **リモートコマンド** — HTTP経由で実行中のEmDashインスタンスと通信: `types`、`login`、`logout`、`whoami`、`content`、`schema`、`media`、`search`、`taxonomy`、`menu`、`plugin`
+## エージェント向けに自動公開される
 
-## 認証
+CLIは`create`と`update`でデフォルトで自動公開する。エージェントがドラフト/公開のライフサイクルを
+管理しなくても、書いた直後に`get`で読み戻したときに自分の変更が見えるようにするため。
 
-リモートコマンドは認証情報を自動的に解決します。
+- **`create`** — 作成後に公開する。返るアイテムは`published`
+- **`update`** — 更新する。コレクションがリビジョンを使っていてドラフトリビジョンが作られた場合は、
+  自動的に公開してドラフトを昇格させる
+- **`get`** — 保留中のドラフトがあれば(例: 誰かが管理UIで編集して未公開のまま)、公開済みデータでは
+  なく**ドラフトデータ**を返す
 
-1. `--token`フラグ
-2. `EMDASH_TOKEN`環境変数
-3. `emdash login`から保存された認証情報
-4. Dev bypass(localhostのみ——トークン不要)
+自動公開を止めるにはcreate/updateで`--draft`。
 
-ローカルの開発サーバーの場合は、コマンドを実行するだけで認証は自動的に処理されます。リモートインスタンスの場合は、まず`emdash login --url https://my-site.pages.dev`を実行してください。
+## `content get --published`(公式に記載なし)
 
-## クイックリファレンス
-
-### データベースのセットアップ
-
-マイグレーションとシードの適用はランタイム内部で自動的に行われます——別途init/seedの手順は不要です。開発サーバーを起動する(またはデプロイする)だけで、最初のリクエストで保留中のマイグレーションが実行され、データベースが空であればバンドルされたシードが適用されます。
-
-```bash
-# Start dev server (runs migrations, applies seed on empty DB, starts Astro)
-npx emdash dev
-
-# Start dev server and generate types from remote
-npx emdash dev --types
-
-# Export an existing database as a seed file
-# (the runtime auto-discovers .emdash/seed.json on first boot;
-# `mkdir -p` because the directory may not exist yet)
-mkdir -p .emdash
-npx emdash export-seed > .emdash/seed.json
-npx emdash export-seed --with-content > .emdash/seed.json
-```
-
-### 型の生成
+上記のドラフト優先を打ち消して、公開済みデータだけを見るためのフラグ。公式のCLIリファレンスには
+`--raw`しか載っていないが、`--published`も実在する。
 
 ```bash
-# Generate types from local dev server
-npx emdash types
-
-# Generate from remote
-npx emdash types --url https://my-site.pages.dev
-
-# Custom output path
-npx emdash types --output src/types/cms.ts
+npx emdash content get posts 01ABC123               # ドラフトがあればドラフトを返す
+npx emdash content get posts 01ABC123 --published   # 公開済みデータのみ
+npx emdash content get posts 01ABC123 --raw         # Portable Text→markdown変換をスキップ
 ```
 
-既定では`.emdash/types.ts`(TypeScriptインターフェース)と`.emdash/schema.json`を書き出します。
-(このリポジトリがtsconfigでincludeする`emdash-env.d.ts`はEmDashインテグレーションがdevサーバー
-起動時に自動生成するもの。型を更新したいときはdevサーバーを起動し直すのが手軽。)
+## `--rev`は`update`だけの要求
 
-### 認証
+`update`は`get`で得た`_rev`トークンを要求する(楽観的並行性制御。読まずに上書きさせないための仕組み)。
+それ以外のコマンドは冪等か非破壊なので不要。
 
-```bash
-# Login (OAuth Device Flow)
-npx emdash login --url https://my-site.pages.dev
+| コマンド            | `--rev` | 理由                             |
+| ------------------- | ------- | -------------------------------- |
+| `content create`    | 不要    | まだ何も存在しないため           |
+| `content update`    | **必要**| 既存データを上書きするため       |
+| `content delete`    | 不要    | ソフトデリートで戻せるため       |
+| `content publish`   | 不要    | 冪等なステータス変更             |
+| `content unpublish` | 不要    | 冪等なステータス変更             |
+| `content schedule`  | 不要    | メタデータのみを変更するため     |
+| `content restore`   | 不要    | ゴミ箱から復元するため           |
 
-# Check current user
-npx emdash whoami
+競合すると`409 CONFLICT`が返る。`get`で読み直し、新しい`_rev`で`update`し直す。
 
-# Logout
-npx emdash logout
+## 型生成はdevサーバー再起動のほうが早い
 
-# デプロイ用の暗号化鍵(EMDASH_ENCRYPTION_KEY)を生成する
-npx emdash secrets generate
-```
-
-### コンテンツのCRUD
-
-このCLIはエージェント向けに設計されています。createとupdateはデフォルトで自動的にpublishされるため、エージェントはドラフトを管理することなく読み取り後書き込みの一貫性を得られます。
-
-```bash
-# List content
-npx emdash content list posts
-npx emdash content list posts --status published --limit 10
-
-# Get a single item (Portable Text fields converted to markdown)
-# Returns draft data if a pending draft exists
-npx emdash content get posts 01ABC123
-npx emdash content get posts 01ABC123 --raw        # skip PT->markdown conversion
-npx emdash content get posts 01ABC123 --published   # ignore pending drafts
-
-# Create content (auto-publishes by default)
-npx emdash content create posts --data '{"title": "Hello", "body": "# World"}'
-npx emdash content create posts --file post.json --slug hello-world
-npx emdash content create posts --draft --data '...'  # keep as draft
-cat post.json | npx emdash content create posts --stdin
-
-# Update (requires --rev from a prior get, auto-publishes by default)
-npx emdash content update posts 01ABC123 --rev MToyMDI2... --data '{"title": "Updated"}'
-npx emdash content update posts 01ABC123 --rev MToyMDI2... --draft --data '...'  # keep as draft
-
-# Delete (soft delete)
-npx emdash content delete posts 01ABC123
-
-# Lifecycle
-npx emdash content publish posts 01ABC123
-npx emdash content unpublish posts 01ABC123
-npx emdash content schedule posts 01ABC123 --at 2026-03-01T09:00:00Z
-npx emdash content restore posts 01ABC123
-```
-
-### スキーマ管理
-
-```bash
-# List collections
-npx emdash schema list
-
-# Get collection with fields
-npx emdash schema get posts
-
-# Create collection
-npx emdash schema create articles --label Articles --description "Blog articles"
-
-# Delete collection
-npx emdash schema delete articles --force
-
-# Add field
-npx emdash schema add-field posts body --type portableText --label "Body Content"
-npx emdash schema add-field posts featured --type boolean --required
-
-# Remove field
-npx emdash schema remove-field posts featured
-```
-
-フィールドタイプ(16種): `string`、`text`、`url`、`slug`、`number`、`integer`、`boolean`、`datetime`、`select`、`multiSelect`、`portableText`、`image`、`file`、`reference`、`json`、`repeater`。詳細は`search_docs`(Field Types Reference)を参照してください。
-
-### メディア
-
-```bash
-# List media
-npx emdash media list
-npx emdash media list --mime image/png
-
-# Upload
-npx emdash media upload ./photo.jpg --alt "A sunset" --caption "Bristol, 2026"
-
-# Get / delete
-npx emdash media get 01MEDIA123
-npx emdash media delete 01MEDIA123
-```
-
-### 検索
-
-```bash
-npx emdash search "hello world"
-npx emdash search "hello" --collection posts --limit 5
-```
-
-### タクソノミー
-
-```bash
-npx emdash taxonomy list
-npx emdash taxonomy terms categories
-npx emdash taxonomy add-term categories --name "Tech" --slug tech
-npx emdash taxonomy add-term categories --name "Frontend" --parent 01PARENT123
-```
-
-### メニュー
-
-```bash
-npx emdash menu list
-npx emdash menu get primary
-```
-
-## ドラフトと公開
-
-CLIはデフォルトで`create`と`update`時に自動公開します。つまり以下の通りです。
-
-- **`create`**はアイテムを作成し、即座に公開します
-- **`update`**はアイテムを更新し、ドラフトリビジョンが作成された場合は公開します
-- **`get`**は保留中のドラフトが存在する場合(例: 管理UIからの変更)、ドラフトデータを返します
-
-自動公開をスキップするにはcreate/updateで`--draft`を使用してください。保留中のドラフトを無視するにはgetで`--published`を使用してください。
-
-リビジョンをサポートするコレクションは、編集内容をドラフトリビジョンとして保存します。CLIはこれを透過的に処理するため、エージェントはコレクションがリビジョンを使用しているかどうかを知る必要はありません。
-
-## JSON出力
-
-すべてのリモートコマンドは機械可読な出力のために`--json`をサポートしています。標準出力がパイプされている場合は自動的に有効になります。
-
-```bash
-# Pipe to jq
-npx emdash content list posts --json | jq '.items[].slug'
-
-# Use in scripts
-ID=$(npx emdash content create posts --data '{"title":"Hello"}' --json | jq -r '.id')
-```
+`emdash types`の出力先は`.emdash/types.ts`で、Astroの`tsconfig.json`がincludeしている
+`emdash-env.d.ts`は**更新されない**。後者はEmDashインテグレーションがdevサーバー起動時に生成する。
+詳細は`building-emdash-site`スキルの`references/configuration.md`(取り込んでいれば
+`.agents/skills/building-emdash-site/references/configuration.md`)。
 
 ## 編集フロー
 
-コンテンツ編集の仕組み——Portable Text/markdown変換、`_rev`トークン、rawモード——の詳細については**[EDITING-FLOW.md](./EDITING-FLOW.md)**を参照してください。
+Portable Text ⇄ markdownの自動変換、未知ブロックの扱い、rawモードは
+**[EDITING-FLOW.md](./EDITING-FLOW.md)** を参照(公式ドキュメントには書かれていない)。

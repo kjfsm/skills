@@ -236,9 +236,13 @@ while IFS= read -r path; do
   [ -f "$path/SKILL.md" ] || err "$PLUGIN lists $path, which has no SKILL.md"
 done < <(sed -n 's|^[[:space:]]*"\(\./skills/[^"]*\)",\{0,1\}$|\1|p' "$PLUGIN")
 
-# 11. plugin.json carries no `version` — see CLAUDE.md
+# 11. `version` はどこにも無い — plugin.json と marketplace.json の両方。
+#     コミット SHA をバージョンとして扱わせるには、公式が「両方から省く」ことを
+#     求めている。片方だけ書いても更新は止まるので、両方を検査する。see CLAUDE.md
 ! grep -q '^[[:space:]]*"version"' "$PLUGIN" ||
   err "$PLUGIN has a \"version\" field; it pins the cache key and stops updates from reaching installed users"
+! grep -q '"version"' .claude-plugin/marketplace.json ||
+  err ".claude-plugin/marketplace.json has a \"version\" field; the commit-SHA versioning needs it omitted from the marketplace entry too"
 
 # ---------------------------------------------------------------- buckets --
 # 12. 昇格していないバケットはトップレベルの README から辿れる。昇格済みの

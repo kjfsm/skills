@@ -43,6 +43,7 @@ Anthropic の公式ドキュメントとブログから抽出した、**AI に�
 
 | キー | ソース                                                                 | 何が書いてあるか                                                            |
 | ---- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `sp` | [Agent Skills 仕様][sp]                                                | 標準そのもの。frontmatter の各フィールドの検証規則、ディレクトリ構成        |
 | `bp` | [Skill authoring best practices][bp]                                   | 最も密度の高い正典。数値上限、良い例/悪い例、アンチパターン、チェックリスト |
 | `cc` | [Extend Claude with skills (Claude Code)][cc]                          | Claude Code 固有の frontmatter、置き場所、実行モデル、標準との差            |
 | `eq` | [Equipping agents for the real world with Agent Skills][eq]            | 段階的開示の設計思想、スクリプト vs 指示、eval 駆動                         |
@@ -55,6 +56,7 @@ Anthropic の公式ドキュメントとブログから抽出した、**AI に�
 | `cm` | [CLAUDE.md ファイルの使用][cm]                                         | `CLAUDE.md` に何を書き、何を書かないか                                      |
 | `pe` | [プロンプトエンジニアリングのベストプラクティス][pe]                   | 明示性、例示、肯定形、prefill、CoT                                          |
 
+[sp]: https://agentskills.io/specification
 [bp]: https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
 [cc]: https://code.claude.com/docs/en/skills
 [eq]: https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills
@@ -105,7 +107,11 @@ Claude がコーディングについて既に知っていることを言い直�
 
 ### frontmatter は `name` と `description` の2つが核
 
-`name`: 最大64文字、小文字・数字・ハイフンのみ、XML タグ不可、予約語(`anthropic` / `claude`)不可。 `description`: 非空、最大1,024文字、XML タグ不可。 — [bp]
+`name` は1〜64文字、小文字英数字(`a-z` `0-9`)とハイフンのみ、**先頭と末尾にハイフン不可**、**連続ハイフン(`--`)不可**、そして**親ディレクトリ名と一致**。`description` は1〜1,024文字。`compatibility` を書くなら最大500文字。 — [sp]
+
+### 予約語の禁止は標準ではなくプラットフォーム側の規則
+
+`name` に `anthropic` / `claude` を含められない、`name` と `description` に XML タグを書けない — これらは [sp] の仕様には**無く**、Anthropic のプラットフォーム(claude.ai へのアップロード、Skills API、`package_skill.py`)の検証にだけ存在する。Claude Code プラグインや `npx skills` で配る限りは当たらないが、claude.ai へ直接上げる予定があるなら避ける。 — [bp]
 
 ### Claude Code では `name` は任意で、既定はディレクトリ名
 
@@ -468,8 +474,9 @@ XML / JSON / Markdown で性能が変わる。学習データとの整合で決�
 - [ ] description が具体的で、キーとなる語を含む
 - [ ] description に「何をするか」と「いつ使うか」の両方がある
 - [ ] description が三人称
-- [ ] `name` が64文字以内、小文字・数字・ハイフンのみ、予約語なし
-- [ ] `description` が1,024文字以内
+- [ ] `name` が1〜64文字、小文字英数字とハイフンのみ、先頭末尾と連続のハイフン無し、親ディレクトリ名と一致
+- [ ] `description` が1〜1,024文字
+- [ ] claude.ai へ上げるなら `name` に `anthropic` / `claude` を含まない
 - [ ] SKILL.md 本文が500行以内
 - [ ] 詳細は別ファイルに出してある
 - [ ] 時限情報が無い(あるなら「旧パターン」節に畳んである)

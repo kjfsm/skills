@@ -18,6 +18,8 @@
 
 `plugin.json` の `skills` 配列は、既定の `skills/` スキャンに **追加** されるのが原則で、`marketplace.json` の `source` がマーケットプレイスのルート(`"./"`)に解決される場合に限り **置き換え** になる。昇格していないバケットがプラグインに載らないのはこの例外に乗っているからなので、`source` を変えるときは `deprecated/` や `in-progress/` が出荷対象に混ざらないか確認する。
 
+スキルを追加・改名・昇格・退役させる手順は [.agents/adding-a-skill.md](./.agents/adding-a-skill.md) にある — バケットと呼び出し方式の選び方、そして検査に出ない後始末(`ask-kjfsm`、`link-skills.sh`、他のスキルからの文中呼び出し)。
+
 マニフェストを触ったあとは `scripts/check-invariants.sh` を実行する。`claude plugin validate .` も走らせてよいが、リポジトリルートを渡すと `marketplace.json` しか検証せず `plugin.json` の壊れたパスを見逃すこと、`--strict` は `version` 不在を error に格上げしてしまうこと(上記の通り、これは意図的な状態である)に注意する。
 
 トップレベルの `README.md` にある各スキルのエントリは、スキル名をその `SKILL.md` へリンクしなければならない。

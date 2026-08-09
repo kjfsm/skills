@@ -7,6 +7,23 @@
 > ここに書くのは、**公式の一覧に載っていない**ブロック・要素だけ(`@emdash-cms/blocks`のバリデータが
 > 実際に受け付けるもの)。
 
+## 目次
+
+- [公式の表に無いブロック](#公式の表に無いブロック)
+  - [`chart`(タイムシリーズ)](#chartタイムシリーズ)
+  - [`chart`(カスタム / ECharts生オプション)](#chartカスタム--echarts生オプション)
+  - [`banner`](#banner)
+  - [`meter`](#meter)
+  - [`code`](#code)
+- [公式の表に無い要素](#公式の表に無い要素)
+  - [`checkbox` / `radio`](#checkbox--radio)
+  - [`date_input`](#date_input)
+  - [`combobox`](#combobox)
+  - [`media_picker`](#media_picker)
+  - [`repeater`](#repeater)
+- [ボタンの確認ダイアログ](#ボタンの確認ダイアログ)
+- [トースト](#トースト)
+
 ## 公式の表に無いブロック
 
 ### `chart`(タイムシリーズ)

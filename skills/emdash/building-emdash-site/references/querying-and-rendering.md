@@ -6,6 +6,16 @@
 > [reference/api](https://docs.emdashcms.com/reference/api/)。
 > ここに書くのは、公式と食い違う点と、公式に載っていないAPIだけ。
 
+## 目次
+
+- [`cacheHint`を必ずセットする(公式に記載なし)](#cachehintを必ずセットする公式に記載なし)
+- [`orderBy`はクエリ側で効く(公式に記載なし)](#orderbyはクエリ側で効く公式に記載なし)
+- [`entry.id`と`entry.data.id`は別物](#entryidとentrydataidは別物)
+- [日付は`Date`オブジェクトで返る](#日付はdateオブジェクトで返る)
+- [`bylines`と`terms`はエントリに事前ロードされている](#bylinesとtermsはエントリに事前ロードされている)
+- [`emdash/ui`のエクスポート(公式に一覧なし)](#emdashuiのエクスポート公式に一覧なし)
+- [画像の描画](#画像の描画)
+
 ## `cacheHint`を必ずセットする(公式に記載なし)
 
 公式のQuerying Contentは「サーバーレンダリングのページには`Astro.response.headers.set("Cache-Control", ...)`を

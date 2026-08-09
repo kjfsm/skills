@@ -1,8 +1,8 @@
 # このリポジトリにスキルを足す
 
-配線 — マニフェストへの登録、README への掲載、`agents/openai.yaml` の有無、2つのハーネスの呼び出し方式の一致 — は `scripts/check-invariants.sh` が機械的に検査する。**走らせて落ちた項目が、まだ済んでいない配線である。** 覚えておく必要はない。
+配線 — マニフェストへの登録、README への掲載、`agents/openai.yaml` の有無、2つのハーネスの呼び出し方式の一致、frontmatter の上限、参照ファイルの実在と階層 — は `scripts/check-invariants.sh` が機械的に検査する。**走らせて落ちた項目が、まだ済んでいない配線である。** 覚えておく必要はない。
 
-この文書が扱うのは、検査が見られない3つ: 走らせる前に下す **判断**、スキル本体の **中身**、そして検査に出ない **後始末** である。
+この文書が扱うのは、検査が見られない2つ: 走らせる前に下す **判断** と、検査に出ない **後始末** である。
 
 ## 1. バケットを選ぶ
 
@@ -44,7 +44,7 @@ policy:
 
 判断基準は [`/writing-great-skills`](../skills/productivity/writing-great-skills/SKILL.md)、公式の仕様は同じフォルダの [`OFFICIAL.md`](../skills/productivity/writing-great-skills/OFFICIAL.md)。
 
-`name` の形式、`description` の長さ、本文の行数、参照ファイルの階層 — **ここは今のところ検査に出ないので、`OFFICIAL.md` を引いて自分で確かめる。**
+数値上限(`name` の形式、`description` の長さ、本文の行数、参照ファイルの階層)は**暗記しなくてよい** — 検査が落とす。`OFFICIAL.md` を引くのは、上限を確かめるためではなく、何をどう書くかを決めるためである。
 
 ## 4. 検査を走らせる
 

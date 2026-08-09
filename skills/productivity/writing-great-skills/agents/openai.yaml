@@ -1,5 +1,3 @@
 interface:
   display_name: "良いスキルを書く"
   short_description: "スキルを予測可能にする原則"
-policy:
-  allow_implicit_invocation: false

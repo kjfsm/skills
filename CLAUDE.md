@@ -26,6 +26,8 @@
 
 すべての `SKILL.md` は、ユーザー呼び出し型(`disable-model-invocation: true` に加えて `agents/openai.yaml` で `policy.allow_implicit_invocation: false`、人間だけが到達できる)か、モデル呼び出し型(モデルからもユーザーからも到達できる)のいずれかである。[.agents/invocation.md](./.agents/invocation.md) を参照。
 
+スキルを書く・直すときの判断基準は [`writing-great-skills`](./skills/productivity/writing-great-skills/SKILL.md) にある。公式が定める数値上限、frontmatter のどのフィールドが Agent Skills 標準でどれが Claude Code 独自か、公式が名指ししているアンチパターンは、同じフォルダの [`OFFICIAL.md`](./skills/productivity/writing-great-skills/OFFICIAL.md) にまとまっている — スキルを新規に書く前と、frontmatter や参照ファイルの構成を確定させるときに引く。
+
 [`ask-kjfsm`](./skills/engineering/ask-kjfsm/SKILL.md) は、ユーザーが到達できるすべてのスキルとその関係を対応付けるルーターである。ドキュメントページを再同期させるのと同じトリガーがこれにも当てはまる: ユーザーが到達できるスキルを追加・改名・削除したり、フローへの組み込み方を変えたりしたときは、必ず `ask-kjfsm` の `SKILL.md` を読み直して更新し、この地図が正確であり続けるようにする — 一度も言及されない新しいスキルや、いまだにルーティングされる古びたスキルがあれば、それは嘘をつくルーターである。
 
 すべてのスキルをローカルのハーネススキルディレクトリ(`~/.claude/skills`、`~/.agents/skills`)へ(再)リンクするには、`scripts/link-skills.sh` を実行する。各エントリはこのリポジトリへのシンボリックリンクなので、`git pull` すればインストール済みのスキルは常に最新の状態を保つ。スキルを追加・削除・改名したあとは、このスクリプトを再実行すること。

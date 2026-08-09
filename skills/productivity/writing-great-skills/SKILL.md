@@ -10,6 +10,8 @@ disable-model-invocation: true
 
 **太字の用語** は [`GLOSSARY.md`](GLOSSARY.md) で定義されている。完全な意味はそちらを参照。
 
+このスキルが持つのは判断基準であって、プラットフォームの仕様ではない。公式が定める **数値上限・frontmatter のフィールド・名指しのアンチパターン** は [`OFFICIAL.md`](OFFICIAL.md) にある。書き始める前に一度通し、`description` の文字数、`SKILL.md` の行数、frontmatter のフィールド名、参照ファイルの階層を確定させるときに引き直す。
+
 ## Invocation(呼び出し)
 
 異なるコストを天秤にかける、2つの選択肢:

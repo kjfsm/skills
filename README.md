@@ -87,7 +87,7 @@ npx -y skills add kjfsm/skills
 
 **ユーザー呼び出し型**
 
-- **[ask-kjfsm](./skills/engineering/ask-kjfsm/SKILL.md)** — どのスキルやフローが自分の状況に合うかを尋ねる。このリポジトリのユーザー呼び出し型スキルを案内するルーター。
+- **[ask-kjfsm](./skills/engineering/ask-kjfsm/SKILL.md)** — どのスキルやフローが自分の状況に合うかを尋ねる。このリポジトリのスキルを案内するルーター。
 - **[grill-with-docs](./skills/engineering/grill-with-docs/SKILL.md)** — プロジェクトのドメインモデルも構築するグリリングセッション。用語を研ぎ澄まし、`CONTEXT.md` と ADR をその場で更新する。
 - **[triage](./skills/engineering/triage/SKILL.md)** — トリアージロールのステートマシンに沿ってイシューを進める。
 - **[improve-codebase-architecture](./skills/engineering/improve-codebase-architecture/SKILL.md)** — コードベースをスキャンして深化の機会を見つけ、視覚的な HTML レポートとして提示し、選んだものについてグリリングする。

@@ -1,6 +1,6 @@
 ---
 name: edit-article
-description: セクションの再構成、明瞭さの向上、文章の引き締めによって記事を編集・改善する。ユーザーが記事の下書きを編集・改訂・改善したいときに使う。
+description: セクションの再構成、明瞭さの向上、文章の引き締めによって記事を編集・改善する。
 disable-model-invocation: true
 ---
 

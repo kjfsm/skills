@@ -41,6 +41,23 @@ charlen() {
   LC_ALL=C printf '%s' "$1" | LC_ALL=C tr -d '\200-\277' | wc -c | tr -d ' '
 }
 
+est_tokens() {
+  # est_tokens — 標準入力の中身のトークン数の見積もり。
+  #
+  # 正確なトークナイザは手元に無いので近似する: ASCII は概ね4文字で1トークン、
+  # 日本語などの非 ASCII は概ね1文字で1トークン。ASCII 側を 0.28/文字 と
+  # やや重く見るぶん、見積もりは実測より上振れする — 上限の検査なので、
+  # 甘い側ではなく厳しい側へ倒してある。
+  #
+  # 行数ではなくトークンを数える理由: 上限がトークンで定められているうえ、
+  # 日本語の本文は同じ行数でも英語よりはるかに重く、行数の検査だけを通り抜ける。
+  local text ascii total
+  text="$(cat)"
+  total="$(charlen "$text")"
+  ascii="$(LC_ALL=C printf '%s' "$text" | LC_ALL=C tr -cd '\000-\177' | wc -c | tr -d ' ')"
+  awk -v a="$ascii" -v t="$total" 'BEGIN { printf "%d\n", a * 0.28 + (t - a) }'
+}
+
 strip_code() {
   # strip_code <ファイル> — フェンス付きコードブロックとインラインのコードスパンを
   # 取り除いた中身。スキルはその中に例示のリンクを書く(利用側リポジトリへ書き込む
@@ -169,6 +186,14 @@ while IFS= read -r skill_md; do
   fm_end="$(awk 'NR==1 && $0!="---" {print 0; exit} NR>1 && $0=="---" {print NR; exit}' "$skill_md")"
   body_lines="$(($(wc -l <"$skill_md") - ${fm_end:-0}))"
   [ "$body_lines" -le 500 ] || err "$name: SKILL.md body is $body_lines lines; keep it under 500 and push detail into reference files"
+
+  # 9b. 本文がトークンの予算にも収まっている。仕様は第2層(本文)を5,000トークン
+  #     未満と推奨しており、加えて自動圧縮のあとコンテキストへ繋ぎ直されるのは
+  #     各スキルの先頭5,000トークンだけである。超過分は削られるのではなく、
+  #     圧縮を挟んだ時点で黙って落ちる — 書いている最中には決して見えない。
+  body_tokens="$(tail -n +$((${fm_end:-0} + 1)) "$skill_md" | est_tokens)"
+  [ "$body_tokens" -le 5000 ] ||
+    err "$name: SKILL.md body is ~$body_tokens tokens; keep it under 5000 (past that, compaction re-attaches only the first 5000 and the tail is silently dropped)"
 
   # 10. SKILL.md がリンクする参照ファイルが実在し、スキルの中にあり、1ホップで
   #     到達できる。別の参照ファイル経由でしか届かないファイルは部分読みされ、

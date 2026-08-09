@@ -11,7 +11,7 @@
 - **[triage](./triage/SKILL.md)** — トリアージロールのステートマシンに沿ってイシューを進める。
 - **[improve-codebase-architecture](./improve-codebase-architecture/SKILL.md)** — コードベースをスキャンして深化の機会を見つけ、視覚的な HTML レポートとして提示し、選んだものについてグリリングする。
 - **[setup-skills](./setup-skills/SKILL.md)** — このリポジトリをエンジニアリング系スキル向けに設定する(イシュートラッカー、トリアージラベル、ドメインドキュメントの配置)。リポジトリごとに一度実行する。
-- **[tend-claude-md](./tend-claude-md/SKILL.md)** — CLAUDE.mdを新規に書く、または既存のものを監査してトリムする。行数の目安に収め、具体的で矛盾のない指示だけを残す。
+- **[tend-memory-files](./tend-memory-files/SKILL.md)** — `CLAUDE.md` と `.claude/rules/` を新規に書く、または監査してトリムする。行数の目安に収め、具体的で矛盾のない指示だけを残す。
 - **[to-spec](./to-spec/SKILL.md)** — 今の会話をスペックに変換し、イシュートラッカーへ公開する。
 - **[to-tickets](./to-tickets/SKILL.md)** — どんな計画・スペック・会話も、それぞれがブロッキングエッジを宣言するトレーサーバレット方式のチケットの集合へ分割する — ローカルファイルへのテキストとして、あるいは実際のトラッカー上のネイティブなブロッキングリンクとして。
 - **[implement](./implement/SKILL.md)** — スペックやチケットの集合が記述する作業をビルドする。事前に合意したシームで `/tdd` を駆動し、`/verification-loop` でクリーンランを取り、コミット前に `/two-axis-review` で締めくくる。

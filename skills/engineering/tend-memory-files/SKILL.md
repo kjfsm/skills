@@ -1,10 +1,12 @@
 ---
-name: tend-claude-md
-description: CLAUDE.mdを新規に書く、または既存のものを監査してトリムする — 行数の目安に収め、具体的で矛盾のない指示だけを残す。
+name: tend-memory-files
+description: CLAUDE.md と .claude/rules/ を新規に書く、または既存のものを監査してトリムする — 行数の目安に収め、具体的で矛盾のない指示だけを残す。
 disable-model-invocation: true
 ---
 
-# Tend CLAUDE.md
+# メモリファイルの手入れ
+
+対象は、セッション開始時にロードされる指示ファイル一式 — `CLAUDE.md`、`CLAUDE.local.md`、`.claude/rules/` — で、`/context` が **Memory files** として並べるものである。
 
 CLAUDE.mdはセッション開始のたびに丸ごとコンテキストへ読み込まれる。長くなるほど指示への従いやすさ(adherence)は下がる — 公式ドキュメント([code.claude.com/docs/en/memory](https://code.claude.com/docs/en/memory))は1ファイル200行未満を目安に挙げている。このスキルは新規作成と既存ファイルの手入れの両方を、この一線を守りながら進める。
 

@@ -45,7 +45,28 @@ strip_code() {
   # strip_code <ファイル> — フェンス付きコードブロックとインラインのコードスパンを
   # 取り除いた中身。スキルはその中に例示のリンクを書く(利用側リポジトリへ書き込む
   # コンテキストポインタ、CONTEXT.md の作例)ので、それらは本物の参照ではない。
-  awk '/^[[:space:]]*```/ { fence = !fence; next } !fence { gsub(/`[^`]*`/, ""); print }' "$1"
+  # フェンスが閉じずに終わったら非ゼロで抜ける — 13. がこれを閉じ忘れの検査に使う。
+  #
+  # スキルは例示のためにフェンスを入れ子にする(```` の中に ```)ので、開閉を単純に
+  # 反転させると内側で同期がずれる。開いた記号より長いか同じ長さで、情報文字列を
+  # 持たない行だけを閉じとして数える。区間量指定子 {3,} は mawk に無いため、
+  # バッククォートは数えて判定する。
+  awk '
+    {
+      line = $0
+      sub(/^[ \t]+/, "", line)
+      n = 0
+      while (substr(line, n + 1, 1) == "`") n++
+      if (n >= 3) {
+        rest = substr(line, n + 1)
+        gsub(/[ \t]/, "", rest)
+        if (depth == 0) { depth = n; next }
+        if (n >= depth && rest == "") { depth = 0; next }
+      }
+      if (depth == 0) { gsub(/`[^`]*`/, ""); print }
+    }
+    END { exit(depth ? 1 : 0) }
+  ' "$1"
 }
 
 md_links() {
@@ -200,27 +221,11 @@ while IFS= read -r bucket_readme; do
     err "skills/$bucket/ is not linked from README.md; an unpromoted bucket nobody lists is invisible"
 done < <(find skills -mindepth 2 -maxdepth 2 -name README.md | sort)
 
-# 13. コードフェンスが閉じている。スキルは例示のためにフェンスを入れ子にする
-#     (```` の中に ```)ので、閉じ忘れると以降の本文がまるごとコードブロックに
-#     飲まれ、見出しも指示も本文として読まれなくなる。開いた記号より長いか同じ
-#     長さで、情報文字列を持たない行だけが閉じとして数えられる。
+# 13. コードフェンスが閉じている。閉じ忘れると以降の本文がまるごとコードブロックに
+#     飲まれ、見出しも指示も本文として読まれなくなる。判定は strip_code が持つ
+#     ものと同一で、10. のリンク抽出とこの検査は同じフェンス解析を共有する。
 while IFS= read -r md; do
-  # 区間量指定子 {3,} は mawk にないので、バッククォートは数えて判定する。
-  awk '
-    {
-      line = $0
-      sub(/^[ \t]+/, "", line)
-      n = 0
-      while (substr(line, n + 1, 1) == "`") n++
-      if (n >= 3) {
-        rest = substr(line, n + 1)
-        gsub(/[ \t]/, "", rest)
-        if (depth == 0) depth = n
-        else if (n >= depth && rest == "") depth = 0
-      }
-    }
-    END { exit(depth ? 1 : 0) }
-  ' "$md" ||
+  strip_code "$md" >/dev/null ||
     err "$md has an unclosed code fence; everything after it reads as code"
 done < <(find skills -name '*.md' -not -path '*/node_modules/*' | sort)
 

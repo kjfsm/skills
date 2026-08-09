@@ -41,19 +41,19 @@ Anthropic の公式ドキュメントとブログから抽出した、**AI に�
 
 ## ソース
 
-| キー | ソース | 何が書いてあるか |
-| --- | --- | --- |
-| `bp` | [Skill authoring best practices][bp] | 最も密度の高い正典。数値上限、良い例/悪い例、アンチパターン、チェックリスト |
-| `cc` | [Extend Claude with skills (Claude Code)][cc] | Claude Code 固有の frontmatter、置き場所、実行モデル、標準との差 |
-| `eq` | [Equipping agents for the real world with Agent Skills][eq] | 段階的開示の設計思想、スクリプト vs 指示、eval 駆動 |
-| `lc` | [Lessons from building Claude Code: How we use skills][lc] | Gotchas、モデル向け description、最小から育てる、スキルの類型 |
-| `ce` | [Effective context engineering for AI agents][ce] | 適切な高度、最小の高シグナルトークン、just-in-time 取得 |
-| `wt` | [Writing effective tools for AI agents][wt] | ツール定義・命名・レスポンス形式・エラーメッセージ |
-| `lh` | [Effective harnesses for long-running agents][lh] | 長時間タスク、将来のコンテキストに何を残すか |
-| `hc` | [スキルの作成方法][hc] | 5ステップ、3シナリオのテスト、トリガーの限界 |
-| `se` | [スキル解説: プロンプト/プロジェクト/MCP/サブエージェントとの比較][se] | どの手段に載せるかの使い分け |
-| `cm` | [CLAUDE.md ファイルの使用][cm] | `CLAUDE.md` に何を書き、何を書かないか |
-| `pe` | [プロンプトエンジニアリングのベストプラクティス][pe] | 明示性、例示、肯定形、prefill、CoT |
+| キー | ソース                                                                 | 何が書いてあるか                                                            |
+| ---- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `bp` | [Skill authoring best practices][bp]                                   | 最も密度の高い正典。数値上限、良い例/悪い例、アンチパターン、チェックリスト |
+| `cc` | [Extend Claude with skills (Claude Code)][cc]                          | Claude Code 固有の frontmatter、置き場所、実行モデル、標準との差            |
+| `eq` | [Equipping agents for the real world with Agent Skills][eq]            | 段階的開示の設計思想、スクリプト vs 指示、eval 駆動                         |
+| `lc` | [Lessons from building Claude Code: How we use skills][lc]             | Gotchas、モデル向け description、最小から育てる、スキルの類型               |
+| `ce` | [Effective context engineering for AI agents][ce]                      | 適切な高度、最小の高シグナルトークン、just-in-time 取得                     |
+| `wt` | [Writing effective tools for AI agents][wt]                            | ツール定義・命名・レスポンス形式・エラーメッセージ                          |
+| `lh` | [Effective harnesses for long-running agents][lh]                      | 長時間タスク、将来のコンテキストに何を残すか                                |
+| `hc` | [スキルの作成方法][hc]                                                 | 5ステップ、3シナリオのテスト、トリガーの限界                                |
+| `se` | [スキル解説: プロンプト/プロジェクト/MCP/サブエージェントとの比較][se] | どの手段に載せるかの使い分け                                                |
+| `cm` | [CLAUDE.md ファイルの使用][cm]                                         | `CLAUDE.md` に何を書き、何を書かないか                                      |
+| `pe` | [プロンプトエンジニアリングのベストプラクティス][pe]                   | 明示性、例示、肯定形、prefill、CoT                                          |
 
 [bp]: https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
 [cc]: https://code.claude.com/docs/en/skills

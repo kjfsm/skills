@@ -214,6 +214,17 @@ while IFS= read -r skill_md; do
     lvl1="$lvl1 $rel"
   done < <(md_links "$dir" "$skill_md")
 
+  # 10b. スキルの中にあるすべての参照ファイルが、SKILL.md からリンクされている。
+  #      10. が「リンク先が実在するか」を見るのに対し、こちらはその逆 —
+  #      置いてあるのに誰も指していないファイルを捕まえる。公式は「一度も読まれない
+  #      ファイルは、不要であるか signal が足りていないかのどちらか」と名指ししている。
+  #      検査に出ないまま放置されると、書いた本人以外には存在しないのと同じになる。
+  while IFS= read -r orphan; do
+    rel="${orphan#"$dir"/}"
+    case " $lvl1 " in *" $rel "*) continue ;; esac
+    err "$name: $rel is not linked from SKILL.md; either point at it or delete it — an unreferenced file is one the agent never reads"
+  done < <(find "$dir" -name '*.md' ! -name 'SKILL.md' ! -path "$dir/agents/*" | sort)
+
   for rel in $lvl1; do
     while IFS= read -r deep; do
       [ -n "$deep" ] && [ "$deep" != "SKILL.md" ] || continue

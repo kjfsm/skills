@@ -25,4 +25,18 @@ Codex に昇格済みだけの単一パスを渡す頑健な方法は、(a) `ski
 ## この決定が生む不変条件
 
 - 昇格済みのスキルはすべて `.claude-plugin/plugin.json` の `skills` 配列にエントリを持つ(これはすでに `CLAUDE.md` のルールとして存在していたが、今やプラグインの内容もこれによってゲートされる)。
-- `.claude-plugin/plugin.json` の `version` は `package.json` のバージョンを追随する — リリース時は両方を一緒に上げること。Claude はプラグインの `version` を見て、インストール済みユーザーにいつ更新を表示するか決める。
+
+## 更新の届け方は、その後この決定を離れた
+
+<details>
+<summary>当初この ADR が立てた不変条件(いまは成り立たない)</summary>
+
+> `.claude-plugin/plugin.json` の `version` は `package.json` のバージョンを追随する — リリース時は両方を一緒に上げること。Claude はプラグインの `version` を見て、インストール済みユーザーにいつ更新を表示するか決める。
+
+</details>
+
+**現行は逆である: `version` はどこにも置かない。** 公式はプラグインの更新の届き方を3通り定めており、`version` を明示すると「上げたときだけ更新が届く」、`plugin.json` と marketplace エントリの **両方から省く** と「解決されるコミットが変わるたびに更新が届く」になる。リリースの刻みを持たないこのリポジトリでは後者が正しいので、`version` を書かないことそのものが不変条件になった。
+
+- 検査 11. が両方のマニフェストを見る。
+- CI が `claude plugin validate` から `--strict` を外しているのも同じ理由である — `--strict` は `version` 不在を error に格上げしてしまう(この ADR の本文が「`--strict` が通る」と書いているのは、`version` を持っていた当時の話である)。
+- 根拠は `CLAUDE.md` にまとめてある。

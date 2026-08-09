@@ -1,7 +1,6 @@
 ---
 name: writing-great-skills
-description: スキルをうまく書き、編集するためのリファレンス — スキルを予測可能にする語彙と原則。
-disable-model-invocation: true
+description: スキルを書く・直すための判断基準と、公式が定める仕様。予測可能性、情報階層、段階的開示、先導語、失敗モードの語彙に加えて、name と description の文字数上限や frontmatter のどれが Agent Skills 標準でどれが Claude Code 独自かをまとめた OFFICIAL.md を持つ。SKILL.md を新規に書くとき、既存のスキルを編集・分割・刈り込むとき、description のトリガーを調整するとき、スキルが発火しない・実行ごとに動きがばらつく原因を診断するときに使う。
 ---
 
 # 良いスキルを書く

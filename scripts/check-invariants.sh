@@ -195,6 +195,14 @@ while IFS= read -r skill_md; do
       case " $lvl1 " in *" $deep "*) continue ;; esac
       err "$name: $rel links to $deep, which SKILL.md does not link; keep references one level deep from SKILL.md"
     done < <(md_links "$dir" "$dir/$rel")
+
+    # 14. 100行を超える参照ファイルは目次を持つ。エージェントは長い参照を頭から
+    #     100行だけ読んで済ませることがあり、目次があれば、本文を読まなくても
+    #     そのファイルに何がどこまで載っているかは見える。
+    [ "$(wc -l <"$dir/$rel")" -gt 100 ] || continue
+    grep -qiE '^#{1,3}[[:space:]]+(目次|Contents|Table of contents)[[:space:]]*$' \
+      < <(strip_code "$dir/$rel") ||
+      err "$name: $rel is over 100 lines with no table of contents; a partial read cannot see what else is in it"
   done
 done < <(find skills -name SKILL.md -not -path '*/node_modules/*' | sort)
 

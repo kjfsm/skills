@@ -124,10 +124,10 @@ npx -y skills add kjfsm/skills
 - **[grill-me](./skills/productivity/grill-me/SKILL.md)** — 決定木のすべての枝が解決するまで、計画やデザインについて容赦なくインタビューされる。
 - **[handoff](./skills/productivity/handoff/SKILL.md)** — 今の会話を引き継ぎ用のドキュメントへ圧縮し、別のエージェントが作業を継続できるようにする。
 - **[teach](./skills/productivity/teach/SKILL.md)** — 現在のディレクトリをステートフルな教育用ワークスペースとして使い、複数セッションにわたってユーザーに新しいスキルや概念を教える。
-- **[writing-great-skills](./skills/productivity/writing-great-skills/SKILL.md)** — スキルをうまく書き、編集するためのリファレンス: スキルを予測可能にする語彙と原則。
 
 **モデル呼び出し型**
 
+- **[writing-great-skills](./skills/productivity/writing-great-skills/SKILL.md)** — スキルを書く・直すための判断基準と、公式が定める仕様: 予測可能性・情報階層・段階的開示・先導語・失敗モードの語彙に、公式の数値上限と frontmatter の規則をまとめた `OFFICIAL.md` が付く。
 - **[grilling](./skills/productivity/grilling/SKILL.md)** — 決定木のすべての枝が解決するまで、計画・決定・アイデアについてユーザーに容赦なくインタビューする。`grill-me` と `grill-with-docs` の裏にある再利用可能なループ。
 
 ### その他のバケット

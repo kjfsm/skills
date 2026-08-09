@@ -37,6 +37,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -49,7 +50,7 @@ def read_description(skill_md: Path) -> str:
     lines = skill_md.read_text().splitlines()
     if not lines or lines[0] != "---":
         raise SystemExit(f"{skill_md} に frontmatter がない")
-    for i, line in enumerate(lines[1:], start=1):
+    for line in lines[1:]:
         if line == "---":
             break
         m = re.match(r"^description:\s*(.*)$", line)
@@ -59,48 +60,65 @@ def read_description(skill_md: Path) -> str:
 
 
 def run_once(query: str, name: str, description: str, model: str, timeout: int) -> dict:
+    """1回分の実行。`usable` が False の実行は、発火の証拠にも非発火の証拠にもならない。
+
+    落ちた claude は空の stdout を返すので、返り値を見なければ「一度も発火しなかった実行」と
+    見分けがつかない — skill-creator の判定を壊していたのと同じ種類の取り違えである。
+    """
     workspace = Path(tempfile.mkdtemp(prefix="trigger-"))
-    commands = workspace / ".claude" / "commands"
-    commands.mkdir(parents=True)
-    indented = "\n  ".join(description.splitlines())
-    (commands / f"{name}.md").write_text(
-        f"---\ndescription: |\n  {indented}\n---\n\n# {name}\n\nThis skill handles: {description}\n"
-    )
-
-    # CLAUDECODE を落とすと claude -p を Claude Code セッションの中から起動できる。
-    # あのガードは対話端末の衝突を防ぐためのもので、サブプロセスとしての利用は安全。
-    env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
-    cmd = ["claude", "-p", query, "--output-format", "stream-json", "--verbose"]
-    if model:
-        cmd += ["--model", model]
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, cwd=workspace, env=env, timeout=timeout)
-    except subprocess.TimeoutExpired:
-        return {"target": False, "skills": [], "first_tool": None, "timeout": True}
+        commands = workspace / ".claude" / "commands"
+        commands.mkdir(parents=True)
+        indented = "\n  ".join(description.splitlines())
+        (commands / f"{name}.md").write_text(
+            f"---\ndescription: |\n  {indented}\n---\n\n# {name}\n\nThis skill handles: {description}\n"
+        )
 
-    skills, tools = [], []
-    for line in proc.stdout.splitlines():
-        line = line.strip()
-        if not line:
-            continue
+        # CLAUDECODE を落とすと claude -p を Claude Code セッションの中から起動できる。
+        # あのガードは対話端末の衝突を防ぐためのもので、サブプロセスとしての利用は安全。
+        env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
+        cmd = ["claude", "-p", query, "--output-format", "stream-json", "--verbose"]
+        if model:
+            cmd += ["--model", model]
         try:
-            event = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        if event.get("type") != "assistant":
-            continue
-        for block in event.get("message", {}).get("content", []):
-            if block.get("type") != "tool_use":
+            proc = subprocess.run(
+                cmd, capture_output=True, text=True, cwd=workspace, env=env, timeout=timeout
+            )
+        except subprocess.TimeoutExpired:
+            return {"usable": False, "why": "timeout", "target": False, "skills": [], "first_tool": None}
+        if proc.returncode != 0:
+            return {
+                "usable": False,
+                "why": f"exit {proc.returncode}: {proc.stderr.strip()[:160]}",
+                "target": False, "skills": [], "first_tool": None,
+            }
+
+        skills, tools = [], []
+        for line in proc.stdout.splitlines():
+            line = line.strip()
+            if not line:
                 continue
-            tools.append(block.get("name"))
-            if block.get("name") == "Skill":
-                skills.append(str(block.get("input", {}).get("skill", "")))
-    return {
-        "target": any(name in s for s in skills),
-        "skills": skills,
-        "first_tool": tools[0] if tools else None,
-        "timeout": False,
-    }
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if event.get("type") != "assistant":
+                continue
+            for block in event.get("message", {}).get("content", []):
+                if block.get("type") != "tool_use":
+                    continue
+                tools.append(block.get("name"))
+                if block.get("name") == "Skill":
+                    skills.append(str(block.get("input", {}).get("skill", "")))
+        return {
+            "usable": True,
+            "why": None,
+            "target": any(name in s for s in skills),
+            "skills": skills,
+            "first_tool": tools[0] if tools else None,
+        }
+    finally:
+        shutil.rmtree(workspace, ignore_errors=True)
 
 
 def main() -> None:
@@ -120,18 +138,21 @@ def main() -> None:
     queries = json.loads(Path(args.eval_set).read_text())
 
     def work(item: dict) -> dict:
-        runs = [
+        attempts = [
             run_once(item["query"], name, description, args.model, args.timeout)
             for _ in range(args.runs_per_query)
         ]
+        usable = [r for r in attempts if r["usable"]]
         return {
             "query": item["query"],
             "should_trigger": item["should_trigger"],
-            "hits": sum(1 for r in runs if r["target"]),
-            "runs": len(runs),
-            "timeouts": sum(1 for r in runs if r["timeout"]),
-            "no_tool_calls": sum(1 for r in runs if r["first_tool"] is None),
-            "other_skills": sorted({s for r in runs for s in r["skills"] if name not in s}),
+            "hits": sum(1 for r in usable if r["target"]),
+            # 分母は成立した実行のみ。落ちた実行を数えると、失敗が非発火として率を薄める。
+            "runs": len(usable),
+            "attempted": len(attempts),
+            "unusable": [r["why"] for r in attempts if not r["usable"]],
+            "no_tool_calls": sum(1 for r in usable if r["first_tool"] is None),
+            "other_skills": sorted({s for r in usable for s in r["skills"] if name not in s}),
         }
 
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
@@ -139,17 +160,25 @@ def main() -> None:
 
     positives = [r for r in results if r["should_trigger"]]
     negatives = [r for r in results if not r["should_trigger"]]
-    majority = args.runs_per_query / 2
+
+    def passed(r: dict) -> bool:
+        if r["runs"] == 0:  # 成立した実行が無いクエリは測れていない
+            return False
+        return (r["hits"] * 2 > r["runs"]) == r["should_trigger"]
+
     summary = {
         "skill": name,
         "description_chars": len(description),
-        "should_trigger_passed": sum(1 for r in positives if r["hits"] > majority),
+        "should_trigger_passed": sum(1 for r in positives if passed(r)),
         "should_trigger_total": len(positives),
-        "should_not_trigger_passed": sum(1 for r in negatives if r["hits"] <= majority),
+        "should_not_trigger_passed": sum(1 for r in negatives if passed(r)),
         "should_not_trigger_total": len(negatives),
-        # ツールを1つも呼ばなかった実行は「正しく黙った」ではなく、何も検証していない。
+        # 以下は「満点」を額面どおりに読まないための数字。
+        # ツールを1つも呼ばなかった実行は「正しく黙った」のではなく、何も検証していない。
         "uninformative_runs": sum(r["no_tool_calls"] for r in results),
-        "timeouts": sum(r["timeouts"] for r in results),
+        # 成立しなかった実行。多いなら、その測定結果は信用できない。
+        "unusable_runs": sum(len(r["unusable"]) for r in results),
+        "unmeasured_queries": sum(1 for r in results if r["runs"] == 0),
     }
     json.dump(
         {"description": description, "summary": summary, "results": results},

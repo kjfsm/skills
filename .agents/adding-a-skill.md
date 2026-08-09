@@ -46,6 +46,10 @@ policy:
 
 数値上限(`name` の形式、`description` の長さ、本文の行数、参照ファイルの階層)は**暗記しなくてよい** — 検査が落とす。`OFFICIAL.md` を引くのは、上限を確かめるためではなく、何をどう書くかを決めるためである。
 
+**`name` に `claude` と `anthropic` を入れない。** 仕様上の禁止ではないので検査は落とさないが、Anthropic 側の検証(claude.ai へのアップロード、Skills API、`package_skill.py`)はこれを弾く。Claude Code プラグインと `npx skills` で配るぶんには当たらない一方、**個人スキルを Cowork やクラウドセッションで有効にする経路は claude.ai へのアップロードを通る** ので、そこでは弾かれる。トリガー語としての "CLAUDE.md" が要るなら `description` に書く — 予約語の制約がかかるのは `name` だけである。
+
+残っている例外は `claude-handoff` と `git-guardrails-claude-code` の2つで、どちらも未昇格なので配布経路に乗らない。昇格させるなら、そのときに改名する。(`tend-claude-md` は昇格済みだったので `tend-memory-files` に改名した。)
+
 ## 4. 検査を走らせる
 
 ```

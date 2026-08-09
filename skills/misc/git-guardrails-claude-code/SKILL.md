@@ -15,7 +15,9 @@ Claude が危険な git コマンドを実行する前に、それを検知し�
 - `git branch -D`
 - `git checkout .` / `git restore .`
 
-ブロックされると、Claude にはこれらのコマンドを実行する権限がない旨のメッセージが表示される。
+ブロックされると、Claude には拒否理由がそのまま渡り、そのコマンドは実行されない。
+
+拒否は **終了コード 0 と `hookSpecificOutput.permissionDecision: "deny"`** で返す。終了コード 2 でも今のところ拒否になるが、そちらは非推奨の経路である。`jq` が無いなどでコマンドを取り出せなかったときは `"defer"` を返して通常の権限フローへ戻す — ガードレールが壊れたときに、全部拒否も全部許可もしないためである。
 
 ## 手順
 
@@ -89,7 +91,13 @@ settings ファイルが既に存在する場合は、既存の `hooks.PreToolUs
 簡単なテストを実行する。
 
 ```bash
-echo '{"tool_input":{"command":"git push origin main"}}' | <path-to-script>
+echo '{"tool_name":"Bash","tool_input":{"command":"git push origin main"}}' | <path-to-script>
 ```
 
-終了コード 2 で終わり、stderr に BLOCKED メッセージが表示されるはず。
+終了コード 0 で終わり、標準出力に `"permissionDecision":"deny"` を含む JSON が出るはず。素通しの側も確かめる:
+
+```bash
+echo '{"tool_name":"Bash","tool_input":{"command":"git status"}}' | <path-to-script>
+```
+
+こちらは何も出力せず、終了コード 0 で終わる。

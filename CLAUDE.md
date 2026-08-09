@@ -14,7 +14,7 @@
 
 このリポジトリ自体が単一プラグインの Claude Code マーケットプレイスでもある: `.claude-plugin/marketplace.json` は `kjfsm-skills` プラグインを1つだけ列挙している。Claude プラグインとして出荷し、(今のところ)Codex プラグインとして出荷しない理由は [.agents/adr/0002-ship-as-a-claude-code-plugin.md](./.agents/adr/0002-ship-as-a-claude-code-plugin.md) にある。
 
-`plugin.json` に `version` を **置かない**。Claude Code は version が無いとき git のコミット SHA をバージョンとして扱うので、push するたびにインストール済みユーザーへ更新が届く。`version` を書くとその文字列が固定のキャッシュキーになり、手で上げない限り更新が一切届かなくなる。リリースの刻みを持つと決めるまで、このフィールドは空けておく。
+`version` を **どこにも置かない** — `plugin.json` と `marketplace.json` のプラグインエントリの **両方** から省く。公式はコミット SHA をバージョンとして扱う条件をこの「両方から省く」で定めており、片方にでも書くとその文字列が固定のキャッシュキーになって、手で上げない限り更新が一切届かなくなる。省いてあるかぎり、push するたびにインストール済みユーザーへ更新が届く。リリースの刻みを持つと決めるまで、このフィールドは空けておく(検査 11. が両方を見る)。
 
 `plugin.json` の `skills` 配列は、既定の `skills/` スキャンに **追加** されるのが原則で、`marketplace.json` の `source` がマーケットプレイスのルート(`"./"`)に解決される場合に限り **置き換え** になる。昇格していないバケットがプラグインに載らないのはこの例外に乗っているからなので、`source` を変えるときは `deprecated/` や `in-progress/` が出荷対象に混ざらないか確認する。
 

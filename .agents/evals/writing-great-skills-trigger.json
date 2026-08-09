@@ -1,0 +1,82 @@
+[
+  {
+    "query": "書いたスキルが実行するたびに違う手順で動いてしまう。どこを直せば毎回同じ経路を通るようになるか、原因の切り分け方から教えてほしい",
+    "should_trigger": true
+  },
+  {
+    "query": "SKILL.md が長くなってきた。どこまでを本文に残して、どこから別ファイルに押し出すべきかの判断軸がほしい",
+    "should_trigger": true
+  },
+  {
+    "query": "スキルの description にトリガー表現をどこまで盛るべきか迷っている。増やしすぎたときの弊害も含めて基準を知りたい",
+    "should_trigger": true
+  },
+  {
+    "query": "SKILL.md の description は何文字まで書ける? frontmatter に書けるフィールドのうち、どれが標準でどれが Claude Code 独自かも整理して教えて",
+    "should_trigger": true
+  },
+  {
+    "query": "スキルの参照ファイルを references/ に分けたい。何階層まで許されるのか、長いファイルに目次が要るのかを確認したい",
+    "should_trigger": true
+  },
+  {
+    "query": "今作っているスキルをユーザーが打ったときだけ動かすか、モデルにも自動で拾わせるかで迷っている。どう決めればいい?",
+    "should_trigger": true
+  },
+  {
+    "query": "既存のスキルから要らない行を削って短くしたい。何をもって「要らない」と判断すればいいのか基準がほしい",
+    "should_trigger": true
+  },
+  {
+    "query": "スキルの手順の途中で、エージェントがまだ終わっていないのに完了したことにしてしまう。書き方でどう防げる?",
+    "should_trigger": true
+  },
+  {
+    "query": "1つのスキルが大きくなってきたので2つに分けるべきか悩んでいる。分割してよい場合とかえって悪くなる場合の判断軸を教えて",
+    "should_trigger": true
+  },
+  {
+    "query": "手順を散文で書くか、スクリプトを同梱して実行させるかの判断基準を整理したい。エージェントに毎回同じコードを書かせている状態をどう扱うべき?",
+    "should_trigger": true
+  },
+  {
+    "query": "この skill の eval を実際に走らせて、合格率と所要トークンを出して",
+    "should_trigger": false
+  },
+  {
+    "query": "description のトリガー精度を測定して、失敗したクエリをもとに改善案を自動生成して",
+    "should_trigger": false
+  },
+  {
+    "query": "新しいスキルの雛形を、ディレクトリとファイルごと生成して",
+    "should_trigger": false
+  },
+  {
+    "query": "このスキルを claude.ai にアップロードできる zip にパッケージ化して",
+    "should_trigger": false
+  },
+  {
+    "query": "2つのバージョンのスキルをブラインドで A/B 比較して、どちらが良いか判定して",
+    "should_trigger": false
+  },
+  {
+    "query": "CLAUDE.md が肥大化して矛盾も出てきたので、監査してトリムしてほしい",
+    "should_trigger": false
+  },
+  {
+    "query": "この処理の背景をコメントに書くべきか JSDoc に書くべきか判断したい。型に出ない契約はどちらに置く?",
+    "should_trigger": false
+  },
+  {
+    "query": "コミットメッセージの本文に何を書くべきか、PR 本文との書き分けも含めて教えて",
+    "should_trigger": false
+  },
+  {
+    "query": "今の状況にどのスキルやフローが合うのか分からない。手持ちのスキルから案内して",
+    "should_trigger": false
+  },
+  {
+    "query": "作ったスキル集を Claude Code のプラグインとして配布したい。マーケットプレイスの登録手順を教えて",
+    "should_trigger": false
+  }
+]

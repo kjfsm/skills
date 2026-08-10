@@ -14,6 +14,8 @@
       "Bash(git show:*)",
       "Bash(scripts/check-invariants.sh)",
       "Bash(scripts/list-skills.sh)",
+      "Bash(scripts/sync-project-skills.sh)",
+      "Bash(scripts/sync-project-skills.sh --check)",
       "Bash(claude plugin validate:*)",
       "Bash(pnpm format:check)"
     ]

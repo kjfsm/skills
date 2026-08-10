@@ -277,6 +277,13 @@ while IFS= read -r md; do
     err "$md has an unclosed code fence; everything after it reads as code"
 done < <(find skills -name '*.md' -not -path '*/node_modules/*' | sort)
 
+# 14. `.claude/skills/` がこのリポジトリのスキルと一致している。ここが実体への
+#     シンボリックリンクで埋まっているあいだだけ、このリポジトリで作業する
+#     エージェントが自分のスキルを使える。スキルを足したり改名したりすると
+#     真っ先にずれ、しかも「呼べない」以外の症状が出ないので検査で捕まえる。
+scripts/sync-project-skills.sh --check ||
+  err ".claude/skills/ is out of sync with skills/; run scripts/sync-project-skills.sh"
+
 if [ "$fail" -eq 0 ]; then
   echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills)"
 fi

@@ -1,0 +1,3 @@
+interface:
+  display_name: "見た目の仕事を検証する"
+  short_description: "目で判定せず、不変量を式にして測る"

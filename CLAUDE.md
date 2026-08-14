@@ -18,6 +18,10 @@
 
 `plugin.json` の `skills` 配列は、既定の `skills/` スキャンに **追加** されるのが原則で、`marketplace.json` の `source` がマーケットプレイスのルート(`"./"`)に解決される場合に限り **置き換え** になる。昇格していないバケットがプラグインに載らないのはこの例外に乗っているからなので、`source` を変えるときは `deprecated/` や `in-progress/` が出荷対象に混ざらないか確認する。
 
+出力スタイルは `output-styles/` に置き、`plugin.json` の `outputStyles` で指す。`force-for-plugin` は **付けない** — 付けると入れた人の `outputStyle` 設定を黙って上書きするので、選ぶかどうかは利用者に残す。`keep-coding-instructions: true` は必須である: 出力スタイルは既定でハーネス組み込みのエンジニアリング指示(変更の切り方、**コメントの書き方**、検証のしかた)を外すため、付け忘れると規律を足すつもりで既存の規律を消すことになる。このリポジトリ自身は `.claude/output-styles/` のシンボリックリンクと `.claude/settings.json` の `outputStyle` で同じスタイルを選んでいる(検査 15. が両方を見る)。
+
+出力スタイルが入るのはメイン会話のシステムプロンプトだけで、**サブエージェントには届かない**。届くのは `CLAUDE.md` と `.claude/rules/` の側である(組み込みの探索用エージェントを除く)。だから同じ応答・記述の規約が `setup-skills` の書く `## Agent skills` ブロックにも載る — 意図的な唯一の重複であり、どちらか片方だけでは穴が空く。
+
 スキルを追加・改名・昇格・退役させる手順は [.agents/adding-a-skill.md](./.agents/adding-a-skill.md) にある — バケットと呼び出し方式の選び方、そして検査に出ない後始末(`ask-kjfsm`、`link-skills.sh`、他のスキルからの文中呼び出し)。
 
 マニフェストを触ったあとは `scripts/check-invariants.sh` を実行する。`claude plugin validate .` も走らせてよいが、リポジトリルートを渡すと `marketplace.json` しか検証せず `plugin.json` の壊れたパスを見逃すこと、`--strict` は `version` 不在を error に格上げしてしまうこと(上記の通り、これは意図的な状態である)に注意する。
@@ -35,3 +39,7 @@
 すべてのスキルをローカルのハーネススキルディレクトリ(`~/.claude/skills`、`~/.agents/skills`)へ(再)リンクするには、`scripts/link-skills.sh` を実行する。各エントリはこのリポジトリへのシンボリックリンクなので、`git pull` すればインストール済みのスキルは常に最新の状態を保つ。スキルを追加・削除・改名したあとは、このスクリプトを再実行すること。
 
 このリポジトリは自分のスキルを自分自身で使う。`.claude/skills/` に `deprecated/` を除く全スキルの実体へのシンボリックリンクが **コミットされている** ので、ここで作業するエージェントは `/ask-kjfsm` や `/writing-great-skills` をそのまま呼べる — Claude Code がプロジェクトスキルとして見るのは `.claude/skills/<名前>/SKILL.md` だけで、`skills/<バケット>/` は見に行かないためである。`link-skills.sh` が端末側(`~`)を埋めるのに対しこちらはリポジトリ側なので、クローンした誰にでも、`~` を持ち越せないクラウドセッションにも届く。張り直すのは `scripts/sync-project-skills.sh`、ずれの検出は検査 14. が行う。`in-progress/` を含めてあるのは意図的である: 下書きは実際に呼んでみて初めて直せる。
+
+ユーザーとのやり取りは日本語で行う。コミットメッセージと PR 本文もこのリポジトリの慣習に従って日本語である(識別子とファイル名は英語)。
+
+コードを読めば分かることは書かない — 処理の逐語的な説明、変更の経緯、構成の概観。コメント・JSDoc・コミットメッセージ・PR 本文・ADR・docs のどれに何を書くかは [`where-to-write-what`](./skills/engineering/where-to-write-what/SKILL.md) が決める。

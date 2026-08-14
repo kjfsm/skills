@@ -18,6 +18,7 @@
     "domain-modeling",
     "productivity"
   ],
+  "outputStyles": ["./output-styles/"],
   "skills": [
     "./skills/engineering/ask-kjfsm",
     "./skills/engineering/diagnosing-bugs",

@@ -66,6 +66,21 @@ npx -y skills add kjfsm/skills
 - どのイシュートラッカーを使うか尋ねる(GitHub、Linear、ローカルファイル)
 - チケットをトリアージするときに適用するラベルを尋ねる(`/triage` がラベルを使う)
 - 作成するドキュメントの保存先を尋ねる
+- 応答と記述の規約を尋ね、`CLAUDE.md` / `AGENTS.md` に書き込む
+
+### 出力スタイル
+
+プラグインには `kjfsm` という[出力スタイル](https://code.claude.com/docs/en/output-styles)が同梱されている — ユーザーへの応答を日本語にし、書いたものの宛先を [`where-to-write-what`](./skills/engineering/where-to-write-what/SKILL.md) に寄せる。
+
+**自動では有効にならない。** 使うなら1回選ぶ — `/config` の **Output style** から `kjfsm` を選ぶか、設定ファイルに直接書く:
+
+```json
+{
+  "outputStyle": "kjfsm"
+}
+```
+
+出力スタイルが効くのは**メインの会話だけ**で、サブエージェントには届かない。レビューや調査を子コンテキストに投げたときにも同じ規約を効かせたいなら、`/setup-skills` を実行して `CLAUDE.md` / `AGENTS.md` 側にも書かせること — そちらはサブエージェントにも読まれる。
 
 ## これらのスキルが存在する理由
 

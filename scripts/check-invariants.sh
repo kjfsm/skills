@@ -284,6 +284,47 @@ done < <(find skills -name '*.md' -not -path '*/node_modules/*' | sort)
 scripts/sync-project-skills.sh --check ||
   err ".claude/skills/ is out of sync with skills/; run scripts/sync-project-skills.sh"
 
+# ----------------------------------------------------------- output styles --
+# 15. 出力スタイルが出荷され、このリポジトリ自身でも選ばれている。スキルと違って
+#     出力スタイルは1つしかないので sync スクリプトは持たせず、ここで直接見る。
+#     壊れたときの症状が「効いていない」だけで、黙って通り過ぎる類だからである。
+grep -q '"outputStyles"' "$PLUGIN" ||
+  err "$PLUGIN does not declare \"outputStyles\"; the style ships only if the manifest points at it"
+
+while IFS= read -r style; do
+  name="$(basename "$style" .md)"
+  link=".claude/output-styles/$name.md"
+  want="../../output-styles/$name.md"
+
+  # 出力スタイルは既定でハーネス組み込みのエンジニアリング指示を **外す**。付け忘れ
+  # ると、コメントの規律を足すつもりで既存の規律を消すことになる。see CLAUDE.md
+  [ "$(field "$style" "keep-coding-instructions")" = "true" ] ||
+    err "$style does not set keep-coding-instructions: true; it would drop the harness's built-in engineering instructions"
+
+  if [ -L "$link" ]; then
+    [ "$(readlink "$link")" = "$want" ] ||
+      err "$link points at $(readlink "$link"), not $want"
+  else
+    err "$link is missing or is not a symlink; this repository cannot use its own output style"
+  fi
+done < <(find output-styles -name '*.md' | sort)
+
+selected="$(sed -n 's/^[[:space:]]*"outputStyle":[[:space:]]*"\([^"]*\)".*/\1/p' .claude/settings.json | head -1)"
+if [ -z "$selected" ]; then
+  err ".claude/settings.json does not set \"outputStyle\"; a project style that nobody selects never loads"
+elif [ ! -f "output-styles/$selected.md" ]; then
+  err ".claude/settings.json selects the \"$selected\" output style, which does not exist under output-styles/"
+fi
+
+# 出荷しない側の後始末 — リンクだけ残ると、実体の無いスタイルが名前だけ生き続ける
+if [ -d ".claude/output-styles" ]; then
+  while IFS= read -r stale; do
+    name="$(basename "$stale" .md)"
+    [ -f "output-styles/$name.md" ] ||
+      err "$stale is stale (no such output style under output-styles/)"
+  done < <(find .claude/output-styles -mindepth 1 -maxdepth 1 | sort)
+fi
+
 if [ "$fail" -eq 0 ]; then
   echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills)"
 fi

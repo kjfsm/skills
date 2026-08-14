@@ -72,7 +72,7 @@ scripts/check-invariants.sh
 
 そのうえで、名前を書いている場所すべてを追う: バケットの `README.md`、トップレベルの `README.md`、`plugin.json`、`ask-kjfsm`、そして**他のスキルの本文にある `/旧名` の文中呼び出し**。最後の1つは検査に出ない — `grep -rn '/旧名' skills/` で拾う。
 
-改名後は `link-skills.sh` を走らせ、古い名前のシンボリックリンクを手で消す(スクリプトは張り直すだけで、消えた名前の後始末はしない)。
+改名後は `link-skills.sh` を走らせ、古い名前のシンボリックリンクを手で消す(スクリプトは張り直すだけで、消えた名前の後始末はしない)。リポジトリ側の `.claude/skills/` は `scripts/sync-project-skills.sh` が古い名前ごと張り直すので手当ては要らず、忘れれば検査 14. が落ちる。
 
 ## 昇格するとき
 
@@ -84,6 +84,6 @@ scripts/check-invariants.sh
 
 ## 退役させるとき
 
-`deprecated/` へ移す。`scripts/link-skills.sh` はこのバケットを除外するので、移した時点でローカルのハーネスからは消える。
+`deprecated/` へ移す。`scripts/link-skills.sh` と `scripts/sync-project-skills.sh` はどちらもこのバケットを除外するので、走らせ直せばローカルのハーネスからも `.claude/skills/` からも消える。
 
 `plugin.json` とトップレベル `README.md` からは消える必要がある(検査が要求する)。`ask-kjfsm` からも消す。他のスキルがその名前を文中呼び出ししていないか `grep` で確かめる — 呼ばれたまま退役したスキルは、実行時に静かに何も起きない。

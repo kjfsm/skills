@@ -70,6 +70,8 @@ npx -y skills add kjfsm/skills --agent claude-code
 - **検証ゲート** — `/verification-loop` が走らせるコマンドとその順序
 - **応答と記述の規約** — ユーザーに向けて話す言語と、コメントの判定基準(何をコメントに書き、何をコード自体やコミットメッセージへ回すか)を書き込む。宛先は `CLAUDE.md` / `AGENTS.md` か `.claude/rules/`(Claude Code だけが読むリポジトリならこちら)。**方式 B ではここだけが規約の届け先である** — 出力スタイルが入らないため
 
+Claude Code を使うリポジトリなら、`/setup-skills` は最後に `/setup-rules` へ引き継ぎ、パスに応じて注入されるルールを `.claude/rules/` に敷く。こちらはモデル呼び出し型なので、ユーザーに入力してもらう必要はない。
+
 すべて済んだら、ユーザーに次を伝える(A で入れた場合):
 
 ```

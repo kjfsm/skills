@@ -1,0 +1,3 @@
+interface:
+  display_name: "ルールを敷く"
+  short_description: "リポジトリのルールを rules と CLAUDE.md の2層に置く"

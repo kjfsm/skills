@@ -69,6 +69,8 @@ npx -y skills add kjfsm/skills
 - 作成するドキュメントの保存先を尋ねる
 - 応答と記述の規約を尋ね、`CLAUDE.md` / `AGENTS.md` か `.claude/rules/` に書き込む(どちらか一方 — Claude Code だけが読むリポジトリなら後者)
 
+Claude Code を使うリポジトリでは、続けて **`/setup-rules`** へ引き継ぐ — `paths:` を持つ rule を `.claude/rules/` に敷き、スタックに依存しない絶対ルールを `CLAUDE.md` に置く。
+
 ### 出力スタイル
 
 プラグインには `kjfsm` という[出力スタイル](https://code.claude.com/docs/en/output-styles)が同梱されている — ユーザーへの応答を日本語にし、コメントの判定基準(何をコメントに書き、何をコード自体やコミットメッセージへ回すか)をセッションに常駐させる。残る宛先 — JSDoc・PR 本文・ADR・docs — は [`where-to-write-what`](./skills/engineering/where-to-write-what/SKILL.md) が決める。
@@ -132,6 +134,7 @@ npx -y skills add kjfsm/skills
 - **[resolving-merge-conflicts](./skills/engineering/resolving-merge-conflicts/SKILL.md)** — 進行中の git マージやリベースのコンフリクトを、ハンクごとに、双方の一次情報源にたどれる意図に基づいて解決し、そのうえで操作を完了させる — `--abort` は決して使わない。
 - **[react-router-route-module](./skills/engineering/react-router-route-module/SKILL.md)** — React Router（framework mode）の route module に何をどの export へ置くかの規律: 認可の強制点は `middleware`（loader と action の両方の手前を通る）、レイアウトが持つ値は `<Outlet context>` で配る。
 - **[where-to-write-what](./skills/engineering/where-to-write-what/SKILL.md)** — コメント・JSDoc・コミットメッセージ・PR 本文・ADR のどこに何を書くかのルーティング規律: コメント=コードから読めない制約と理由、JSDoc=型に出ない契約、コミット=何をなぜ変えたか、PR=レビューに要る文脈。
+- **[setup-rules](./skills/engineering/setup-rules/SKILL.md)** — このリポジトリのルールを2層に敷く: `paths:` を持つ rule はその glob を編集するときだけ注入され、スタックに依存しない絶対ルールと追記先の優先順位は毎セッション読まれる側に置く。`/setup-skills` から引き継がれる。
 
 ### Productivity
 

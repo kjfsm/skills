@@ -325,6 +325,17 @@ if [ -d ".claude/output-styles" ]; then
   done < <(find .claude/output-styles -mindepth 1 -maxdepth 1 | sort)
 fi
 
+# --------------------------------------------------- resident conventions --
+# 16. コメントの判定基準が、常駐する3か所すべてに本文として載っている。スキルは
+#     呼ばれて初めて読まれるが、コメントを書く場面でモデルはスキルを呼ばない。
+#     参照 1 行に痩せた瞬間に規律は効かなくなり、しかも症状が出ない。see CLAUDE.md
+for resident in output-styles/kjfsm.md CLAUDE.md skills/engineering/setup-skills/SKILL.md; do
+  grep -q 'コードを読めば分かることは書かない' "$resident" ||
+    err "$resident lost the comment rule's opening test; the convention only works while its body is resident"
+  grep -q '採らなかった素直な書き方' "$resident" ||
+    err "$resident lost what a comment may carry; a pointer to where-to-write-what does not fire on its own"
+done
+
 if [ "$fail" -eq 0 ]; then
   echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills)"
 fi

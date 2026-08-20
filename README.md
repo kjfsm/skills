@@ -56,6 +56,7 @@ npx -y skills add kjfsm/skills
 - プロジェクト内で実行するとそのプロジェクトのスキルディレクトリ(`.claude/skills/` など)へ**実ファイルとしてコピー**され、`skills-lock.json` が作られる。`--global` を付けるとユーザーレベル(`~/.claude/skills`)に入る。
 - コピーなので `git pull` では追随しない。更新は `npx skills update`、`skills-lock.json` からの復元は `npx skills experimental_install`。
 - この CLI はリポジトリ全体を走査するため、`--skill '*'` は `deprecated/` や `in-progress/` まで含めて全スキルを入れてしまう。昇格済みの集合だけが欲しいなら選択肢 B を使うか、`--skill` で名前を挙げること。
+- **出力スタイルは入らない**(プラグイン専用)。この経路で応答と記述の規約 — 応答言語と、コメントの判定基準 — を効かせるには `/setup-skills` を走らせる。`--skill` で絞る場合も `setup-skills` は含めること。
 
 **3つの方法は併用しない。** 同じスキルが2系統で入ると、スラッシュコマンドが重複し、常時読み込まれる description も二重に数えられる。このリポジトリを開発するなら選択肢 A、使うだけなら選択肢 B を選ぶ。
 
@@ -66,11 +67,11 @@ npx -y skills add kjfsm/skills
 - どのイシュートラッカーを使うか尋ねる(GitHub、Linear、ローカルファイル)
 - チケットをトリアージするときに適用するラベルを尋ねる(`/triage` がラベルを使う)
 - 作成するドキュメントの保存先を尋ねる
-- 応答と記述の規約を尋ね、`CLAUDE.md` / `AGENTS.md` に書き込む
+- 応答と記述の規約を尋ね、`CLAUDE.md` / `AGENTS.md` か `.claude/rules/` に書き込む(どちらか一方 — Claude Code だけが読むリポジトリなら後者)
 
 ### 出力スタイル
 
-プラグインには `kjfsm` という[出力スタイル](https://code.claude.com/docs/en/output-styles)が同梱されている — ユーザーへの応答を日本語にし、書いたものの宛先を [`where-to-write-what`](./skills/engineering/where-to-write-what/SKILL.md) に寄せる。
+プラグインには `kjfsm` という[出力スタイル](https://code.claude.com/docs/en/output-styles)が同梱されている — ユーザーへの応答を日本語にし、コメントの判定基準(何をコメントに書き、何をコード自体やコミットメッセージへ回すか)をセッションに常駐させる。残る宛先 — JSDoc・PR 本文・ADR・docs — は [`where-to-write-what`](./skills/engineering/where-to-write-what/SKILL.md) が決める。
 
 **自動では有効にならない。** 使うなら1回選ぶ — `/config` の **Output style** から `kjfsm` を選ぶか、設定ファイルに直接書く:
 

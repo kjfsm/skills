@@ -1,6 +1,6 @@
 ---
 name: setup-ci
-description: 記録された検証ゲートを CI に敷き、ローカルの規律を機構に変える。リポジトリに CI が無いとき、`docs/agents/verification.md` はあるのに自動では誰も走らせていないとき、検証されないまま PR がマージされているとき、`/setup-skills` の Section D を終えた直後に使う。
+description: 記録された検証ゲートを CI に敷き、ローカルの規律を機構に変える。ゲートを強制する仕組みがまだ無いとき（CI が無い、あるいは誰も走らせていない）、CI が `docs/agents/verification.md` とずれてきたとき、`/setup-repo` の工程 C として使う。
 ---
 
 # CI を敷く

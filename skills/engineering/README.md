@@ -34,9 +34,11 @@
 - **[verification-loop](./verification-loop/SKILL.md)** — 変更が本当に動くことを **クリーンラン** で確かめる: 記録された検証ゲートを中断なく1回で通し、そのうえで変更した経路を実際に駆動して観測の証拠を残す。
 - **[two-axis-review](./two-axis-review/SKILL.md)** — 固定した基点からの差分に対する二軸レビュー: **Standards**(リポジトリのコーディング標準に従っているか、加えて Fowler のコードスメルの基準を満たしているか)と **Spec**(元になったイシュー/PRD を忠実に実装しているか)。並列のサブエージェントとして実行する。
 - **[resolving-merge-conflicts](./resolving-merge-conflicts/SKILL.md)** — 進行中の git マージやリベースのコンフリクトを、ハンクごとに、双方の一次情報源にたどれる意図に基づいて解決し、そのうえで操作を完了させる — `--abort` は決して使わない。
+- **[ai-efficiency](./ai-efficiency/SKILL.md)** — 大量のファイル移動・リネーム・import 付け替えを、1ファイルずつ読み書きせずシェルで機械的に処理する: `git mv` で履歴を保ち、相対 import を絶対へ正規化してから一括置換し、抜けの検出は typecheck に委ねる。
 - **[react-router-route-module](./react-router-route-module/SKILL.md)** — React Router（framework mode）の route module に何をどの export へ置くかの規律: 認可の強制点は `middleware`（loader と action の両方の手前を通る）、レイアウトが持つ値は `<Outlet context>` で配る。
 - **[where-to-write-what](./where-to-write-what/SKILL.md)** — コメント・JSDoc・コミットメッセージ・PR 本文・ADR のどこに何を書くかのルーティング規律: コメント=コードから読めない制約と理由、JSDoc=型に出ない契約、コミット=何をなぜ変えたか、PR=レビューに要る文脈。
 - **[setup-rules](./setup-rules/SKILL.md)** — このリポジトリのルールを2層に敷く: `paths:` を持つ rule はその glob を編集するときだけ注入され、スタックに依存しない絶対ルールと追記先の優先順位は毎セッション読まれる側に置く。`/setup-skills` から引き継がれる。
 - **[setup-skills](./setup-skills/SKILL.md)** — このリポジトリをエンジニアリング系スキル向けに設定する(イシュートラッカー、トリアージラベル、ドメインドキュメントの配置、検証ゲート、応答と記述の規約)。`/setup-repo` の工程 A。
 - **[setup-ci](./setup-ci/SKILL.md)** — 記録された検証ゲートを CI に敷き、ローカルの規律を機構に変える。CI に載らない行(観測・シークレットを要る経路)を分け、必須チェックの設定はユーザーの手に残す。
 - **[setup-hooks](./setup-hooks/SKILL.md)** — 散文では守られないルールを Claude Code のフックへ落として決定的に弾く。落とすのは3条件(すでに破られた・破られても気づけない・入力だけで機械的に判定できる)を満たすものだけ。
+- **[setup-cf-app](./setup-cf-app/SKILL.md)** — 新規の Cloudflare Workers フルスタックアプリを、いつも使う標準ライブラリ構成で立ち上げる。バージョンやフラグは固定せず、各ツールの公式手順で都度組む。

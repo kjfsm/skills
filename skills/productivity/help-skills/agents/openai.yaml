@@ -1,0 +1,5 @@
+interface:
+  display_name: "スキル一覧"
+  short_description: "kjfsm のスキル一覧を README で開く"
+policy:
+  allow_implicit_invocation: false

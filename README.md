@@ -18,6 +18,23 @@ Fetch https://raw.githubusercontent.com/kjfsm/skills/main/setup.md
 
 自分の手で入れたい場合は、以下から選ぶ。
 
+### 入るものの差
+
+3つは **配るものが違う**。スキルの数は現時点の実測値である。
+
+|              | A: シンボリックリンク            | B: プラグイン                          | C: `npx skills`                          |
+| ------------ | -------------------------------- | -------------------------------------- | ---------------------------------------- |
+| スキル       | **50**(`deprecated/` 以外の全部) | **32**(昇格済み集合のみ)               | **54**(全部。`deprecated/` も含む)       |
+| 出力スタイル | 入らない                         | **入る**(有効化は別途)                 | 入らない                                 |
+| 実体         | このリポジトリ(clone が必要)     | `~/.claude/plugins/` のキャッシュ      | コピー先に実ファイル                     |
+| 更新         | `git pull` で即反映              | push のたびに届く(コミット SHA で追随) | 追随しない。`npx skills update` を自分で |
+| スコープ     | ユーザー(`~/.claude/skills`)     | ユーザー / **プロジェクト** / ローカル | プロジェクト、または `--global`          |
+| 向いている人 | このリポジトリ自体を開発する     | ふつうはこちら                         | 実体を手元に置いて改変したい             |
+
+**`deprecated/` と `in-progress/` を配らないのは B だけである。** C は `--skill` で名前を挙げれば絞れるが、既定は全部入りで、上流で削除したスキルもコピー先には残り続ける。
+
+**出力スタイルを運べるのも B だけである。** A と C でコメントの判定基準を効かせるには `/setup-repo` を実行して `CLAUDE.md` 側に書かせる。
+
 ### 選択肢 A: ローカルのハーネススキルディレクトリへシンボリックリンクする
 
 リポジトリのルートから:
@@ -44,6 +61,15 @@ claude plugin marketplace add kjfsm/skills
 claude plugin install kjfsm-skills@kjfsm
 ```
 
+既定の導入先はユーザー全体である。**そのリポジトリに入れて、clone した全員へ届けたい**なら `--scope project` を付ける:
+
+```bash
+claude plugin marketplace add kjfsm/skills --scope project
+claude plugin install kjfsm-skills@kjfsm --scope project
+```
+
+これは `.claude/settings.json` に `extraKnownMarketplaces` と `enabledPlugins` を書き込む。コミットすれば、そのリポジトリで作業する人は何も入れなくてもスキルが有効になる — `npx skills` のようにスキルの実体をリポジトリへコミットせずに済む。
+
 ### 選択肢 C: `npx skills` でコピーとして入れる
 
 スキルの **実体** を手元に置きたい場合(このリポジトリを clone せずに使いたい、プロジェクトに同梱したい、など):
@@ -56,7 +82,7 @@ npx -y skills add kjfsm/skills
 - プロジェクト内で実行するとそのプロジェクトのスキルディレクトリ(`.claude/skills/` など)へ**実ファイルとしてコピー**され、`skills-lock.json` が作られる。`--global` を付けるとユーザーレベル(`~/.claude/skills`)に入る。
 - コピーなので `git pull` では追随しない。更新は `npx skills update`、`skills-lock.json` からの復元は `npx skills experimental_install`。
 - この CLI はリポジトリ全体を走査するため、`--skill '*'` は `deprecated/` や `in-progress/` まで含めて全スキルを入れてしまう。昇格済みの集合だけが欲しいなら選択肢 B を使うか、`--skill` で名前を挙げること。
-- **出力スタイルは入らない**(プラグイン専用)。この経路で応答と記述の規約 — 応答言語と、コメントの判定基準 — を効かせるには `/setup-repo` を走らせる。`--skill` で絞る場合も `setup-repo` とその工程(`setup-skills`、`setup-rules`、`setup-ci`、`setup-hooks`)は含めること。
+- **`--skill` で絞る場合も `setup-repo` とその工程(`setup-skills`、`setup-rules`、`setup-ci`、`setup-hooks`)は含めること。** この経路では、応答と記述の規約の届け先がそこしかない。
 
 **3つの方法は併用しない。** 同じスキルが2系統で入ると、スラッシュコマンドが重複し、常時読み込まれる description も二重に数えられる。このリポジトリを開発するなら選択肢 A、使うだけなら選択肢 B を選ぶ。
 
@@ -136,12 +162,14 @@ npx -y skills add kjfsm/skills
 - **[verification-loop](./skills/engineering/verification-loop/SKILL.md)** — 変更が本当に動くことを **クリーンラン** で確かめる: 記録された検証ゲートを中断なく1回で通し、そのうえで変更した経路を実際に駆動して観測の証拠を残す。
 - **[two-axis-review](./skills/engineering/two-axis-review/SKILL.md)** — 固定した基点からの差分に対する二軸レビュー: **Standards**(リポジトリのコーディング標準に従っているか、加えて Fowler のコードスメルの基準を満たしているか)と **Spec**(元になったイシュー/PRD を忠実に実装しているか)。互いを汚染しないよう並列のサブエージェントとして実行する。
 - **[resolving-merge-conflicts](./skills/engineering/resolving-merge-conflicts/SKILL.md)** — 進行中の git マージやリベースのコンフリクトを、ハンクごとに、双方の一次情報源にたどれる意図に基づいて解決し、そのうえで操作を完了させる — `--abort` は決して使わない。
+- **[ai-efficiency](./skills/engineering/ai-efficiency/SKILL.md)** — 大量のファイル移動・リネーム・import 付け替えを、1ファイルずつ読み書きせずシェルで機械的に処理する: `git mv` で履歴を保ち、相対 import を絶対へ正規化してから一括置換し、抜けの検出は typecheck に委ねる。
 - **[react-router-route-module](./skills/engineering/react-router-route-module/SKILL.md)** — React Router（framework mode）の route module に何をどの export へ置くかの規律: 認可の強制点は `middleware`（loader と action の両方の手前を通る）、レイアウトが持つ値は `<Outlet context>` で配る。
 - **[where-to-write-what](./skills/engineering/where-to-write-what/SKILL.md)** — コメント・JSDoc・コミットメッセージ・PR 本文・ADR のどこに何を書くかのルーティング規律: コメント=コードから読めない制約と理由、JSDoc=型に出ない契約、コミット=何をなぜ変えたか、PR=レビューに要る文脈。
 - **[setup-rules](./skills/engineering/setup-rules/SKILL.md)** — このリポジトリのルールを2層に敷く: `paths:` を持つ rule はその glob を編集するときだけ注入され、スタックに依存しない絶対ルールと追記先の優先順位は毎セッション読まれる側に置く。`/setup-skills` から引き継がれる。
 - **[setup-skills](./skills/engineering/setup-skills/SKILL.md)** — このリポジトリをエンジニアリング系スキル向けに設定する(イシュートラッカー、トリアージラベル、ドメインドキュメントの配置、検証ゲート、応答と記述の規約)。`/setup-repo` の工程 A。
 - **[setup-ci](./skills/engineering/setup-ci/SKILL.md)** — 記録された検証ゲートを CI に敷き、ローカルの規律を機構に変える。CI に載らない行(観測・シークレットを要る経路)を分け、必須チェックの設定はユーザーの手に残す。
 - **[setup-hooks](./skills/engineering/setup-hooks/SKILL.md)** — 散文では守られないルールを Claude Code のフックへ落として決定的に弾く。落とすのは3条件(すでに破られた・破られても気づけない・入力だけで機械的に判定できる)を満たすものだけ。
+- **[setup-cf-app](./skills/engineering/setup-cf-app/SKILL.md)** — 新規の Cloudflare Workers フルスタックアプリを、いつも使う標準ライブラリ構成で立ち上げる。バージョンやフラグは固定せず、各ツールの公式手順で都度組む。
 
 ### Productivity
 
@@ -149,6 +177,7 @@ npx -y skills add kjfsm/skills
 
 **ユーザー呼び出し型**
 
+- **[help-skills](./skills/productivity/help-skills/SKILL.md)** — kjfsm のスキル一覧を README で開く。名前を思い出したいだけのときに、一覧をコンテキストへ持ち込まずに済ませる。
 - **[grill-me](./skills/productivity/grill-me/SKILL.md)** — 決定木のすべての枝が解決するまで、計画やデザインについて容赦なくインタビューされる。
 - **[handoff](./skills/productivity/handoff/SKILL.md)** — 今の会話を引き継ぎ用のドキュメントへ圧縮し、別のエージェントが作業を継続できるようにする。
 - **[teach](./skills/productivity/teach/SKILL.md)** — 現在のディレクトリをステートフルな教育用ワークスペースとして使い、複数セッションにわたってユーザーに新しいスキルや概念を教える。

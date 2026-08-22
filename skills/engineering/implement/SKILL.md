@@ -17,4 +17,4 @@ disable-model-invocation: true
 
 クリーンランが取れたら /two-axis-review を使って作業をレビューする。
 
-作業を現在のブランチにコミットする。
+作業を現在のブランチにコミットする。メッセージを書く前に /where-to-write-what を読み、何をコミットに載せ、何をコメントや ADR へ回すかを決める。

@@ -1,6 +1,6 @@
 ---
 name: setup-rules
-description: このリポジトリのルールを `.claude/rules/` と `CLAUDE.md` の2層に敷く — パスに応じて自動注入されるパス別ルールと、全セッションに効く絶対ルール。Claude Code を使うリポジトリを初めて設定するとき、`.claude/rules/` がまだ無いとき、同じ指摘を2回以上受けてルールに落としたいとき、`/setup-skills` の直後に使う。
+description: このリポジトリのルールを `.claude/rules/` と `CLAUDE.md` の2層に敷く — パスに応じて自動注入されるパス別ルールと、全セッションに効く絶対ルール。Claude Code を使うリポジトリを初めて設定するとき、`.claude/rules/` がまだ無いとき、同じ指摘を2回以上受けてルールに落としたいとき、`/setup-repo` の工程 B として使う。
 ---
 
 # ルールを敷く

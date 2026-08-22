@@ -33,7 +33,7 @@ Fetch https://raw.githubusercontent.com/kjfsm/skills/main/setup.md
 
 **`deprecated/` と `in-progress/` を配らないのは B だけである。** C は `--skill` で名前を挙げれば絞れるが、既定は全部入りで、上流で削除したスキルもコピー先には残り続ける。
 
-**出力スタイルを運べるのも B だけである。** A と C でコメントの判定基準を効かせるには `/setup-skills` を実行して `CLAUDE.md` 側に書かせる。
+**出力スタイルを運べるのも B だけである。** A と C でコメントの判定基準を効かせるには `/setup-repo` を実行して `CLAUDE.md` 側に書かせる。
 
 ### 選択肢 A: ローカルのハーネススキルディレクトリへシンボリックリンクする
 
@@ -82,20 +82,24 @@ npx -y skills add kjfsm/skills
 - プロジェクト内で実行するとそのプロジェクトのスキルディレクトリ(`.claude/skills/` など)へ**実ファイルとしてコピー**され、`skills-lock.json` が作られる。`--global` を付けるとユーザーレベル(`~/.claude/skills`)に入る。
 - コピーなので `git pull` では追随しない。更新は `npx skills update`、`skills-lock.json` からの復元は `npx skills experimental_install`。
 - この CLI はリポジトリ全体を走査するため、`--skill '*'` は `deprecated/` や `in-progress/` まで含めて全スキルを入れてしまう。昇格済みの集合だけが欲しいなら選択肢 B を使うか、`--skill` で名前を挙げること。
-- **`--skill` で絞る場合も `setup-skills` は含めること。** この経路では、応答と記述の規約の届け先がそこしかない。
+- **`--skill` で絞る場合も `setup-repo` とその工程(`setup-skills`、`setup-rules`、`setup-ci`、`setup-hooks`)は含めること。** この経路では、応答と記述の規約の届け先がそこしかない。
 
 **3つの方法は併用しない。** 同じスキルが2系統で入ると、スラッシュコマンドが重複し、常時読み込まれる description も二重に数えられる。このリポジトリを開発するなら選択肢 A、使うだけなら選択肢 B を選ぶ。
 
 **このリポジトリを clone した場合は、何も入れなくてもスキルが使える。** `.claude/skills/` に(`deprecated/` を除く)全スキルへのシンボリックリンクがコミットされているので、この clone の中で作業するかぎり `/ask-kjfsm` も `/tdd` もそのまま呼べる。選択肢 A と同じ実体を指すため、両方あっても Claude Code はスキルを1回しか読み込まない — 併用の禁止に触れるのは、実体が別になる選択肢 B・C をこの clone の中で重ねたときである。リンクの張り直しは `scripts/sync-project-skills.sh` で、ずれは `scripts/check-invariants.sh` が落とす。
 
-どの方法でも、他のエンジニアリング系スキルを使う前にリポジトリごとに一度 **`/setup-skills`** を実行すること。これは次のことを行う:
+どの方法でも、他のエンジニアリング系スキルを使う前にリポジトリごとに一度 **`/setup-repo`** を実行すること。setup 系4工程の入口であり、届き方の違う4つの層を順に敷く:
 
-- どのイシュートラッカーを使うか尋ねる(GitHub、Linear、ローカルファイル)
-- チケットをトリアージするときに適用するラベルを尋ねる(`/triage` がラベルを使う)
-- 作成するドキュメントの保存先を尋ねる
-- 応答と記述の規約を尋ね、`CLAUDE.md` / `AGENTS.md` か `.claude/rules/` に書き込む(どちらか一方 — Claude Code だけが読むリポジトリなら後者)
+| 層                     | 効くとき                     | 工程                                                                                                             |
+| ---------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| 規約・ドキュメント配置 | 毎セッション                 | `/setup-skills` — イシュートラッカー、トリアージラベル、ドメインドキュメントの配置、検証ゲート、応答と記述の規約 |
+| パス別ルール           | その glob を編集するとき     | `/setup-rules` — `paths:` を持つ rule を `.claude/rules/` へ、絶対ルールを `CLAUDE.md` へ                        |
+| CI                     | push / PR のとき             | `/setup-ci` — 記録された検証ゲートを GitHub Actions で回す                                                       |
+| フック                 | 該当するツール呼び出しのたび | `/setup-hooks` — 散文では守られないものを決定的に弾く                                                            |
 
-Claude Code を使うリポジトリでは、続けて **`/setup-rules`** へ引き継ぐ — `paths:` を持つ rule を `.claude/rules/` に敷き、スタックに依存しない絶対ルールを `CLAUDE.md` に置く。
+**再実行してよい。** 2回目は済んだ工程を飛ばし、設定と実態のずれ — verification.md に無いコマンドを CI が走らせている、`paths:` がもう存在しないディレクトリを指している — だけを直す。
+
+`AGENTS.md` しか無いリポジトリでは、`.claude/` を読まないハーネスが対象なので `/setup-rules` と `/setup-hooks` は飛ばされる。
 
 ### 出力スタイル
 
@@ -109,7 +113,7 @@ Claude Code を使うリポジトリでは、続けて **`/setup-rules`** へ引
 }
 ```
 
-出力スタイルが効くのは**メインの会話だけ**で、サブエージェントには届かない。レビューや調査を子コンテキストに投げたときにも同じ規約を効かせたいなら、`/setup-skills` を実行して `CLAUDE.md` / `AGENTS.md` 側にも書かせること — そちらはサブエージェントにも読まれる。
+出力スタイルが効くのは**メインの会話だけ**で、サブエージェントには届かない。レビューや調査を子コンテキストに投げたときにも同じ規約を効かせたいなら、`/setup-repo` を実行して `CLAUDE.md` / `AGENTS.md` 側にも書かせること — そちらはサブエージェントにも読まれる。
 
 ## これらのスキルが存在する理由
 
@@ -137,7 +141,7 @@ Claude Code を使うリポジトリでは、続けて **`/setup-rules`** へ引
 - **[grill-with-docs](./skills/engineering/grill-with-docs/SKILL.md)** — プロジェクトのドメインモデルも構築するグリリングセッション。用語を研ぎ澄まし、`CONTEXT.md` と ADR をその場で更新する。
 - **[triage](./skills/engineering/triage/SKILL.md)** — トリアージロールのステートマシンに沿ってイシューを進める。
 - **[improve-codebase-architecture](./skills/engineering/improve-codebase-architecture/SKILL.md)** — コードベースをスキャンして深化の機会を見つけ、視覚的な HTML レポートとして提示し、選んだものについてグリリングする。
-- **[setup-skills](./skills/engineering/setup-skills/SKILL.md)** — このリポジトリをエンジニアリング系スキル向けに設定する(イシュートラッカー、トリアージラベル、ドメインドキュメントの配置)。他のエンジニアリング系スキルを使う前にリポジトリごとに一度実行する。
+- **[setup-repo](./skills/engineering/setup-repo/SKILL.md)** — setup 系4工程(規約とドキュメント配置・パス別ルール・CI・フック)の入口。順序と依存はこのスキルが持つ。再実行すると現況を読み、足りない工程と**ずれた箇所だけ**を当てる。
 - **[tend-memory-files](./skills/engineering/tend-memory-files/SKILL.md)** — セッション開始時にロードされる指示ファイル(`CLAUDE.md`、`.claude/rules/`)を新規に書く、または監査してトリムする。行数の目安に収め、具体的で矛盾のない指示だけを残す。
 - **[to-spec](./skills/engineering/to-spec/SKILL.md)** — 今の会話をスペックに変換し、イシュートラッカーへ公開する。インタビューはせず、すでに話し合った内容をまとめるだけ。
 - **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — どんな計画・スペック・会話も、それぞれがブロッキングエッジを宣言するトレーサーバレット方式のチケットの集合へ分割する — ローカルファイルへのテキストとして、あるいは実際のトラッカー上のネイティブなブロッキングリンクとして書かれる。
@@ -162,6 +166,9 @@ Claude Code を使うリポジトリでは、続けて **`/setup-rules`** へ引
 - **[react-router-route-module](./skills/engineering/react-router-route-module/SKILL.md)** — React Router（framework mode）の route module に何をどの export へ置くかの規律: 認可の強制点は `middleware`（loader と action の両方の手前を通る）、レイアウトが持つ値は `<Outlet context>` で配る。
 - **[where-to-write-what](./skills/engineering/where-to-write-what/SKILL.md)** — コメント・JSDoc・コミットメッセージ・PR 本文・ADR のどこに何を書くかのルーティング規律: コメント=コードから読めない制約と理由、JSDoc=型に出ない契約、コミット=何をなぜ変えたか、PR=レビューに要る文脈。
 - **[setup-rules](./skills/engineering/setup-rules/SKILL.md)** — このリポジトリのルールを2層に敷く: `paths:` を持つ rule はその glob を編集するときだけ注入され、スタックに依存しない絶対ルールと追記先の優先順位は毎セッション読まれる側に置く。`/setup-skills` から引き継がれる。
+- **[setup-skills](./skills/engineering/setup-skills/SKILL.md)** — このリポジトリをエンジニアリング系スキル向けに設定する(イシュートラッカー、トリアージラベル、ドメインドキュメントの配置、検証ゲート、応答と記述の規約)。`/setup-repo` の工程 A。
+- **[setup-ci](./skills/engineering/setup-ci/SKILL.md)** — 記録された検証ゲートを CI に敷き、ローカルの規律を機構に変える。CI に載らない行(観測・シークレットを要る経路)を分け、必須チェックの設定はユーザーの手に残す。
+- **[setup-hooks](./skills/engineering/setup-hooks/SKILL.md)** — 散文では守られないルールを Claude Code のフックへ落として決定的に弾く。落とすのは3条件(すでに破られた・破られても気づけない・入力だけで機械的に判定できる)を満たすものだけ。
 - **[setup-cf-app](./skills/engineering/setup-cf-app/SKILL.md)** — 新規の Cloudflare Workers フルスタックアプリを、いつも使う標準ライブラリ構成で立ち上げる。バージョンやフラグは固定せず、各ツールの公式手順で都度組む。
 
 ### Productivity

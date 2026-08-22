@@ -1,0 +1,5 @@
+interface:
+  display_name: "リポジトリを設定する"
+  short_description: "setup 系の工程を一括で敷き、再実行ではずれだけ直す"
+policy:
+  allow_implicit_invocation: false

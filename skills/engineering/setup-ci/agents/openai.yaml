@@ -1,0 +1,3 @@
+interface:
+  display_name: "CI を敷く"
+  short_description: "記録された検証ゲートを CI で回す"

@@ -170,6 +170,7 @@ Claude Code を使うリポジトリでは、続けて **`/setup-rules`** へ引
 
 **ユーザー呼び出し型**
 
+- **[help-skills](./skills/productivity/help-skills/SKILL.md)** — kjfsm のスキル一覧を README で開く。名前を思い出したいだけのときに、一覧をコンテキストへ持ち込まずに済ませる。
 - **[grill-me](./skills/productivity/grill-me/SKILL.md)** — 決定木のすべての枝が解決するまで、計画やデザインについて容赦なくインタビューされる。
 - **[handoff](./skills/productivity/handoff/SKILL.md)** — 今の会話を引き継ぎ用のドキュメントへ圧縮し、別のエージェントが作業を継続できるようにする。
 - **[teach](./skills/productivity/teach/SKILL.md)** — 現在のディレクトリをステートフルな教育用ワークスペースとして使い、複数セッションにわたってユーザーに新しいスキルや概念を教える。

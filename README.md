@@ -18,6 +18,23 @@ Fetch https://raw.githubusercontent.com/kjfsm/skills/main/setup.md
 
 自分の手で入れたい場合は、以下から選ぶ。
 
+### 入るものの差
+
+3つは **配るものが違う**。スキルの数は現時点の実測値である。
+
+|              | A: シンボリックリンク            | B: プラグイン                          | C: `npx skills`                          |
+| ------------ | -------------------------------- | -------------------------------------- | ---------------------------------------- |
+| スキル       | **50**(`deprecated/` 以外の全部) | **32**(昇格済み集合のみ)               | **54**(全部。`deprecated/` も含む)       |
+| 出力スタイル | 入らない                         | **入る**(有効化は別途)                 | 入らない                                 |
+| 実体         | このリポジトリ(clone が必要)     | `~/.claude/plugins/` のキャッシュ      | コピー先に実ファイル                     |
+| 更新         | `git pull` で即反映              | push のたびに届く(コミット SHA で追随) | 追随しない。`npx skills update` を自分で |
+| スコープ     | ユーザー(`~/.claude/skills`)     | ユーザー / **プロジェクト** / ローカル | プロジェクト、または `--global`          |
+| 向いている人 | このリポジトリ自体を開発する     | ふつうはこちら                         | 実体を手元に置いて改変したい             |
+
+**`deprecated/` と `in-progress/` を配らないのは B だけである。** C は `--skill` で名前を挙げれば絞れるが、既定は全部入りで、上流で削除したスキルもコピー先には残り続ける。
+
+**出力スタイルを運べるのも B だけである。** A と C でコメントの判定基準を効かせるには `/setup-skills` を実行して `CLAUDE.md` 側に書かせる。
+
 ### 選択肢 A: ローカルのハーネススキルディレクトリへシンボリックリンクする
 
 リポジトリのルートから:
@@ -44,6 +61,15 @@ claude plugin marketplace add kjfsm/skills
 claude plugin install kjfsm-skills@kjfsm
 ```
 
+既定の導入先はユーザー全体である。**そのリポジトリに入れて、clone した全員へ届けたい**なら `--scope project` を付ける:
+
+```bash
+claude plugin marketplace add kjfsm/skills --scope project
+claude plugin install kjfsm-skills@kjfsm --scope project
+```
+
+これは `.claude/settings.json` に `extraKnownMarketplaces` と `enabledPlugins` を書き込む。コミットすれば、そのリポジトリで作業する人は何も入れなくてもスキルが有効になる — `npx skills` のようにスキルの実体をリポジトリへコミットせずに済む。
+
 ### 選択肢 C: `npx skills` でコピーとして入れる
 
 スキルの **実体** を手元に置きたい場合(このリポジトリを clone せずに使いたい、プロジェクトに同梱したい、など):
@@ -56,7 +82,7 @@ npx -y skills add kjfsm/skills
 - プロジェクト内で実行するとそのプロジェクトのスキルディレクトリ(`.claude/skills/` など)へ**実ファイルとしてコピー**され、`skills-lock.json` が作られる。`--global` を付けるとユーザーレベル(`~/.claude/skills`)に入る。
 - コピーなので `git pull` では追随しない。更新は `npx skills update`、`skills-lock.json` からの復元は `npx skills experimental_install`。
 - この CLI はリポジトリ全体を走査するため、`--skill '*'` は `deprecated/` や `in-progress/` まで含めて全スキルを入れてしまう。昇格済みの集合だけが欲しいなら選択肢 B を使うか、`--skill` で名前を挙げること。
-- **出力スタイルは入らない**(プラグイン専用)。この経路で応答と記述の規約 — 応答言語と、コメントの判定基準 — を効かせるには `/setup-skills` を走らせる。`--skill` で絞る場合も `setup-skills` は含めること。
+- **`--skill` で絞る場合も `setup-skills` は含めること。** この経路では、応答と記述の規約の届け先がそこしかない。
 
 **3つの方法は併用しない。** 同じスキルが2系統で入ると、スラッシュコマンドが重複し、常時読み込まれる description も二重に数えられる。このリポジトリを開発するなら選択肢 A、使うだけなら選択肢 B を選ぶ。
 

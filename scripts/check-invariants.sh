@@ -328,12 +328,17 @@ fi
 # --------------------------------------------------- resident conventions --
 # 16. コメントの判定基準が、常駐する3か所すべてに本文として載っている。スキルは
 #     呼ばれて初めて読まれるが、コメントを書く場面でモデルはスキルを呼ばない。
-#     参照 1 行に痩せた瞬間に規律は効かなくなり、しかも症状が出ない。see CLAUDE.md
+#     参照 1 行に痩せた瞬間に規律は効かなくなり、しかも症状が出ない。優先順位の
+#     1 句を別に見るのは、ハーネス側の「周囲のコードに合わせろ」と正面から
+#     ぶつかる唯一の行で、落ちてもモデルが黙ってどちらかを選ぶためである。
+#     see CLAUDE.md, .agents/adr/0003-never-start-from-init-output.md
 for resident in output-styles/kjfsm.md CLAUDE.md skills/engineering/setup-skills/SKILL.md; do
   grep -q 'コードを読めば分かることは書かない' "$resident" ||
     err "$resident lost the comment rule's opening test; the convention only works while its body is resident"
   grep -q '採らなかった素直な書き方' "$resident" ||
     err "$resident lost what a comment may carry; a pointer to where-to-write-what does not fire on its own"
+  grep -q 'コメントの密度ではない' "$resident" ||
+    err "$resident lost the precedence clause; without it the harness's match-the-surrounding-code line and this rule point opposite ways and the model picks silently"
 done
 
 if [ "$fail" -eq 0 ]; then

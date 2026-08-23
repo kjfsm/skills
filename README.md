@@ -150,7 +150,7 @@ npx -y skills add kjfsm/skills
 
 **モデル呼び出し型**
 
-- **[prototype](./skills/engineering/prototype/SKILL.md)** — デザイン上の問いに答えるための使い捨てプロトタイプを作る — 状態やロジックの問いには実行可能なターミナルアプリ、または1つのルートから切り替えられる何通りかの根本的に異なる UI バリエーション。
+- **[prototype](./skills/engineering/prototype/SKILL.md)** — デザイン上の問いに答えるための使い捨てプロトタイプを作る — 状態やロジックの問いには開発者でない人にも渡せる共有可能な単一 HTML ファイル、見た目の問いには1つのルートから切り替えられる何通りかの根本的に異なる UI バリエーション。
 - **[diagnosing-bugs](./skills/engineering/diagnosing-bugs/SKILL.md)** — 手強いバグやパフォーマンスのリグレッションのための規律ある診断ループ: 再現 → 最小化 → 仮説立て → 計測 → 修正 → リグレッションテスト。
 - **[research](./skills/engineering/research/SKILL.md)** — 信頼度の高い一次情報源に対してある問いを調査し、その発見を引用付きのマークダウンファイルとしてリポジトリに残す。バックグラウンドエージェントとして実行される。
 - **[tdd](./skills/engineering/tdd/SKILL.md)** — レッド・グリーン・リファクタリングのループによるテスト駆動開発。機能を作るのもバグを直すのも、一度に1つの垂直スライスずつ進める。

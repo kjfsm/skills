@@ -67,6 +67,7 @@ Anthropic の公式ドキュメントとブログから抽出した、**AI に�
 | `cm` | [CLAUDE.md ファイルの使用][cm]                                         | `CLAUDE.md` に何を書き、何を書かないか(ブログ)                                               |
 | `mm` | [Claude はプロジェクトをどう記憶するか][mm]                            | `CLAUDE.md` の製品ドキュメント。200行の目安、`.claude/rules/` と `paths`、`/doctor` のトリム |
 | `pe` | [プロンプトエンジニアリングのベストプラクティス][pe]                   | 明示性、例示、肯定形、prefill、CoT                                                           |
+| `c5` | [Claude 5 世代のコンテキストエンジニアリング][c5]                      | 過剰な制約を外す、例より interface 設計、progressive disclosure、CLAUDE.md は gotcha に使う  |
 
 [ev]: https://agentskills.io/skill-creation/evaluating-skills
 [sp]: https://agentskills.io/specification
@@ -82,6 +83,7 @@ Anthropic の公式ドキュメントとブログから抽出した、**AI に�
 [cm]: https://claude.com/ja/blog/using-claude-md-files
 [mm]: https://code.claude.com/docs/en/memory
 [pe]: https://claude.com/ja/blog/best-practices-for-prompt-engineering
+[c5]: https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models
 
 ---
 
@@ -110,6 +112,10 @@ Anthropic の公式ドキュメントとブログから抽出した、**AI に�
 ### 用語を1つに固定する
 
 「API endpoint」「URL」「API route」「path」を混ぜない。「field」「box」「element」を混ぜない。1つ選んで最後まで使う。 — [bp]
+
+### 過剰に制約しない — 衝突する指示は、判断させるより先に消す
+
+Claude Code のシステムプロンプトは Opus 5 / Fable 5 向けに **80%以上** 削られ、コーディング eval に測定可能な劣化は出なかった。削られたのは古いモデルの最悪ケースを避けるための強い断定である(例: 「コメントは既定で書くな。複数段落の docstring を絶対に書くな」→ 「周囲のコードと同じように書け — コメント密度・命名・イディオムを合わせろ」)。加えて、システムプロンプト・スキル・ユーザー依頼が1リクエスト内で衝突する(「適宜ドキュメントを残せ」と「コメントを追加するな」)と、Claude はどれに従うかを先に考えることになる。**制約を足す前に、いま持っている制約と衝突しないかを見る。** — [c5]
 
 ### 当たり前を書かず、モデルの通常の思考から押し出すものを書く
 
@@ -307,6 +313,13 @@ Claude が実際に踏んだ失敗点から作る。「`@request_id` は billing
 
 入力と出力の対を見せる方が、形式を散文で説明するより伝わる。網羅ではなく、期待する振る舞いを代表する多様な例を選ぶ。 — [bp] / [ce]
 
+### 公式どうしが食い違っている点: 例を出すか、形を設計するか
+
+- [bp] / [pe] は **例を出す** ことを勧める(具体的で正典的なものを少数)。
+- [c5] は、最新世代では **例がかえって探索空間を狭める** として、例の代わりに **インターフェースの設計** に紙面を使えとする — ツール・スクリプト・ファイルのパラメータをどれだけ表現力のある形にできるか。Todo ツールなら `pending` / `in_progress` / `completed` という列挙そのものが使い方を示し、「`in_progress` は常に1つ」という一文が振る舞いを定義する。
+
+**書き手が選べる形があるなら [c5] に寄せる**(自分が定義するツール・スクリプト・frontmatter)。形を変えられない相手を説明するときは [bp] のまま、少数の正典的な例を出す。 — [bp] / [c5]
+
 ### テンプレートは厳密さのレベルを明示する
 
 「ALWAYS use this exact template structure」なのか「a sensible default, but use your best judgment」なのかを書く。書かないと Claude はどちらとも解釈できる。 — [bp]
@@ -453,6 +466,10 @@ Claude A(スキルを設計・推敲する側)と Claude B(そのスキルを実
 
 `CLAUDE.md` は毎セッション **全文** がコンテキストに入る(`MEMORY.md` と違って行数で切られない)。長いほどトークンを食い、**指示への従いやすさが落ちる**。溢れたら `paths` 付きの path-scoped rule へ逃がす。`@path` の import は整理にはなるが起動時に一緒に読まれるので、コンテキストは減らない。 — [mm]
 
+### 紙面の大半を gotcha に使う
+
+リポジトリが何のためのものかは短く書き、**トークンの大半はコードベースの中の gotcha に使う**(例: 型を1つのモノリシックなファイルだけに置いている)。ファイルシステムやリポジトリを見れば Claude に分かる「当たり前」を書かない。検証手順のように固有の指示が複数あるなら、スキルにして `CLAUDE.md` から参照する。 — [c5]
+
 ### 書き足す引き金は4つ
 
 Claude が同じ間違いを2度した / コードレビューが Claude の知っておくべきことを捕まえた / 前のセッションと同じ訂正を打ち込んだ / 新しいチームメイトが同じ文脈を必要とする。理論上の懸念ではなく、実際に繰り返し説明する羽目になったことを書く。小さく始めて育てる。 — [mm] / [cm]
@@ -472,6 +489,10 @@ API キー・認証情報・トークン、脆弱性の詳細、機密のビジ�
 ### 生きた文書として保守する
 
 プロジェクトと一緒に変わる。放置された `CLAUDE.md` は嘘をつく。 — [cm]
+
+### `/doctor` は削り方を実装として持っている
+
+ここに並ぶ判断は `claude doctor` に組み込まれている — Claude Code で `/doctor` を実行すると、スキルと `CLAUDE.md` を rightsize する。手で削る前に一度かける。 — [c5]
 
 ### 公式どうしが食い違っている点: アーキテクチャ概要とディレクトリ構成
 

@@ -1,14 +1,4 @@
-スキルは `skills/` 配下のバケットフォルダに整理されている:
-
-- `engineering/` — 日々のコード作業
-- `productivity/` — 日々の非コード系ワークフローツール
-- `misc/` — 残してあるがほとんど使われない、昇格していない
-- `emdash/` — EmDash CMS のサイト専用。EmDash を使わないプロジェクトでは無価値なので昇格していない
-- `personal/` — この端末固有のセットアップに紐づく、昇格していない
-- `in-progress/` — まだ出荷準備が整っていない下書き
-- `deprecated/` — もう使われていない
-
-`engineering/` または `productivity/`(**昇格済み**バケット)にあるすべてのスキルは、トップレベルの `README.md` への参照と、`.claude-plugin/plugin.json` の `skills` 配列へのエントリを持たなければならない(Claude Code プラグインは昇格済みの集合だけを出荷する)。`misc/`、`emdash/`、`personal/`、`in-progress/`、`deprecated/` のスキルはどちらにも現れてはならない。
+スキルは `skills/` 配下のバケットフォルダに整理されている。**昇格済み**は `engineering/` と `productivity/` の2つだけで、ここにあるスキルはトップレベルの `README.md` への参照と `.claude-plugin/plugin.json` の `skills` 配列へのエントリを持ち、残りのバケット(`misc/`、`emdash/`、`personal/`、`in-progress/`、`deprecated/`)のスキルはどちらにも現れてはならない — Claude Code プラグインは昇格済みの集合だけを出荷する(双方向とも検査 4. が弾く)。各バケットが何のためにあり、なぜ昇格していないかは、そのバケットの `README.md` の冒頭にある。
 
 昇格していないバケットのスキルは、プラグインではなく利用側リポジトリでの `npx skills` による実体配置で配る(`skills-lock.json` に載り、`npx skills update` で追随できる)。`emdash/` がこの経路の主な利用者である。
 
@@ -30,11 +20,11 @@
 
 マニフェストを触ったあとは `scripts/check-invariants.sh` を実行する。`claude plugin validate .` も走らせてよいが、リポジトリルートを渡すと `marketplace.json` しか検証せず `plugin.json` の壊れたパスを見逃すこと、`--strict` は `version` 不在を error に格上げしてしまうこと(上記の通り、これは意図的な状態である)に注意する。
 
-トップレベルの `README.md` にある各スキルのエントリは、スキル名をその `SKILL.md` へリンクしなければならない。
-
-各バケットフォルダには、バケット内の全スキルを1行の説明つきで列挙し、スキル名をその `SKILL.md` へリンクした `README.md` がある。昇格済みバケットの `README.md` とトップレベルの `README.md` は、エントリを **ユーザー呼び出し型** と **モデル呼び出し型** にグループ分けする。昇格していないバケットの `README.md`(`misc/`、`personal/`)はフラットなリストを使う。
+各スキルは、自分のバケットの `README.md` と(昇格済みなら)トップレベルの `README.md` に、スキル名から `SKILL.md` へのリンクと1行の説明つきで載る。**掲載されているかは検査 4./5. が弾くが、以下は弾かない** — 昇格済みバケットとトップレベルの `README.md` はエントリを **ユーザー呼び出し型** と **モデル呼び出し型** にグループ分けし、昇格していないバケット(`misc/`、`personal/`)はフラットなリストを使う。
 
 すべての `SKILL.md` は、ユーザー呼び出し型(`disable-model-invocation: true` に加えて `agents/openai.yaml` で `policy.allow_implicit_invocation: false`、人間だけが到達できる)か、モデル呼び出し型(モデルからもユーザーからも到達できる)のいずれかである。[.agents/invocation.md](./.agents/invocation.md) を参照。
+
+メモリファイルに何を書くかの基準(**発見不可能 ∧ グローバルに有用**)と、`/init` を出発点にしない理由は [.agents/adr/0003-never-start-from-init-output.md](./.agents/adr/0003-never-start-from-init-output.md) にある — `tend-memory-files` と `setup-rules` はこの決定に従っているので、片方だけ動かさない。
 
 スキルを書く・直すときの判断基準は [`writing-great-skills`](./skills/productivity/writing-great-skills/SKILL.md) にある。公式が定める数値上限、frontmatter のどのフィールドが Agent Skills 標準でどれが Claude Code 独自か、公式が名指ししているアンチパターンは、同じフォルダの [`OFFICIAL.md`](./skills/productivity/writing-great-skills/OFFICIAL.md) にまとまっている — スキルを新規に書く前と、frontmatter や参照ファイルの構成を確定させるときに引く。
 

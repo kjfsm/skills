@@ -26,3 +26,4 @@
 - **`ask-matt` / `setup-matt-pocock-skills` の変更** — `ask-kjfsm` / `setup-skills` は別物になった。後者は `setup-repo` を入口とする4工程に分解済み
 - **`code-review`** — `two-axis-review` に置き換えてある
 - **`deprecated/` バケットの廃止** — 本家は退役スキルを削除する方針に変えたが、こちらは残す
+- **「Skill ツールを "x" で呼ぶ」という言い回し** — 呼び出しであることを明示する意図は取り込んだが、道具名は出さず `` `x` スキルを呼ぶ `` にしてある。書き分けの規則は `.agents/invocation.md` にある

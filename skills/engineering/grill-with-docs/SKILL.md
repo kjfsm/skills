@@ -6,4 +6,4 @@ disable-model-invocation: true
 
 # ドキュメント付きグリリング
 
-`/domain-modeling` スキルを使って `/grilling` セッションを実行する。
+`grilling` と `domain-modeling` の2つのスキルを呼ぶ。

@@ -7,4 +7,4 @@ disallowed-tools: Edit Write NotebookEdit
 
 # グリリングを受ける
 
-`/grilling` セッションを実行する。
+`grilling` スキルを呼ぶ。

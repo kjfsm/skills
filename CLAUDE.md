@@ -16,6 +16,8 @@
 
 その重複が運ぶのは `where-to-write-what` への参照 1 行ではなく、**コメントの判定基準そのもの** である。スキルは呼ばれて初めて読まれるが、コメントを書く場面でモデルは「迷った」と自覚しないので呼ばない — 毎回効いてほしい規律は、参照ではなく本文として常駐していなければならない。常駐させるのはコメントの判定だけに留め、JSDoc・コミット・PR・ADR・docs のルーティングはスキル側に残す(規約は行数が増えるほど従われなくなる)。本文が載るのは `output-styles/kjfsm.md`、この `CLAUDE.md`、`setup-skills` の `### Conventions` テンプレートの3か所で、直すときは揃える(検査 16. が3か所を見る)。
 
+このリポジトリは [mattpocock/skills](https://github.com/mattpocock/skills) の日本語訳から出発した独立フォークで、git 上の共通祖先が無い。本家のどこまでを突き合わせ済みか、何を意図的に取り込んでいないか、差分をどう測るか(`scripts/upstream-diff.py`)は [.agents/upstream-sync.md](./.agents/upstream-sync.md) にある — 本家由来のスキルを直すときは、そこを見てから決める。
+
 スキルを追加・改名・昇格・退役させる手順は [.agents/adding-a-skill.md](./.agents/adding-a-skill.md) にある — バケットと呼び出し方式の選び方、そして検査に出ない後始末(`ask-kjfsm`、`link-skills.sh`、他のスキルからの文中呼び出し)。
 
 マニフェストを触ったあとは `scripts/check-invariants.sh` を実行する。`claude plugin validate .` も走らせてよいが、リポジトリルートを渡すと `marketplace.json` しか検証せず `plugin.json` の壊れたパスを見逃すこと、`--strict` は `version` 不在を error に格上げしてしまうこと(上記の通り、これは意図的な状態である)に注意する。

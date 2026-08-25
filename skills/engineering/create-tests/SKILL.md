@@ -1,32 +1,32 @@
 ---
 name: create-tests
-description: Cloudflare Workers のプロジェクトで、テストが1本も無いところからテストを作り始めるときの規律。Workers / D1 / Durable Objects / Queues にテストを入れたいとき、@cloudflare/vitest-pool-workers をどう設定するか決めたいとき、何からテストすればいいか分からないときに使う。
+description: Cloudflare Workers のプロジェクトで、テストが1本も無いところからテストを作り始めるときの規律。Workers / D1 / Durable Objects / Queues にテストを入れたいとき、@cloudflare/vitest-plugin をどう設定するか決めたいとき、何からテストすればいいか分からないときに使う。
 ---
 
 # ゼロからテストを作り始める（Cloudflare Workers）
 
 `tdd` が「1 本のテストをどう書くか」、`rebuild-tests` が「壊れたスイートをどう建て直すか」なら、こちらは **最初の 1 本をどこに置くかを決める** ためのものである。
 
-Workers のプロジェクトでゼロから始めると、`@cloudflare/vitest-pool-workers` が用意した箱にとりあえず全部入れてしまいやすい。すると **すべてのテストが workerd 上で走る** ことになり、実行時間だけが増えて、壊れた場所も特定しにくいスイートができあがる。
+Workers のプロジェクトでゼロから始めると、`@cloudflare/vitest-plugin` が用意した箱にとりあえず全部入れてしまいやすい。すると **すべてのテストが workerd 上で走る** ことになり、実行時間だけが増えて、壊れた場所も特定しにくいスイートができあがる。
 
 ## 一次情報の場所
 
 推測で API 名を書かない。この順で当たる。
 
-| 何を知りたいか                        | 見る場所                                                                                     |
-| ------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `cloudflare:test` の API 一覧と非推奨 | **インストール済みの型定義**（`@cloudflare/vitest-pool-workers/types/cloudflare-test.d.ts`） |
-| 各バインディングの書き方の実例        | `cloudflare/workers-sdk` の `fixtures/vitest-pool-workers-examples/<topic>/`                 |
-| API の説明・レシピの索引・既知の制約  | https://developers.cloudflare.com/workers/testing/vitest-integration/                        |
+| 何を知りたいか                        | 見る場所                                                                               |
+| ------------------------------------- | -------------------------------------------------------------------------------------- |
+| `cloudflare:test` の API 一覧と非推奨 | **インストール済みの型定義**（`@cloudflare/vitest-plugin/types/cloudflare-test.d.ts`） |
+| 各バインディングの書き方の実例        | `cloudflare/workers-sdk` の `fixtures/vitest-plugin-examples/<topic>/`                 |
+| API の説明・レシピの索引・既知の制約  | https://developers.cloudflare.com/workers/testing/vitest-integration/                  |
 
 fixture はブラウザより `gh` が速い:
 
 ```bash
-gh api repos/cloudflare/workers-sdk/contents/fixtures/vitest-pool-workers-examples --jq '.[].name'
-gh api repos/cloudflare/workers-sdk/contents/fixtures/vitest-pool-workers-examples/d1/vitest.config.ts --jq '.content' | base64 -d
+gh api repos/cloudflare/workers-sdk/contents/fixtures/vitest-plugin-examples --jq '.[].name'
+gh api repos/cloudflare/workers-sdk/contents/fixtures/vitest-plugin-examples/d1/vitest.config.ts --jq '.content' | base64 -d
 ```
 
-**型定義とドキュメントが食い違ったら型定義を採る。** 実例: `cloudflare:test` の `env` と `SELF` は 0.18.8 の型定義で `@deprecated`（`cloudflare:workers` の `env` / `exports` へ移行）だが、ドキュメントの API ページには非推奨の記載がない。ドキュメントだけを見ていると、非推奨の API で書き始めてしまう。
+**型定義とドキュメントが食い違ったら型定義を採る。** 実例: `cloudflare:test` の `env` と `SELF` は v1 の型定義でも `@deprecated`（`cloudflare:workers` の `env` / `exports` へ移行）だが、ドキュメントの API ページには非推奨の記載がない。ドキュメントだけを見ていると、非推奨の API で書き始めてしまう。
 
 ## フレームワークからではなく、壊れ方から始める
 
@@ -81,6 +81,10 @@ process.env.TZ = process.env.TEST_TZ ?? "UTC";
 React Router などの SSR フレームワークを使っている場合、`workers/app.ts` のようなエントリは仮想モジュール（`virtual:react-router/server-build`）を import しており、**workerd 上では解決できない**（`main` に指定すること自体はできるが、`fetch` を呼んだ瞬間に落ちる）。
 
 fetch/queue/scheduled の実体を、SSR ディスパッチャを引数で受け取る関数として切り出す。テストは最小のエントリからそれを組み立て、SSR だけを fake に差し替える。SSR を実際に通す検証は、本番ビルドを起動する `createTestHarness()` の担当になる。
+
+**切り出しは、エントリに fetch 層のロジックが乗ってからでよい。** 委譲 1 行しかない段階で切ると、空のシームが 1 つ増えるだけである（足場と同じ判定 — 次節）。
+
+ただし **型プロジェクトの側は最初から巻き込まれる**。`wrangler types` が吐く `worker-configuration.d.ts` は `mainModule` を `typeof import("./workers/app")` と型付けするので、このファイルを `include` したテスト用 tsconfig は **エントリごと引き込む**。テストが一度も import していなくても、そのプロジェクトはフレームワークの typegen 出力（`.react-router/types`）と `vite/client` を要求し始める。`Cannot find module 'virtual:…'` がテスト側の tsconfig から出たら、これである。
 
 ## 最初の 1 本は、足場ゼロで書けるものにする
 

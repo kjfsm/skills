@@ -1,6 +1,6 @@
 ---
 name: rebuild-tests
-description: Cloudflare Workers のプロジェクトで、既存のテストスイートを立て直すときの規律。vitest.config が複雑すぎる、テストが遅い・OOM する、vi.mock だらけで信用できない、@cloudflare/vitest-pool-workers を上げたら壊れた、テストを消して作り直したい、というときに使う。
+description: Cloudflare Workers のプロジェクトで、既存のテストスイートを立て直すときの規律。vitest.config が複雑すぎる、テストが遅い・OOM する、vi.mock だらけで信用できない、@cloudflare/vitest-plugin（旧 @cloudflare/vitest-pool-workers）を上げたら壊れた、テストを消して作り直したい、というときに使う。
 ---
 
 # テストスイートを立て直す（Cloudflare Workers）
@@ -52,8 +52,9 @@ env の受け取り方は経路ごとに決めておく。
 
 ## バージョン移行で必要になる機械的な修正
 
-`@cloudflare/vitest-pool-workers` を上げたとき、あるいは古いスイートを復元したときに当たるもの。
+パッケージを上げたとき、あるいは古いスイートを復元したときに当たるもの。
 
+- **パッケージ名が `@cloudflare/vitest-pool-workers` から `@cloudflare/vitest-plugin` に変わった**（v1）。依存名・import・tsconfig の `types` エントリの3か所を直す。`npx @cloudflare/codemods vitest:pool-workers-to-vitest-plugin` が3つとも書き換える。**`cloudflare/workers-sdk` 側の fixture ディレクトリも `fixtures/vitest-plugin-examples/` に改名されている** — 旧パスを叩くと 404 が返るだけなので、レシピが見つからないときはまずここを疑う
 - **`cloudflare:test` の `env` / `SELF` は非推奨** → `cloudflare:workers` の `env` / `exports.default.fetch()`。ドキュメントのページにはまだ非推奨の記載がないので、型定義を見て判断する
 - **`defineWorkersProject` は `cloudflareTest()` プラグインに置き換わった**（v0.13）。`plugins: [cloudflareTest({ wrangler: { configPath } })]` の形になる
 - **ストレージと Durable Object の分離が「テストごと」から「テストファイルごと」に変わった**（v0.13）。同じ `idFromName` を使い回すと前のテストの状態が残る。公式 fixture と同じく `crypto.randomUUID()` を混ぜて毎回別のインスタンスを引くか、`afterEach` で `reset()`（全バインディングのデータを削除）/ `abortAllDurableObjects()`（インスタンスのみリセット・永続データは残す）を呼ぶ
@@ -64,7 +65,7 @@ env の受け取り方は経路ごとに決めておく。
 マイグレーションの **読み込みは Node 側（config）、適用は workerd 側（setup ファイル）** に分かれる。
 
 ```ts
-// vitest.config.ts — readD1Migrations は @cloudflare/vitest-pool-workers から
+// vitest.config.ts — readD1Migrations は @cloudflare/vitest-plugin から
 const migrations = await readD1Migrations(path.join(import.meta.dirname, "migrations"));
 cloudflareTest({
   wrangler: { configPath: "./wrangler.toml" },
@@ -105,8 +106,8 @@ setup ファイルは **テストファイル単位のストレージ分離の�
 
 ライブラリの API をテストから触るときは、思い出しで書かない。
 
-1. **インストール済みの型定義**（`@cloudflare/vitest-pool-workers/types/cloudflare-test.d.ts`）— 手元のバージョンそのものの事実。非推奨マークもここに出る
-2. **`cloudflare/workers-sdk` の `fixtures/vitest-pool-workers-examples/`** — 実際に動いているコード
+1. **インストール済みの型定義**（`@cloudflare/vitest-plugin/types/cloudflare-test.d.ts`）— 手元のバージョンそのものの事実。非推奨マークもここに出る
+2. **`cloudflare/workers-sdk` の `fixtures/vitest-plugin-examples/`** — 実際に動いているコード
 3. **developers.cloudflare.com のドキュメント** — 説明は厚いが、更新が遅れることがある
 
 型定義とドキュメントが食い違ったら型定義を採る。

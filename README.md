@@ -170,6 +170,7 @@ npx -y skills add kjfsm/skills
 - **[setup-ci](./skills/engineering/setup-ci/SKILL.md)** — 記録された検証ゲートを CI に敷き、ローカルの規律を機構に変える。CI に載らない行(観測・シークレットを要る経路)を分け、必須チェックの設定はユーザーの手に残す。
 - **[setup-hooks](./skills/engineering/setup-hooks/SKILL.md)** — 散文では守られないルールを Claude Code のフックへ落として決定的に弾く。落とすのは3条件(すでに破られた・破られても気づけない・入力だけで機械的に判定できる)を満たすものだけ。
 - **[setup-cf-app](./skills/engineering/setup-cf-app/SKILL.md)** — 新規の Cloudflare Workers フルスタックアプリを、いつも使う標準ライブラリ構成で立ち上げる。バージョンやフラグは固定せず、各ツールの公式手順で都度組む。
+- **[setup-playwright](./skills/engineering/setup-playwright/SKILL.md)** — Playwright の E2E を入れ、ブラウザを3つの層(VM のプロビジョニング・プロジェクトの用意・CI)のどこで用意するか決める。版の正は lockfile 側に置き、`executablePath` で実体を名指しする逃げ道を作らない。
 
 ### Productivity
 

@@ -50,6 +50,8 @@ Vitest の `projects` を分ける正当な理由は **ランタイムが違う�
 
 判定ロジックや変換は全部 `node` に置く。workerd に置くと 1 ファイルあたり数秒の起動コストを払うことになり、得るものが無い。
 
+**SSR フレームワークを `main` に載せているなら 3 つになる。** その構成では「Worker を HTTP で叩く層」と「バインディングに直に触る層」を分ける値段が桁で違う — 測り方と割り当ては `/react-router-worker-tests`。
+
 ```ts
 // vitest.config.ts
 export default defineConfig({
@@ -78,7 +80,7 @@ process.env.TZ = process.env.TEST_TZ ?? "UTC";
 
 ## SSR フレームワークを載せているなら、エントリを切り出す
 
-React Router などの SSR フレームワークを使っている場合、`workers/app.ts` のようなエントリは仮想モジュール（`virtual:react-router/server-build`）を import しており、**workerd 上では解決できない**（`main` に指定すること自体はできるが、`fetch` を呼んだ瞬間に落ちる）。
+React Router などの SSR フレームワークを使っている場合、`workers/app.ts` のようなエントリは仮想モジュール（`virtual:react-router/server-build`）を import している。**フレームワークの Vite プラグインを vitest の config にも載せれば解決はする** — ただしそのとき、SSR のモジュールグラフが **テストファイルごとに** 変換・評価される（実測 15.2 秒/file）。載せなければ `main` に指定した時点で解決に失敗する。どちらに転んでも、この `main` を全テストの土台にはしない（→ `/react-router-worker-tests`）。
 
 fetch/queue/scheduled の実体を、SSR ディスパッチャを引数で受け取る関数として切り出す。テストは最小のエントリからそれを組み立て、SSR だけを fake に差し替える。SSR を実際に通す検証は、本番ビルドを起動する `createTestHarness()` の担当になる。
 

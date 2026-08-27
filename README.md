@@ -24,7 +24,7 @@ Fetch https://raw.githubusercontent.com/kjfsm/skills/main/setup.md
 
 |              | A: シンボリックリンク            | B: プラグイン                          | C: `npx skills`                          |
 | ------------ | -------------------------------- | -------------------------------------- | ---------------------------------------- |
-| スキル       | **50**(`deprecated/` 以外の全部) | **32**(昇格済み集合のみ)               | **54**(全部。`deprecated/` も含む)       |
+| スキル       | **51**(`deprecated/` 以外の全部) | **33**(昇格済み集合のみ)               | **55**(全部。`deprecated/` も含む)       |
 | 出力スタイル | 入らない                         | **入る**(有効化は別途)                 | 入らない                                 |
 | 実体         | このリポジトリ(clone が必要)     | `~/.claude/plugins/` のキャッシュ      | コピー先に実ファイル                     |
 | 更新         | `git pull` で即反映              | push のたびに届く(コミット SHA で追随) | 追随しない。`npx skills update` を自分で |
@@ -164,6 +164,7 @@ npx -y skills add kjfsm/skills
 - **[resolving-merge-conflicts](./skills/engineering/resolving-merge-conflicts/SKILL.md)** — 進行中の git マージやリベースのコンフリクトを、ハンクごとに、双方の一次情報源にたどれる意図に基づいて解決し、そのうえで操作を完了させる — `--abort` は決して使わない。
 - **[ai-efficiency](./skills/engineering/ai-efficiency/SKILL.md)** — 大量のファイル移動・リネーム・import 付け替えを、1ファイルずつ読み書きせずシェルで機械的に処理する: `git mv` で履歴を保ち、相対 import を絶対へ正規化してから一括置換し、抜けの検出は typecheck に委ねる。
 - **[react-router-route-module](./skills/engineering/react-router-route-module/SKILL.md)** — React Router（framework mode）の route module に何をどの export へ置くかの規律: 認可の強制点は `middleware`（loader と action の両方の手前を通る）、レイアウトが持つ値は `<Outlet context>` で配る。
+- **[drizzle-generate-non-interactive](./skills/engineering/drizzle-generate-non-interactive/SKILL.md)** — TTY の無いところで `drizzle-kit generate` を完走させる。止まるのは rename の判定だけなので、その1問だけ pty 越しに答えを渡す。既定でハイライトされているのはデータが消える側である。
 - **[where-to-write-what](./skills/engineering/where-to-write-what/SKILL.md)** — コード・テスト・コメント・JSDoc・コミットメッセージ・PR 本文・ADR・docs のどこに何を書くかのルーティング規律: コードには How、テストには What、コミットログには Why、コメントには Why not。
 - **[setup-rules](./skills/engineering/setup-rules/SKILL.md)** — このリポジトリのルールを2層に敷く: `paths:` を持つ rule はその glob を編集するときだけ注入され、スタックに依存しない絶対ルールと追記先の優先順位は毎セッション読まれる側に置く。`/setup-skills` から引き継がれる。
 - **[setup-skills](./skills/engineering/setup-skills/SKILL.md)** — このリポジトリをエンジニアリング系スキル向けに設定する(イシュートラッカー、トリアージラベル、ドメインドキュメントの配置、検証ゲート、応答と記述の規約)。`/setup-repo` の工程 A。

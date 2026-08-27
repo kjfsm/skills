@@ -328,11 +328,15 @@ fi
 # --------------------------------------------------- resident conventions --
 # 16. コメントの判定基準が、常駐する3か所すべてに本文として載っている。スキルは
 #     呼ばれて初めて読まれるが、コメントを書く場面でモデルはスキルを呼ばない。
-#     参照 1 行に痩せた瞬間に規律は効かなくなり、しかも症状が出ない。優先順位の
+#     参照 1 行に痩せた瞬間に規律は効かなくなり、しかも症状が出ない。4本の柱を
+#     別に見るのは、テストの宛先をこの1行だけが運んでいるためである — 落ちても
+#     残りの本文は素通りする。優先順位の
 #     1 句を別に見るのは、ハーネス側の「周囲のコードに合わせろ」と正面から
 #     ぶつかる唯一の行で、落ちてもモデルが黙ってどちらかを選ぶためである。
 #     see CLAUDE.md, .agents/adr/0003-never-start-from-init-output.md
 for resident in output-styles/kjfsm.md CLAUDE.md skills/engineering/setup-skills/SKILL.md; do
+  grep -q 'コミットログには Why、コードコメントには Why not' "$resident" ||
+    err "$resident lost the four pillars; without them tests have no destination and the routing lives only in a skill nobody calls"
   grep -q 'コードを読めば分かることは書かない' "$resident" ||
     err "$resident lost the comment rule's opening test; the convention only works while its body is resident"
   grep -q '採らなかった素直な書き方' "$resident" ||

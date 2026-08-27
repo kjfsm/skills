@@ -24,7 +24,7 @@ Fetch https://raw.githubusercontent.com/kjfsm/skills/main/setup.md
 
 |              | A: シンボリックリンク            | B: プラグイン                          | C: `npx skills`                          |
 | ------------ | -------------------------------- | -------------------------------------- | ---------------------------------------- |
-| スキル       | **51**(`deprecated/` 以外の全部) | **33**(昇格済み集合のみ)               | **55**(全部。`deprecated/` も含む)       |
+| スキル       | **52**(`deprecated/` 以外の全部) | **34**(昇格済み集合のみ)               | **56**(全部。`deprecated/` も含む)       |
 | 出力スタイル | 入らない                         | **入る**(有効化は別途)                 | 入らない                                 |
 | 実体         | このリポジトリ(clone が必要)     | `~/.claude/plugins/` のキャッシュ      | コピー先に実ファイル                     |
 | 更新         | `git pull` で即反映              | push のたびに届く(コミット SHA で追随) | 追随しない。`npx skills update` を自分で |
@@ -147,6 +147,7 @@ npx -y skills add kjfsm/skills
 - **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — どんな計画・スペック・会話も、それぞれがブロッキングエッジを宣言するトレーサーバレット方式のチケットの集合へ分割する — ローカルファイルへのテキストとして、あるいは実際のトラッカー上のネイティブなブロッキングリンクとして書かれる。
 - **[implement](./skills/engineering/implement/SKILL.md)** — スペックやチケットの集合が記述する作業をビルドする。事前に合意したシームで `/tdd` を駆動し、`/verification-loop` でクリーンランを取り、コミット前に `/two-axis-review` で締めくくる。
 - **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — 1つのエージェントセッションには収まらない巨大な作業のかたまりを、イシュートラッカー上の調査チケットの共有マップとして計画する — 目的地までの道が明らかになるまで、1つずつ解決していく。
+- **[squash-d1-migrations](./skills/engineering/squash-d1-migrations/SKILL.md)** — 積み上がった D1 のマイグレーションを1本に畳む。合格条件はファイルが減ったことではなく、空の DB に適用した結果が旧チェーンと一致すること。`d1_migrations` は名前を記録しているので、各環境と突き合わせるまでが作業である。
 
 **モデル呼び出し型**
 

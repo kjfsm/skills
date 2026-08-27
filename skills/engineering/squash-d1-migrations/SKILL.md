@@ -18,12 +18,35 @@ allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/d1-fingerprint.py *)
 1つでも真なら、squash しない。
 
 - **未適用のマイグレーションを持つ環境がある。** squash は全環境が同じ地点にいることを前提にする。local / preview / production のそれぞれで `wrangler d1 migrations apply <db> --dry-run` を実行し、**すべてが「未適用なし」** になるまで進まない
-- **その DB に対して自分が書き込み権限を持っていない。** 手順5は各環境の `d1_migrations` を書き換える。書き換えられない環境が残るなら、その環境は次の apply で壊れる
+- **その DB に対して自分が書き込み権限を持っていない。** 「各環境の `d1_migrations` を突き合わせる」は各環境の DB を書き換える。書き換えられない環境が残るなら、その環境は次の apply で壊れる
 - **畳もうとしている範囲に、まだ意味のある履歴がある。** 「どの列がいつ入ったか」を git log ではなくマイグレーションの並びで読んでいるなら、それは畳んだ瞬間に失われる
 
 ## 手順
 
-### 1. 消えるものを数え、シードとバックフィルに分ける
+### 1. 本番を手元に再現する
+
+**squash が保存しようとしている相手は、マイグレーションの並びではなく本番の DB そのものである。** 本番が手で当てた `ALTER` や途中で失敗したマイグレーションでずれていれば、そのずれは squash が固定化する — そして後続の手順はチェーンどうしを比べるだけなので、ずれには一生気づかない。
+
+まず本番の実スキーマを取る。
+
+```
+wrangler d1 export <db> --remote --no-data --output /tmp/prod-schema.sql
+```
+
+つぎにフルダンプを取り、まっさらなローカル D1 へ流し込む。
+
+```
+wrangler d1 export <db> --remote --output /tmp/prod-full.sql
+wrangler d1 execute <db> --local --file /tmp/prod-full.sql
+```
+
+**ダンプには `d1_migrations` も含まれる。** つまり手元に、本番と同じスキーマ・同じデータ・**同じ追跡状態** の DB ができる。「各環境の `d1_migrations` を突き合わせる」は、本番に触る前にここで一度通す。
+
+`d1 export` は `--persist-to` を受け付けない — 既定の `.wrangler` を読み書きする(実測)。
+
+**完了基準: 本番のスキーマが手元にあり、旧チェーンを空 DB へ流した結果と突き合わせて、説明のつかない差が無いこと。** 差があるなら、それは squash の問題ではない。先にそれを片付ける。
+
+### 2. 消えるものを数え、シードとバックフィルに分ける
 
 **`generate` が再生成できるのは DDL だけである。** `ALTER TABLE users ADD email text` はスキーマ定義の言い換えにすぎないので同じものが出る。DML(`INSERT` / `UPDATE` / `DELETE`)は **その時点の DB に何が入っていたか** の話であってスキーマの形ではないため、スキーマのどこを読んでも復元できない。畳めば消える。
 
@@ -44,7 +67,7 @@ grep -liE '^\s*(UPDATE|INSERT|DELETE)\b' <migrations_dir>/*.sql
 
 **完了基準: 該当ファイルを一覧し、1つずつシードかバックフィルかを言い、シードの扱いを決めたこと。**
 
-### 2. 旧チェーンの指紋を取る
+### 3. 旧チェーンの指紋を取る
 
 畳む前の姿を記録する。これが後で比べる相手になる。
 
@@ -53,11 +76,11 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/d1-fingerprint.py \
   --database <database_name> --state /tmp/fp-before > /tmp/fp-before.txt
 ```
 
-使い捨てのローカル D1 に旧チェーンを流し、スキーマオブジェクトと各テーブルの行数を出す。引用符と句読点の空白は正規化される — drizzle-kit はバッククォート付きの DDL を書き、手書きの SQL は書かないので、そこは差分として読まない。**列の並びは正規化しない**(意味を持つ差分だからである。手順4を見よ)。
+使い捨てのローカル D1 に旧チェーンを流し、スキーマオブジェクトと各テーブルの行数を出す。引用符と句読点の空白は正規化される — drizzle-kit はバッククォート付きの DDL を書き、手書きの SQL は書かないので、そこは差分として読まない。**列の並びは正規化しない**(意味を持つ差分だからである。「差分を1行ずつ分類する」を見よ)。
 
 **完了基準: 出力が空でなく、テーブル数が実際のスキーマと一致していること。**
 
-### 3. 全削除 → 再生成
+### 4. 全削除 → 再生成
 
 ```
 rm -rf <migrations_dir>
@@ -70,7 +93,7 @@ npx drizzle-kit generate --name init
 
 **完了基準: `<migrations_dir>` に SQL が1本と、`meta/` に対応するスナップショット1つだけがあること。**
 
-### 4. 新チェーンの指紋を取り、差分を1行ずつ分類する
+### 5. 新チェーンの指紋を取り、差分を1行ずつ分類する
 
 ```
 python3 ${CLAUDE_SKILL_DIR}/scripts/d1-fingerprint.py \
@@ -88,7 +111,7 @@ diff /tmp/fp-before.txt /tmp/fp-after.txt
 
 **完了基準: 差分の全行を読み、1行ずつ「無害である理由」を言えること。「たぶん大丈夫」で通さない。**
 
-### 5. 各環境の `d1_migrations` を突き合わせる
+### 6. 各環境の `d1_migrations` を突き合わせる
 
 畳んだ結果を、すでに適用済みの各 DB に「適用済み」として教える。
 
@@ -107,7 +130,16 @@ wrangler d1 execute <db> --remote --command \
 wrangler d1 migrations apply <db> --remote --dry-run
 ```
 
-**完了基準: 手順1で数えたすべての環境で「未適用なし」が出ること。1つでも残っていれば、その環境は次のデプロイで壊れる。**
+**完了基準: 始める前に数え上げたすべての環境で「未適用なし」が出ること。1つでも残っていれば、その環境は次のデプロイで壊れる。**
+
+## 気をつけること
+
+- **`DELETE FROM d1_migrations` の前に中身を控える。** `--remote` に対する DELETE は取り消せない。`SELECT * FROM d1_migrations` の出力を手元に保存してから実行する
+- **リセットとデプロイの順序を決めてから始める。** squash した変更がマージされ、CI/CD が `migrations apply` を走らせると、リセット前なら `already exists` で落ちる。「マージ → リセット」なら一度落ちる前提で、「リセット → マージ」なら畳む前のチェーンが未適用扱いになる前提で組む。どちらを取るにせよ、**落ちる窓を無人にしない**
+- **壊れない環境ほど危ない。** 既存の DB は `already exists` で派手に落ちるので必ず気づく。fresh な環境(E2E、CI、新しい preview)は畳んだ init が普通に通るので **何も起きない** — シードが消えていても、そこで初めて気づくことはない。「シードとバックフィルに分ける」を飛ばした代償はこちら側に出る
+- **環境を数え上げてから始める。** local / preview / production だけとは限らない。E2E が作る使い捨ての DB、`wrangler.*.toml` を分けた別環境、他人の手元。`d1_migrations` を書き換えられない環境が1つでも残るなら、そこは次の apply で止まる
+- **`d1_migrations` という名前を決め打ちしない。** `migrations_table` で変更できる — [d1]。wrangler 設定を読んでから SQL を書く
+- **畳んだ結果を1度は本番以外の実環境に当てる。** ローカルのリハーサルは `--local` の SQLite であって D1 ではない。preview があるなら、本番の前にそこを通す
 
 ## 参照
 
@@ -119,4 +151,4 @@ wrangler d1 migrations apply <db> --remote --dry-run
 [d1]: https://developers.cloudflare.com/d1/reference/migrations/
 [ke]: https://orm.drizzle.team/docs/drizzle-kit-export
 
-**引用は取得時点のものである。** 手順4の「必ずずれる3点」は公式ではなく実測なので、drizzle-kit の生成器が変われば変わる — 食い違ったら、正しいのは目の前の diff である。
+**引用は取得時点のものである。** 「必ずずれる3点」は公式ではなく実測なので、drizzle-kit の生成器が変われば変わる — 食い違ったら、正しいのは目の前の diff である。

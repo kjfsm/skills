@@ -1,0 +1,3 @@
+interface:
+  display_name: "TTY 無しで drizzle generate"
+  short_description: "rename プロンプトの答えを外から渡して完走させる"

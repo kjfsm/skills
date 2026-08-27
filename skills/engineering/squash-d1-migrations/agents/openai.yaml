@@ -1,0 +1,5 @@
+interface:
+  display_name: "D1 のマイグレーションを squash"
+  short_description: "履歴を1本に畳み、適用済みの各環境と突き合わせる"
+policy:
+  allow_implicit_invocation: false

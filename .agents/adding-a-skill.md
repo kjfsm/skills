@@ -62,7 +62,7 @@ scripts/check-invariants.sh
 
 ここだけは自分で確認する。
 
-- **`ask-kjfsm` を更新する** — ユーザーが到達できるスキルを追加・改名・削除したとき、あるいはフローへの組み込み方を変えたとき。[`ask-kjfsm/SKILL.md`](../skills/engineering/ask-kjfsm/SKILL.md) を読み直し、新しいスキルが一度も言及されない・古いスキルがまだルーティングされる状態を残さない。**嘘をつくルーターは、無いルーターより悪い。**
+- **`ask-kjfsm` を更新する** — ユーザーが到達できるスキルを追加・改名・削除したとき、あるいはフローへの組み込み方を変えたとき。[`SKILL.md`](../skills/engineering/ask-kjfsm/SKILL.md)(起点)と [`SITUATIONS.md`](../skills/engineering/ask-kjfsm/SITUATIONS.md)(状況で入るもの)の両方を読み直し、新しいスキルが一度も言及されない・古いスキルがまだルーティングされる状態を残さない。**嘘をつくルーターは、無いルーターより悪い。** `SITUATIONS.md` 側に足したら、`SKILL.md` 冒頭のポインタが並べるトリガーにも足す。
 - **`scripts/link-skills.sh` を走らせる** — ローカルのハーネススキルディレクトリへのシンボリックリンクを張り直す。追加・削除・改名のあと。
 - **`pnpm format`** — CI が `format:check` で落とす。
 
@@ -80,7 +80,7 @@ scripts/check-invariants.sh
 
 ディレクトリを移動したら、あとは検査が要求してくる — トップレベル `README.md` への追加と `plugin.json` の `skills` 配列への登録。バケットの `README.md` は移動元から消し、移動先へ足す。昇格済みバケットの README は **ユーザー呼び出し型 / モデル呼び出し型** でグループ分けするので、正しい側へ入れる。
 
-そのスキルにユーザーが到達できるなら `ask-kjfsm` にも足す。
+そのスキルにユーザーが到達できるなら `ask-kjfsm` にも足す。作業の起点になるなら `SKILL.md`、フローの途中で状況が満たされたときだけ入るなら `SITUATIONS.md`。
 
 ## 退役させるとき
 

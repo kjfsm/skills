@@ -29,6 +29,7 @@
 - **[tdd](./tdd/SKILL.md)** — レッド・グリーン・リファクタリングのループによるテスト駆動開発。機能を作るのもバグを直すのも、一度に1つの垂直スライスずつ進める。
 - **[create-tests](./create-tests/SKILL.md)** — Cloudflare Workers のプロジェクトで、テストが 1 本も無いところから作り始める。何が壊れると困るかから始め、node と workerd の 2 プロジェクトに分けて、依存の内側から積む。
 - **[rebuild-tests](./rebuild-tests/SKILL.md)** — Cloudflare Workers のテストスイートを立て直す。vitest.config の複雑さを `vi.mock` の本数の問題として読み替え、消す前に棚卸しし、履歴から復元し、書いたテストは壊して実効性を確かめる。
+- **[migrate-d1](./migrate-d1/SKILL.md)** — Cloudflare D1 のスキーマを移行する。生成されたテーブル再構築の SQL は D1 では子テーブルを空にするので、消える側を退避して戻す形に書き直し、当てる前に復元点を控える。
 - **[domain-modeling](./domain-modeling/SKILL.md)** — プロジェクトのドメインモデルを能動的に構築し研ぎ澄ます — 用語に異議を唱え、シナリオでストレステストし、`CONTEXT.md` と ADR をその場で更新する。
 - **[codebase-design](./codebase-design/SKILL.md)** — 深いモジュールを設計するための共有された規律と語彙: 小さなインターフェース、きれいなシーム、インターフェースを通してテスト可能。
 - **[delegation](./delegation/SKILL.md)** — 作業をどこで走らせるかの共有された語彙: 大量の出力を子コンテキストへ押し出し、タスクに見合ったモデル階層に回す。

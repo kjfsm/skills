@@ -1,0 +1,3 @@
+interface:
+  display_name: "D1 のスキーマを移行する"
+  short_description: "テーブル再構築でデータを消さずに D1 のスキーマを変える"

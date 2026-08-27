@@ -24,7 +24,7 @@ disable-model-invocation: true
 
    `/tdd` はテストを書ける土台があることを前提にする。Cloudflare Workers のリポジトリでその土台自体が無い、あるいは信用できないときは、先に **`/create-tests`**(テストが1本も無い)か **`/rebuild-tests`**(既存のスイートが遅い・OOM する・`vi.mock` だらけ)を通す。
 
-   スタックに固有の規律も、この層で `/implement` と `/tdd` の下敷きになる。どれも呼び出さなくてよい — そのリポジトリのコードを書くときにモデルが自分で手を伸ばす。React Router(framework mode)なら **`/react-router-route-module`**(認可の強制点は `middleware`、レイアウトが持つ値は `<Outlet context>`)。Drizzle なら **`/drizzle-generate-non-interactive`**(`generate` が TTY を求めて止まるのは rename の判定だけ)と **`/squash-d1-migrations`**(積み上がった D1 のマイグレーションを1本に畳む)。
+   スタックに固有の規律も、この層で `/implement` と `/tdd` の下敷きになる。どれも呼び出さなくてよい — そのリポジトリのコードを書くときにモデルが自分で手を伸ばす。React Router(framework mode)なら **`/react-router-route-module`**(認可の強制点は `middleware`、レイアウトが持つ値は `<Outlet context>`)。Drizzle なら **`/drizzle-generate-non-interactive`**(TTY を求めるのは rename の判定だけ)、**`/migrate-d1`**(再構築の生成物は D1 で子表を空にする)、**`/squash-d1-migrations`**(マイグレーションを1本に畳む)。
 
    ロジックを変えない機械的な変更 — ディレクトリ再編、大量リネーム、import の一括付け替え — は **`/ai-efficiency`**。1ファイルずつ Read/Edit せず、シェルで一括処理して抜けは typecheck で拾う。
 

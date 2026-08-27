@@ -53,6 +53,7 @@
     "./skills/engineering/drizzle-generate-non-interactive",
     "./skills/engineering/squash-d1-migrations",
     "./skills/engineering/where-to-write-what",
+    "./skills/engineering/migrate-d1",
     "./skills/productivity/help-skills",
     "./skills/productivity/grill-me",
     "./skills/productivity/grilling",

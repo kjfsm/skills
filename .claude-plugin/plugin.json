@@ -47,6 +47,7 @@
     "./skills/engineering/delegation",
     "./skills/engineering/verification-loop",
     "./skills/engineering/two-axis-review",
+    "./skills/engineering/prune-comments",
     "./skills/engineering/resolving-merge-conflicts",
     "./skills/engineering/ai-efficiency",
     "./skills/engineering/react-router-route-module",

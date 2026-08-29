@@ -18,6 +18,7 @@
     "domain-modeling",
     "productivity"
   ],
+  "hooks": "./hooks/hooks.json",
   "outputStyles": ["./output-styles/"],
   "skills": [
     "./skills/engineering/ask-kjfsm",

@@ -345,6 +345,24 @@ for resident in output-styles/kjfsm.md CLAUDE.md skills/engineering/setup-skills
     err "$resident lost the precedence clause; without it the harness's match-the-surrounding-code line and this rule point opposite ways and the model picks silently"
 done
 
+# ---------------------------------------------------------------- hooks --
+# 17. コメントのフックが、出荷側(プラグイン)と自家用(このリポジトリ)の両方から
+#     実在する実行可能スクリプトを指している。そして 4本の柱を復唱していない —
+#     復唱した瞬間にこれは常駐 3か所(検査 16.)の同期先 4つ目になり、フックが
+#     黙って壊れた日に、揃っていない本文だけが残る。see CLAUDE.md
+hook_script="hooks/nudge-comment-check.sh"
+if [ ! -x "$hook_script" ]; then
+  err "$hook_script is missing or not executable; a hook that cannot run fails silently"
+else
+  grep -q 'コミットログには Why' "$hook_script" &&
+    err "$hook_script restates the four pillars; it would become a fourth copy to keep in sync (see invariant 16)"
+fi
+
+for manifest in hooks/hooks.json .claude/settings.json; do
+  grep -q 'nudge-comment-check.sh' "$manifest" ||
+    err "$manifest does not wire $hook_script; the repository would ship a discipline it does not run on itself"
+done
+
 if [ "$fail" -eq 0 ]; then
   echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills)"
 fi

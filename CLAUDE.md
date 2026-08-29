@@ -16,6 +16,10 @@
 
 その重複が運ぶのは `where-to-write-what` への参照 1 行ではなく、**コメントの判定基準そのもの** である。スキルは呼ばれて初めて読まれるが、コメントを書く場面でモデルは「迷った」と自覚しないので呼ばない — 毎回効いてほしい規律は、参照ではなく本文として常駐していなければならない。常駐させるのは4本の柱(How=コード、What=テスト、Why=コミットログ、Why not=コメント)とコメントの判定に留め、JSDoc・PR・ADR・docs のルーティングはスキル側に残す(規約は行数が増えるほど従われなくなる)。本文が載るのは `output-styles/kjfsm.md`、この `CLAUDE.md`、`setup-skills` の `### Conventions` テンプレートの3か所で、直すときは揃える(検査 16. が3か所を見る)。配布先のリポジトリへ同じ本文を届けるのは `setup-skills` の一度きりの書き込みで、こちらを直しても追随はしない。
 
+その3か所は常に読まれる。それでも守られない。**4か所目を同じ「常に読まれる」層へ足さない** — `SessionStart` フックの標準出力が着く先も同じシステムプロンプトなので、同期先が1つ増えるだけである。代わりに三層で押さえる: `Edit`/`Write` でコメント行が**増えたときだけ**鳴るフック(`hooks/hooks.json` から出荷)、書かれたものを削る `/prune-comments`、書かれなかった Why not を探す `/two-axis-review` の Standards 軸。理由・分業の境界・却下した手・覆る条件は [.agents/adr/0004-enforce-comment-conventions-in-three-layers.md](./.agents/adr/0004-enforce-comment-conventions-in-three-layers.md) にある。
+
+フックについてここで押さえるのは2点だけである。**4本の柱を復唱させない**(復唱した瞬間に常駐3か所の同期先4つ目になる — 検査 17. が見る)。そして**判定させない**(鳴る条件は機械的、適切かの判断はモデルに残す)。`Bash` の `sed` 経由の書き込みは承知のうえで素通しする。フックはサブエージェントの中でも走るので、出力スタイルが届かない側の穴も同時に埋まる。
+
 このリポジトリは [mattpocock/skills](https://github.com/mattpocock/skills) の日本語訳から出発した独立フォークで、git 上の共通祖先が無い。本家のどこまでを突き合わせ済みか、何を意図的に取り込んでいないか、差分をどう測るか(`scripts/upstream-diff.py`)は [.agents/upstream-sync.md](./.agents/upstream-sync.md) にある — 本家由来のスキルを直すときは、そこを見てから決める。
 
 スキルを追加・改名・昇格・退役させる手順は [.agents/adding-a-skill.md](./.agents/adding-a-skill.md) にある — バケットと呼び出し方式の選び方、そして検査に出ない後始末(`ask-kjfsm`、`link-skills.sh`、他のスキルからの文中呼び出し)。

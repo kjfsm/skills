@@ -1,0 +1,3 @@
+interface:
+  display_name: "コメントを削る"
+  short_description: "書かれたコメントを1パスで削り、非自明なものだけ残す"

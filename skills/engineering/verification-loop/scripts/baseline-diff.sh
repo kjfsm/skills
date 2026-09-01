@@ -73,8 +73,8 @@ WORK="$(mktemp -d)"
 STASHED=0
 RETURN_REF="$(git symbolic-ref --quiet --short HEAD || git rev-parse HEAD)"
 
-# 元の位置と作業ツリーへ戻す。git は --quiet でも内部マージの一言を出すので
-# 出力は握り、失敗したときだけ見せる — 失敗は黙って通してよいものではない。
+# git は --quiet でも内部マージの一言を出すので出力は握り、失敗したときだけ
+# 見せる — 失敗は黙って通してよいものではない。
 restore() {
   local out
   if [ "$(git rev-parse HEAD)" != "$(git rev-parse "$RETURN_REF")" ]; then
@@ -94,7 +94,6 @@ restore() {
 cleanup() { restore; rm -rf "$WORK"; }
 trap cleanup EXIT
 
-# ゲートの出力を、比較できる行の集合へ落とす。
 collect() {
   if [ -n "$EXTRACT" ]; then
     grep -oE "$EXTRACT" | sort -u

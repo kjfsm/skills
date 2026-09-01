@@ -26,9 +26,9 @@ TOTAL_MINUTES=0
 _STAGE_INDEX=0
 _MINUTES_ELAPSED=0
 ENV_FILE="${ENV_FILE:-.env}"
-WRITTEN_ENV=()    # KEYs written to ENV_FILE this run
-WRITTEN_SECRET=() # secret NAMEs set this run
-SKIPPED=()        # things we couldn't do (e.g. gh missing)
+WRITTEN_ENV=()
+WRITTEN_SECRET=()
+SKIPPED=() # things we couldn't do (e.g. gh missing)
 
 # _clear — wipe the terminal so only the current step is on screen. No-op when
 # output isn't a terminal, so piped logs stay readable.
@@ -49,8 +49,7 @@ banner() {
   pause "Ready to start?"
 }
 
-# stage "Name" <minutes> — clear the screen, then announce a stage and show
-# progress + time remaining. Clearing keeps only the current step on screen.
+# stage "Name" <minutes> — announce a stage and show progress + time remaining.
 stage() {
   _clear
   _STAGE_INDEX=$((_STAGE_INDEX + 1))

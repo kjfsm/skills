@@ -9,9 +9,8 @@ set -uo pipefail
 INPUT=$(cat)
 COMMAND=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty')
 
-# jq が無い、あるいは Bash 以外のツールで呼ばれてコマンドが取れない場合は、
-# 何も主張せず通常の権限フローへ戻す。ガードレールが壊れたときに
-# 「全部拒否」も「全部許可」もしないための逃げ道である。
+# コマンドが取れない(jq が無い、Bash 以外のツールから呼ばれた)ときに defer するのは、
+# ガードレールが壊れたときに「全部拒否」も「全部許可」もしないための逃げ道である。
 if [ -z "$COMMAND" ]; then
   printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"defer"}}'
   exit 0

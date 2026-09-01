@@ -5,17 +5,15 @@ set -euo pipefail
 # It is not a supported installer. Modifications to it — or requests for
 # modifications — will not be approved.
 #
-# Links all skills in the repository into the local skill directories used by
-# each agent harness:
+# Links every skill into the local skill directory each harness reads:
 #   - ~/.claude/skills  — Claude Code
 #   - ~/.agents/skills  — Codex and other Agent Skills-compatible harnesses
-# Each entry is a symlink into this repo, so a `git pull` is all that's needed
-# to keep installed skills up to date.
+# Each entry is a symlink into this repo, so a `git pull` keeps installed skills
+# up to date.
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 DESTS=("$HOME/.claude/skills" "$HOME/.agents/skills")
 
-# Collect the repo's skills once, link into every destination.
 names=()
 srcs=()
 while IFS= read -r -d '' skill_md; do
@@ -26,8 +24,7 @@ done < <(find "$REPO/skills" -name SKILL.md -not -path '*/node_modules/*' -not -
 
 for DEST in "${DESTS[@]}"; do
   # If $DEST is a symlink that resolves into this repo, we'd end up writing the
-  # per-skill symlinks back into the repo's own skills/ tree. Detect and bail
-  # out instead of polluting the working copy.
+  # per-skill symlinks back into the repo's own skills/ tree.
   if [ -L "$DEST" ]; then
     resolved="$(readlink -f "$DEST")"
     case "$resolved" in

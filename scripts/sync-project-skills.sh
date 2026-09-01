@@ -34,7 +34,6 @@ fi
 
 drift=0
 note() {
-  # note <メッセージ> — --check では報告だけ、通常はそのまま進捗として出す
   if [ "$check" -eq 1 ]; then
     echo "DRIFT: $1" >&2
     drift=1
@@ -43,8 +42,8 @@ note() {
   fi
 }
 
-# 期待するリンクを集める。連想配列は bash 4 以降にしか無く、macOS の bash は
-# 3.2 で止まっているので、link-skills.sh と同じく添字配列を2本並べる。
+# 連想配列は bash 4 以降にしか無く、macOS の bash は 3.2 で止まっているので、
+# link-skills.sh と同じく添字配列を2本並べる。
 names=()
 targets=()
 while IFS= read -r skill_md; do
@@ -68,7 +67,6 @@ elif [ ! -d "$DEST" ]; then
   exit 1
 fi
 
-# 張る — 内容が合っているリンクは黙って通す
 for i in "${!names[@]}"; do
   name="${names[$i]}"
   target="${targets[$i]}"

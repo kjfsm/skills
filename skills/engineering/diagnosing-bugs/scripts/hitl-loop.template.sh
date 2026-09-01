@@ -3,9 +3,6 @@
 # Copy this file, edit the steps below, and run it.
 # The agent runs the script; the user follows prompts in their terminal.
 #
-# Usage:
-#   bash hitl-loop.template.sh
-#
 # Two helpers:
 #   step "<instruction>"          → show instruction, wait for Enter
 #   capture VAR "<question>"      → show question, read response into VAR

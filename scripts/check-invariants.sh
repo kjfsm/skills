@@ -2,8 +2,7 @@
 set -uo pipefail
 
 # Checks the repository invariants that CLAUDE.md and .agents/invocation.md
-# state in prose. Run it after adding, renaming, promoting, or deleting a skill,
-# and after touching either manifest.
+# state in prose.
 #
 # `claude plugin validate . --strict` only reaches marketplace.json when handed
 # the repo root, so it does not catch a broken path in plugin.json. This does.
@@ -21,12 +20,10 @@ PROMOTED_BUCKETS="engineering productivity"
 PLUGIN=".claude-plugin/plugin.json"
 
 frontmatter() {
-  # frontmatter <file> — prints the lines between the opening and closing ---
   awk 'NR==1 && $0!="---" {exit} NR>1 && $0=="---" {exit} NR>1' "$1"
 }
 
 field() {
-  # field <file> <key> — prints the frontmatter value for <key>, unquoted
   frontmatter "$1" | sed -n "s/^$2:[[:space:]]*//p" | head -1 | sed 's/^"\(.*\)"$/\1/'
 }
 
@@ -42,12 +39,10 @@ charlen() {
 }
 
 est_tokens() {
-  # est_tokens — 標準入力の中身のトークン数の見積もり。
-  #
   # 正確なトークナイザは手元に無いので近似する: ASCII は概ね4文字で1トークン、
-  # 日本語などの非 ASCII は概ね1文字で1トークン。ASCII 側を 0.28/文字 と
-  # やや重く見るぶん、見積もりは実測より上振れする — 上限の検査なので、
-  # 甘い側ではなく厳しい側へ倒してある。
+  # 日本語などの非 ASCII は概ね1文字で1トークン。ASCII 側を 0.28/文字 とやや重く
+  # 見るぶん、見積もりは実測より上振れする — 上限の検査なので、甘い側ではなく
+  # 厳しい側へ倒してある。
   #
   # 行数ではなくトークンを数える理由: 上限がトークンで定められているうえ、
   # 日本語の本文は同じ行数でも英語よりはるかに重く、行数の検査だけを通り抜ける。
@@ -59,14 +54,12 @@ est_tokens() {
 }
 
 strip_code() {
-  # strip_code <ファイル> — フェンス付きコードブロックとインラインのコードスパンを
-  # 取り除いた中身。スキルはその中に例示のリンクを書く(利用側リポジトリへ書き込む
+  # スキルはコードブロックの中に例示のリンクを書く(利用側リポジトリへ書き込む
   # コンテキストポインタ、CONTEXT.md の作例)ので、それらは本物の参照ではない。
   # フェンスが閉じずに終わったら非ゼロで抜ける — 13. がこれを閉じ忘れの検査に使う。
   #
   # スキルは例示のためにフェンスを入れ子にする(```` の中に ```)ので、開閉を単純に
-  # 反転させると内側で同期がずれる。開いた記号より長いか同じ長さで、情報文字列を
-  # 持たない行だけを閉じとして数える。区間量指定子 {3,} は mawk に無いため、
+  # 反転させると内側で同期がずれる。区間量指定子 {3,} は mawk に無いため、
   # バッククォートは数えて判定する。
   awk '
     {
@@ -87,9 +80,8 @@ strip_code() {
 }
 
 md_links() {
-  # md_links <スキルディレクトリ> <ファイル> — <ファイル> がリンクしている .md のパス。
   # 入れ子の参照ファイルからのリンクを SKILL.md が宣言したものと突き合わせられるよう、
-  # すべて <スキルディレクトリ> からの相対で返す。アンカーと外部 URL は落とす。
+  # リンク先はすべて第1引数のスキルディレクトリからの相対で返す。
   local root="$1" file="$2" base rel
   base="$(dirname "$file")"
   base="${base#"$root"}"
@@ -103,7 +95,6 @@ md_links() {
     done
 }
 
-# ---------------------------------------------------------------- per skill --
 seen_names=""
 while IFS= read -r skill_md; do
   dir="$(dirname "$skill_md")"
@@ -159,15 +150,12 @@ while IFS= read -r skill_md; do
   esac
   seen_names="$seen_names $name"
 
-  # ------------------------------------------------------------------------
-  # 以下の上限は Agent Skills 仕様と Anthropic の執筆ガイダンスに由来する。
-  # 出典つきの要約は writing-great-skills/OFFICIAL.md にある。
-  # 散文で頼まず検査にしてあるのは、破ったスキルが仕様のバリデータに弾かれるか
-  # 黙って切り捨てられるかのどちらかで、どちらも書いている最中には見えないため。
-  # ------------------------------------------------------------------------
+  # 以下の上限は Agent Skills 仕様と Anthropic の執筆ガイダンスに由来する(出典つきの
+  # 要約は writing-great-skills/OFFICIAL.md)。散文で頼まず検査にしてあるのは、破った
+  # スキルが仕様のバリデータに弾かれるか黙って切り捨てられるかのどちらかで、どちらも
+  # 書いている最中には見えないため。
 
   # 7. `name` が仕様に沿う: 1〜64文字、小文字英数字と単独の中間ハイフン。
-  #    このパターンで先頭・末尾・連続のハイフンをまとめて弾ける。
   case "$declared" in
     *[!a-z0-9-]* | -* | *- | *--*) err "$name: name '$declared' must be lowercase a-z, 0-9 and single interior hyphens" ;;
   esac
@@ -181,16 +169,14 @@ while IFS= read -r skill_md; do
     [ "$(charlen "$desc")" -le 1024 ] || err "$name: description is $(charlen "$desc") characters; the spec caps it at 1024"
   fi
 
-  # 9. 本文が推奨の予算に収まっている — ここを超えたら SKILL.md を伸ばすのではなく
-  #    参照ファイルへ分割する
+  # 9. 本文が推奨の行数の予算に収まっている
   fm_end="$(awk 'NR==1 && $0!="---" {print 0; exit} NR>1 && $0=="---" {print NR; exit}' "$skill_md")"
   body_lines="$(($(wc -l <"$skill_md") - ${fm_end:-0}))"
   [ "$body_lines" -le 500 ] || err "$name: SKILL.md body is $body_lines lines; keep it under 500 and push detail into reference files"
 
-  # 9b. 本文がトークンの予算にも収まっている。仕様は第2層(本文)を5,000トークン
-  #     未満と推奨しており、加えて自動圧縮のあとコンテキストへ繋ぎ直されるのは
-  #     各スキルの先頭5,000トークンだけである。超過分は削られるのではなく、
-  #     圧縮を挟んだ時点で黙って落ちる — 書いている最中には決して見えない。
+  # 9b. 本文がトークンの予算にも収まっている。仕様が第2層(本文)を5,000トークン未満と
+  #     推奨しているのに加え、自動圧縮のあとコンテキストへ繋ぎ直されるのも各スキルの
+  #     先頭5,000トークンだけである。
   body_tokens="$(tail -n +$((${fm_end:-0} + 1)) "$skill_md" | est_tokens)"
   [ "$body_tokens" -le 5000 ] ||
     err "$name: SKILL.md body is ~$body_tokens tokens; keep it under 5000 (past that, compaction re-attaches only the first 5000 and the tail is silently dropped)"
@@ -215,10 +201,9 @@ while IFS= read -r skill_md; do
   done < <(md_links "$dir" "$skill_md")
 
   # 10b. スキルの中にあるすべての参照ファイルが、SKILL.md からリンクされている。
-  #      10. が「リンク先が実在するか」を見るのに対し、こちらはその逆 —
-  #      置いてあるのに誰も指していないファイルを捕まえる。公式は「一度も読まれない
-  #      ファイルは、不要であるか signal が足りていないかのどちらか」と名指ししている。
-  #      検査に出ないまま放置されると、書いた本人以外には存在しないのと同じになる。
+  #      10. の逆 — 置いてあるのに誰も指していないファイルを捕まえる。公式は「一度も
+  #      読まれないファイルは、不要であるか signal が足りていないかのどちらか」と
+  #      名指ししている。
   while IFS= read -r orphan; do
     rel="${orphan#"$dir"/}"
     case " $lvl1 " in *" $rel "*) continue ;; esac
@@ -242,20 +227,18 @@ while IFS= read -r skill_md; do
   done
 done < <(find skills -name SKILL.md -not -path '*/node_modules/*' | sort)
 
-# ------------------------------------------------------------ manifest side --
 while IFS= read -r path; do
   [ -f "$path/SKILL.md" ] || err "$PLUGIN lists $path, which has no SKILL.md"
 done < <(sed -n 's|^[[:space:]]*"\(\./skills/[^"]*\)",\{0,1\}$|\1|p' "$PLUGIN")
 
 # 11. `version` はどこにも無い — plugin.json と marketplace.json の両方。
-#     コミット SHA をバージョンとして扱わせるには、公式が「両方から省く」ことを
-#     求めている。片方だけ書いても更新は止まるので、両方を検査する。see CLAUDE.md
+#     コミット SHA をバージョンとして扱わせる条件が「両方から省く」ことで、片方だけ
+#     書いても更新は止まる。see CLAUDE.md
 ! grep -q '^[[:space:]]*"version"' "$PLUGIN" ||
   err "$PLUGIN has a \"version\" field; it pins the cache key and stops updates from reaching installed users"
 ! grep -q '"version"' .claude-plugin/marketplace.json ||
   err ".claude-plugin/marketplace.json has a \"version\" field; the commit-SHA versioning needs it omitted from the marketplace entry too"
 
-# ---------------------------------------------------------------- buckets --
 # 12. 昇格していないバケットはトップレベルの README から辿れる。昇格済みの
 #     バケットは自分の節を持つので個々のスキルの掲載を 4. が見ているが、昇格して
 #     いないバケットはバケット単位でしか載らないため、丸ごと落ちても誰も気づかない
@@ -270,8 +253,7 @@ while IFS= read -r bucket_readme; do
 done < <(find skills -mindepth 2 -maxdepth 2 -name README.md | sort)
 
 # 13. コードフェンスが閉じている。閉じ忘れると以降の本文がまるごとコードブロックに
-#     飲まれ、見出しも指示も本文として読まれなくなる。判定は strip_code が持つ
-#     ものと同一で、10. のリンク抽出とこの検査は同じフェンス解析を共有する。
+#     飲まれ、見出しも指示も本文として読まれなくなる。
 while IFS= read -r md; do
   strip_code "$md" >/dev/null ||
     err "$md has an unclosed code fence; everything after it reads as code"
@@ -284,10 +266,8 @@ done < <(find skills -name '*.md' -not -path '*/node_modules/*' | sort)
 scripts/sync-project-skills.sh --check ||
   err ".claude/skills/ is out of sync with skills/; run scripts/sync-project-skills.sh"
 
-# ----------------------------------------------------------- output styles --
-# 15. 出力スタイルが出荷され、このリポジトリ自身でも選ばれている。スキルと違って
-#     出力スタイルは1つしかないので sync スクリプトは持たせず、ここで直接見る。
-#     壊れたときの症状が「効いていない」だけで、黙って通り過ぎる類だからである。
+# 15. 出力スタイルが出荷され、このリポジトリ自身でも選ばれている。壊れたときの症状が
+#     「効いていない」だけで黙って通り過ぎるので、sync スクリプトを持たせず検査で見る。
 grep -q '"outputStyles"' "$PLUGIN" ||
   err "$PLUGIN does not declare \"outputStyles\"; the style ships only if the manifest points at it"
 
@@ -325,14 +305,11 @@ if [ -d ".claude/output-styles" ]; then
   done < <(find .claude/output-styles -mindepth 1 -maxdepth 1 | sort)
 fi
 
-# --------------------------------------------------- resident conventions --
-# 16. コメントの判定基準が、常駐する3か所すべてに本文として載っている。スキルは
-#     呼ばれて初めて読まれるが、コメントを書く場面でモデルはスキルを呼ばない。
-#     参照 1 行に痩せた瞬間に規律は効かなくなり、しかも症状が出ない。4本の柱を
-#     別に見るのは、テストの宛先をこの1行だけが運んでいるためである — 落ちても
-#     残りの本文は素通りする。優先順位の
-#     1 句を別に見るのは、ハーネス側の「周囲のコードに合わせろ」と正面から
-#     ぶつかる唯一の行で、落ちてもモデルが黙ってどちらかを選ぶためである。
+# 16. コメントの判定基準が、常駐する3か所すべてに本文として載っている。スキルは呼ばれて
+#     初めて読まれるが、コメントを書く場面でモデルはスキルを呼ばない — 参照 1 行に痩せた
+#     瞬間に規律は効かなくなり、しかも症状が出ない。4本の柱を別に見るのはテストの宛先を
+#     その1行だけが運んでいるため、優先順位の句を別に見るのはハーネス側の「周囲のコードに
+#     合わせろ」と正面からぶつかる唯一の行だからである。
 #     see CLAUDE.md, .agents/adr/0003-never-start-from-init-output.md
 for resident in output-styles/kjfsm.md CLAUDE.md skills/engineering/setup-skills/SKILL.md; do
   grep -q 'コミットログには Why、コードコメントには Why not' "$resident" ||
@@ -345,7 +322,6 @@ for resident in output-styles/kjfsm.md CLAUDE.md skills/engineering/setup-skills
     err "$resident lost the precedence clause; without it the harness's match-the-surrounding-code line and this rule point opposite ways and the model picks silently"
 done
 
-# ---------------------------------------------------------------- hooks --
 # 17. コメントのフックが、出荷側(プラグイン)と自家用(このリポジトリ)の両方から
 #     実在する実行可能スクリプトを指している。そして 4本の柱を復唱していない —
 #     復唱した瞬間にこれは常駐 3か所(検査 16.)の同期先 4つ目になり、フックが

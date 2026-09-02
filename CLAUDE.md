@@ -2,7 +2,7 @@
 
 このリポジトリ自体が単一プラグイン `kjfsm-skills` の Claude Code マーケットプレイスでもある。そう決めた理由は [.agents/adr/0002-ship-as-a-claude-code-plugin.md](./.agents/adr/0002-ship-as-a-claude-code-plugin.md) にある。**`version` はどこにも置かない** — `plugin.json` と `marketplace.json` の **両方** から省いてあるあいだだけ、push した内容がインストール済みユーザーへ更新として届く(検査 11. が両方を見る)。マニフェストの他の決まりと、触ったあとに走らせるものは [.agents/adding-a-skill.md](./.agents/adding-a-skill.md) が持つ。
 
-出力スタイルは `output-styles/` に置き、`plugin.json` の `outputStyles` で指す。**`force-for-plugin` は付けない** — 入れた人の `outputStyle` 設定を黙って上書きする。**`keep-coding-instructions: true` は必須**で、付け忘れるとハーネス組み込みのエンジニアリング指示(変更の切り方、**コメントの書き方**、検証のしかた)ごと外れる — 規律を足すつもりで既存の規律を消すことになる(検査 15.)。
+出力スタイルは `output-styles/` に置き、`plugin.json` の `outputStyles` で指す。**`force-for-plugin` は付けない** — 入れた人の `outputStyle` 設定を黙って上書きする。**`keep-coding-instructions: true` は必須**で、付け忘れるとハーネス組み込みのエンジニアリング指示(変更の切り方、**コメントの書き方**、検証のしかた)ごと外れる — 規律を足すつもりで既存の規律を消すことになる。このリポジトリ自身も `.claude/output-styles/` のシンボリックリンクと `.claude/settings.json` の `outputStyle` で同じスタイルを選んでおり、**出荷と自家用の2本が要る**(検査 15. が両方を見る)。
 
 出力スタイルが入るのはメイン会話のシステムプロンプトだけで、**サブエージェントには届かない**。届くのは `CLAUDE.md` と `.claude/rules/` の側である(組み込みの探索用エージェントを除く)。だから下のコメントの判定基準は、`output-styles/kjfsm.md`・この `CLAUDE.md`・`setup-skills` の `### Conventions` テンプレートの3か所に **本文として** 載る — スキルは呼ばれて初めて読まれるが、コメントを書く場面でモデルは「迷った」と自覚しないので呼ばない。参照 1 行に痩せた瞬間に効かなくなり、しかも症状が出ない。直すときは3か所を揃える(検査 16.)。常駐させるのは4本の柱とコメントの判定に留め、JSDoc・PR・ADR・docs のルーティングはスキル側に残す(規約は行数が増えるほど従われなくなる)。配布先のリポジトリへ届けるのは `setup-skills` の一度きりの書き込みで、こちらを直しても追随はしない。
 

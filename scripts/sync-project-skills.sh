@@ -27,7 +27,8 @@ cd "$REPO"
 
 DEST=".claude/skills"
 
-# check-invariants.sh と同じ集合。片方だけ動かすと検査 14. が落ちる。
+# check-invariants.sh の PROMOTED_BUCKETS と同じ集合。検査 14. はこの定数で --check
+# するので、あちらだけ動かしても 14. は通ってしまう — 揃えるのは手で確かめる。
 PROMOTED_BUCKETS="engineering productivity"
 
 check=0

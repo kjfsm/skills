@@ -58,13 +58,26 @@ scripts/check-invariants.sh
 
 落ちた項目を潰す。README への追加も `plugin.json` への登録も、ここに出てくる。**クリーンになるまで、配線は済んでいない。**
 
+`claude plugin validate .` も走らせてよいが、2点で当てにならない。リポジトリルートを渡すと `marketplace.json` しか検証せず、`plugin.json` の壊れたパスを見逃す。そして `--strict` は `version` 不在を error に格上げする — このリポジトリではそれが意図した状態である(→ `CLAUDE.md`)。
+
 ## 5. 検査に出ない後始末
 
 ここだけは自分で確認する。
 
-- **`ask-kjfsm` を更新する** — ユーザーが到達できるスキルを追加・改名・削除したとき、あるいはフローへの組み込み方を変えたとき。[`SKILL.md`](../skills/engineering/ask-kjfsm/SKILL.md)(起点)と [`SITUATIONS.md`](../skills/engineering/ask-kjfsm/SITUATIONS.md)(状況で入るもの)の両方を読み直し、新しいスキルが一度も言及されない・古いスキルがまだルーティングされる状態を残さない。**嘘をつくルーターは、無いルーターより悪い。** `SITUATIONS.md` 側に足したら、`SKILL.md` 冒頭のポインタが並べるトリガーにも足す。
+- **`ask-kjfsm` を更新する** — ユーザーが到達できるスキルを追加・改名・削除したとき、あるいはフローへの組み込み方を変えたとき。[`SKILL.md`](../skills/engineering/ask-kjfsm/SKILL.md)(起点)と [`SITUATIONS.md`](../skills/engineering/ask-kjfsm/SITUATIONS.md)(状況で入るもの)の両方を読み直し、新しいスキルが一度も言及されない・古いスキルがまだルーティングされる状態を残さない。**嘘をつくルーターは、無いルーターより悪い。** `SITUATIONS.md` 側に足したら、`SKILL.md` 冒頭のポインタが並べるトリガーにも足す — その文言が到達を決めている。
+
+  どちらに置くかは **作業の起点になるか** だけで決める。ルーターは呼ばれた瞬間に全文がコンテキストに乗るので、起点にならないものを `SKILL.md` に置くと呼び出しのたびに重くなる。
+
 - **`scripts/link-skills.sh` を走らせる** — ローカルのハーネススキルディレクトリへのシンボリックリンクを張り直す。追加・削除・改名のあと。
 - **`pnpm format`** — CI が `format:check` で落とす。
+
+## マニフェストの決まり
+
+`plugin.json` の `skills` 配列は、既定の `skills/` スキャンに **追加** されるのが原則で、`marketplace.json` の `source` がマーケットプレイスのルート(`"./"`)に解決される場合に限り **置き換え** になる。昇格していないバケットがプラグインに載らないのはこの例外に乗っているからなので、`source` を変えるときは `deprecated/` や `in-progress/` が出荷対象に混ざらないか確認する。
+
+`version` を両方のマニフェストから省く理由は `CLAUDE.md` が持つ。片方にでも書くと、その文字列が固定のキャッシュキーになって更新が止まる。
+
+昇格していないバケットのスキルは、プラグインではなく利用側リポジトリでの `npx skills` による実体配置で配る(`skills-lock.json` に載り、`npx skills update` で追随できる)。`emdash/` がこの経路の主な利用者である。
 
 ## 改名するとき
 
@@ -78,7 +91,9 @@ scripts/check-invariants.sh
 
 `in-progress/` や `misc/` から `engineering/` か `productivity/` へ移す。
 
-ディレクトリを移動したら、あとは検査が要求してくる — トップレベル `README.md` への追加と `plugin.json` の `skills` 配列への登録。バケットの `README.md` は移動元から消し、移動先へ足す。昇格済みバケットの README は **ユーザー呼び出し型 / モデル呼び出し型** でグループ分けするので、正しい側へ入れる。
+ディレクトリを移動したら、あとは検査が要求してくる — トップレベル `README.md` への追加と `plugin.json` の `skills` 配列への登録。バケットの `README.md` は移動元から消し、移動先へ足す。昇格済みバケットとトップレベルの README は **ユーザー呼び出し型 / モデル呼び出し型** でグループ分けするので、正しい側へ入れる(昇格していないバケットの README はフラットなリストを使う)。掲載されているかは検査 4./5. が弾くが、**どちらのグループに入っているかは弾かない。**
+
+`scripts/sync-project-skills.sh` を走らせ直す — 昇格したスキルはプラグインが配るようになるので、`.claude/skills/` のリンクは外れる(忘れれば検査 14. が落とす)。
 
 そのスキルにユーザーが到達できるなら `ask-kjfsm` にも足す。作業の起点になるなら `SKILL.md`、フローの途中で状況が満たされたときだけ入るなら `SITUATIONS.md`。
 

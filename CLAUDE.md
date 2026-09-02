@@ -1,46 +1,20 @@
-スキルは `skills/` 配下のバケットフォルダに整理されている。**昇格済み**は `engineering/` と `productivity/` の2つだけで、ここにあるスキルはトップレベルの `README.md` への参照と `.claude-plugin/plugin.json` の `skills` 配列へのエントリを持ち、残りのバケット(`misc/`、`emdash/`、`personal/`、`in-progress/`、`deprecated/`)のスキルはどちらにも現れてはならない — Claude Code プラグインは昇格済みの集合だけを出荷する(双方向とも検査 4. が弾く)。各バケットが何のためにあり、なぜ昇格していないかは、そのバケットの `README.md` の冒頭にある。
+スキルは `skills/` 配下のバケットフォルダに整理されている。**昇格済み**は `engineering/` と `productivity/` の2つだけで、そこにあるスキルだけがトップレベルの `README.md` と `.claude-plugin/plugin.json` の `skills` 配列に載る — 残りのバケット(`misc/`、`emdash/`、`personal/`、`in-progress/`、`deprecated/`)はどちらにも現れてはならない(双方向とも検査 4. が弾く)。各バケットが何のためにあり、なぜ昇格していないかは、そのバケットの `README.md` の冒頭にある。
 
-昇格していないバケットのスキルは、プラグインではなく利用側リポジトリでの `npx skills` による実体配置で配る(`skills-lock.json` に載り、`npx skills update` で追随できる)。`emdash/` がこの経路の主な利用者である。
+このリポジトリ自体が単一プラグイン `kjfsm-skills` の Claude Code マーケットプレイスでもある。そう決めた理由は [.agents/adr/0002-ship-as-a-claude-code-plugin.md](./.agents/adr/0002-ship-as-a-claude-code-plugin.md) にある。**`version` はどこにも置かない** — `plugin.json` と `marketplace.json` の **両方** から省いてあるあいだだけ、push した内容がインストール済みユーザーへ更新として届く(検査 11. が両方を見る)。マニフェストの他の決まりと、触ったあとに走らせるものは [.agents/adding-a-skill.md](./.agents/adding-a-skill.md) が持つ。
 
-このリポジトリ自体が単一プラグインの Claude Code マーケットプレイスでもある: `.claude-plugin/marketplace.json` は `kjfsm-skills` プラグインを1つだけ列挙している。Claude プラグインとして出荷し、(今のところ)Codex プラグインとして出荷しない理由は [.agents/adr/0002-ship-as-a-claude-code-plugin.md](./.agents/adr/0002-ship-as-a-claude-code-plugin.md) にある。
+出力スタイルは `output-styles/` に置き、`plugin.json` の `outputStyles` で指す。**`force-for-plugin` は付けない** — 入れた人の `outputStyle` 設定を黙って上書きする。**`keep-coding-instructions: true` は必須**で、付け忘れるとハーネス組み込みのエンジニアリング指示(変更の切り方、**コメントの書き方**、検証のしかた)ごと外れる — 規律を足すつもりで既存の規律を消すことになる。このリポジトリ自身も `.claude/output-styles/` のシンボリックリンクと `.claude/settings.json` の `outputStyle` で同じスタイルを選んでおり、**出荷と自家用の2本が要る**(検査 15. が両方を見る)。
 
-`version` を **どこにも置かない** — `plugin.json` と `marketplace.json` のプラグインエントリの **両方** から省く。公式はコミット SHA をバージョンとして扱う条件をこの「両方から省く」で定めており、片方にでも書くとその文字列が固定のキャッシュキーになって、手で上げない限り更新が一切届かなくなる。省いてあるかぎり、push するたびにインストール済みユーザーへ更新が届く。リリースの刻みを持つと決めるまで、このフィールドは空けておく(検査 11. が両方を見る)。
-
-`plugin.json` の `skills` 配列は、既定の `skills/` スキャンに **追加** されるのが原則で、`marketplace.json` の `source` がマーケットプレイスのルート(`"./"`)に解決される場合に限り **置き換え** になる。昇格していないバケットがプラグインに載らないのはこの例外に乗っているからなので、`source` を変えるときは `deprecated/` や `in-progress/` が出荷対象に混ざらないか確認する。
-
-出力スタイルは `output-styles/` に置き、`plugin.json` の `outputStyles` で指す。`force-for-plugin` は **付けない** — 付けると入れた人の `outputStyle` 設定を黙って上書きするので、選ぶかどうかは利用者に残す。`keep-coding-instructions: true` は必須である: 出力スタイルは既定でハーネス組み込みのエンジニアリング指示(変更の切り方、**コメントの書き方**、検証のしかた)を外すため、付け忘れると規律を足すつもりで既存の規律を消すことになる。このリポジトリ自身は `.claude/output-styles/` のシンボリックリンクと `.claude/settings.json` の `outputStyle` で同じスタイルを選んでいる(検査 15. が両方を見る)。
-
-出力スタイルが入るのはメイン会話のシステムプロンプトだけで、**サブエージェントには届かない**。届くのは `CLAUDE.md` と `.claude/rules/` の側である(組み込みの探索用エージェントを除く)。だから同じ応答・記述の規約が `setup-skills` の書く `## Agent skills` ブロックにも載る — 意図的な唯一の重複であり、どちらか片方だけでは穴が空く。
+出力スタイルが入るのはメイン会話のシステムプロンプトだけで、**サブエージェントには届かない**。届くのは `CLAUDE.md` と `.claude/rules/` の側である(組み込みの探索用エージェントを除く)。だから下のコメントの判定基準は、`output-styles/kjfsm.md`・この `CLAUDE.md`・`setup-skills` の `### Conventions` テンプレートの3か所に **本文として** 載る — スキルは呼ばれて初めて読まれるが、コメントを書く場面でモデルは「迷った」と自覚しないので呼ばない。参照 1 行に痩せた瞬間に効かなくなり、しかも症状が出ない。直すときは3か所を揃える(検査 16.)。常駐させるのは4本の柱とコメントの判定に留め、JSDoc・PR・ADR・docs のルーティングはスキル側に残す(規約は行数が増えるほど従われなくなる)。配布先のリポジトリへ届けるのは `setup-skills` の一度きりの書き込みで、こちらを直しても追随はしない。
 
 相談の規律(`## 同意ではなく立場を取る`)を出力スタイルだけに置いてあるのは、その裏返しである — サブエージェントはユーザーに相談しないので、届かなくても穴が空かない。3か所へ同期しない。
 
-その重複が運ぶのは `where-to-write-what` への参照 1 行ではなく、**コメントの判定基準そのもの** である。スキルは呼ばれて初めて読まれるが、コメントを書く場面でモデルは「迷った」と自覚しないので呼ばない — 毎回効いてほしい規律は、参照ではなく本文として常駐していなければならない。常駐させるのは4本の柱(How=コード、What=テスト、Why=コミットログ、Why not=コメント)とコメントの判定に留め、JSDoc・PR・ADR・docs のルーティングはスキル側に残す(規約は行数が増えるほど従われなくなる)。本文が載るのは `output-styles/kjfsm.md`、この `CLAUDE.md`、`setup-skills` の `### Conventions` テンプレートの3か所で、直すときは揃える(検査 16. が3か所を見る)。配布先のリポジトリへ同じ本文を届けるのは `setup-skills` の一度きりの書き込みで、こちらを直しても追随はしない。
+その3か所は常に読まれる。それでも守られない。**4か所目を同じ「常に読まれる」層へ足さない** — `SessionStart` フックの標準出力が着く先も同じシステムプロンプトなので、同期先が1つ増えるだけである。代わりに三層で押さえる: `Edit`/`Write` でコメント行が**増えたときだけ**鳴るフック(`hooks/hooks.json` から出荷)、書かれたものを削る `/prune-comments`、書かれなかった Why not を探す `/two-axis-review` の Standards 軸。理由・分業の境界・却下した手・覆る条件は [.agents/adr/0004-enforce-comment-conventions-in-three-layers.md](./.agents/adr/0004-enforce-comment-conventions-in-three-layers.md) にある。フックについて押さえるのは2点だけである。**4本の柱を復唱させない**(復唱した瞬間に常駐3か所の同期先4つ目になる — 検査 17.)、そして**判定させない**(鳴る条件は機械的、適切かの判断はモデルに残す)。
 
-その3か所は常に読まれる。それでも守られない。**4か所目を同じ「常に読まれる」層へ足さない** — `SessionStart` フックの標準出力が着く先も同じシステムプロンプトなので、同期先が1つ増えるだけである。代わりに三層で押さえる: `Edit`/`Write` でコメント行が**増えたときだけ**鳴るフック(`hooks/hooks.json` から出荷)、書かれたものを削る `/prune-comments`、書かれなかった Why not を探す `/two-axis-review` の Standards 軸。理由・分業の境界・却下した手・覆る条件は [.agents/adr/0004-enforce-comment-conventions-in-three-layers.md](./.agents/adr/0004-enforce-comment-conventions-in-three-layers.md) にある。
+すべての `SKILL.md` は、ユーザー呼び出し型(`disable-model-invocation: true` に加えて `agents/openai.yaml` で `policy.allow_implicit_invocation: false`、人間だけが到達できる)か、モデル呼び出し型(モデルからもユーザーからも到達できる)のいずれかである — [.agents/invocation.md](./.agents/invocation.md)。スキルを追加・改名・昇格・退役させる手順と、検査に出ない後始末(`ask-kjfsm`、`link-skills.sh`、他のスキルからの文中呼び出し)は [.agents/adding-a-skill.md](./.agents/adding-a-skill.md)。書く・直すときの判断基準は [`writing-great-skills`](./skills/productivity/writing-great-skills/SKILL.md) と、同じフォルダの [`OFFICIAL.md`](./skills/productivity/writing-great-skills/OFFICIAL.md)(公式の数値上限・frontmatter の出自・名指しされたアンチパターン)。メモリファイルに何を書くかの基準(**発見不可能 ∧ グローバルに有用**)と `/init` を出発点にしない理由は [.agents/adr/0003-never-start-from-init-output.md](./.agents/adr/0003-never-start-from-init-output.md) にあり、`tend-memory-files` と `setup-rules` はこの決定に従っているので片方だけ動かさない。
 
-フックについてここで押さえるのは2点だけである。**4本の柱を復唱させない**(復唱した瞬間に常駐3か所の同期先4つ目になる — 検査 17. が見る)。そして**判定させない**(鳴る条件は機械的、適切かの判断はモデルに残す)。`Bash` の `sed` 経由の書き込みは承知のうえで素通しする。フックはサブエージェントの中でも走るので、出力スタイルが届かない側の穴も同時に埋まる。
+このリポジトリは [mattpocock/skills](https://github.com/mattpocock/skills) の日本語訳から出発した独立フォークで、git 上の共通祖先が無い。本家のどこまでを突き合わせ済みか、何を意図的に取り込んでいないか、差分をどう測るかは [.agents/upstream-sync.md](./.agents/upstream-sync.md) にある — 本家由来のスキルを直すときは、そこを見てから決める。
 
-このリポジトリは [mattpocock/skills](https://github.com/mattpocock/skills) の日本語訳から出発した独立フォークで、git 上の共通祖先が無い。本家のどこまでを突き合わせ済みか、何を意図的に取り込んでいないか、差分をどう測るか(`scripts/upstream-diff.py`)は [.agents/upstream-sync.md](./.agents/upstream-sync.md) にある — 本家由来のスキルを直すときは、そこを見てから決める。
-
-スキルを追加・改名・昇格・退役させる手順は [.agents/adding-a-skill.md](./.agents/adding-a-skill.md) にある — バケットと呼び出し方式の選び方、そして検査に出ない後始末(`ask-kjfsm`、`link-skills.sh`、他のスキルからの文中呼び出し)。
-
-マニフェストを触ったあとは `scripts/check-invariants.sh` を実行する。`claude plugin validate .` も走らせてよいが、リポジトリルートを渡すと `marketplace.json` しか検証せず `plugin.json` の壊れたパスを見逃すこと、`--strict` は `version` 不在を error に格上げしてしまうこと(上記の通り、これは意図的な状態である)に注意する。
-
-各スキルは、自分のバケットの `README.md` と(昇格済みなら)トップレベルの `README.md` に、スキル名から `SKILL.md` へのリンクと1行の説明つきで載る。**掲載されているかは検査 4./5. が弾くが、以下は弾かない** — 昇格済みバケットとトップレベルの `README.md` はエントリを **ユーザー呼び出し型** と **モデル呼び出し型** にグループ分けし、昇格していないバケット(`misc/`、`personal/`)はフラットなリストを使う。
-
-すべての `SKILL.md` は、ユーザー呼び出し型(`disable-model-invocation: true` に加えて `agents/openai.yaml` で `policy.allow_implicit_invocation: false`、人間だけが到達できる)か、モデル呼び出し型(モデルからもユーザーからも到達できる)のいずれかである。[.agents/invocation.md](./.agents/invocation.md) を参照。
-
-メモリファイルに何を書くかの基準(**発見不可能 ∧ グローバルに有用**)と、`/init` を出発点にしない理由は [.agents/adr/0003-never-start-from-init-output.md](./.agents/adr/0003-never-start-from-init-output.md) にある — `tend-memory-files` と `setup-rules` はこの決定に従っているので、片方だけ動かさない。
-
-スキルを書く・直すときの判断基準は [`writing-great-skills`](./skills/productivity/writing-great-skills/SKILL.md) にある。公式が定める数値上限、frontmatter のどのフィールドが Agent Skills 標準でどれが Claude Code 独自か、公式が名指ししているアンチパターンは、同じフォルダの [`OFFICIAL.md`](./skills/productivity/writing-great-skills/OFFICIAL.md) にまとまっている — スキルを新規に書く前と、frontmatter や参照ファイルの構成を確定させるときに引く。
-
-[`ask-kjfsm`](./skills/engineering/ask-kjfsm/SKILL.md) は、ユーザーが到達できるすべてのスキルとその関係を対応付けるルーターである。地図は2枚に分かれている: `SKILL.md` が **起点**(どのフローに入るか)を、[`SITUATIONS.md`](./skills/engineering/ask-kjfsm/SITUATIONS.md) が **フローを走っている最中に状況が満たされたときだけ入るもの** を持つ。ルーターは呼ばれた瞬間に全文がコンテキストに乗るので、起点にならないものを `SKILL.md` に置くと呼び出しのたびに重くなる — 置き場所は「作業の起点になるか」だけで決める。
-
-ドキュメントページを再同期させるのと同じトリガーがこれにも当てはまる: ユーザーが到達できるスキルを追加・改名・削除したり、フローへの組み込み方を変えたりしたときは、必ず **両方** を読み直して更新し、この地図が正確であり続けるようにする — 一度も言及されない新しいスキルや、いまだにルーティングされる古びたスキルがあれば、それは嘘をつくルーターである。`SITUATIONS.md` に足したときは `SKILL.md` 冒頭のポインタが並べるトリガーにも足す: そのポインタの文言が到達を決めている。
-
-すべてのスキルをローカルのハーネススキルディレクトリ(`~/.claude/skills`、`~/.agents/skills`)へ(再)リンクするには、`scripts/link-skills.sh` を実行する。各エントリはこのリポジトリへのシンボリックリンクなので、`git pull` すればインストール済みのスキルは常に最新の状態を保つ。スキルを追加・削除・改名したあとは、このスクリプトを再実行すること。
-
-このリポジトリは自分のスキルを自分自身で使う。`.claude/skills/` に `deprecated/` を除く全スキルの実体へのシンボリックリンクが **コミットされている** ので、ここで作業するエージェントは `/ask-kjfsm` や `/writing-great-skills` をそのまま呼べる — Claude Code がプロジェクトスキルとして見るのは `.claude/skills/<名前>/SKILL.md` だけで、`skills/<バケット>/` は見に行かないためである。`link-skills.sh` が端末側(`~`)を埋めるのに対しこちらはリポジトリ側なので、クローンした誰にでも、`~` を持ち越せないクラウドセッションにも届く。張り直すのは `scripts/sync-project-skills.sh`、ずれの検出は検査 14. が行う。`in-progress/` を含めてあるのは意図的である: 下書きは実際に呼んでみて初めて直せる。
+このリポジトリは自分のスキルを自分自身で使う。`.claude/skills/` に **昇格していない** バケット(`deprecated/` を除く)のスキルの実体へのシンボリックリンクがコミットされているので、クローンした誰にでも、`~` を持ち越せないクラウドセッションにも届く。**昇格済みはここに張らない** — 配るのはプラグインの役目で、両方から見えると Claude Code はセッション開始時に同じスキルを2度並べ、name と description のぶんだけ毎セッション二重に払う。張り直すのは `scripts/sync-project-skills.sh`、ずれの検出は検査 14. が行う。`in-progress/` を張るのは意図的である: 下書きは実際に呼んでみて初めて直せる。
 
 ユーザーとのやり取りは日本語で行う。コミットメッセージと PR 本文もこのリポジトリの慣習に従って日本語である(識別子とファイル名は英語)。
 

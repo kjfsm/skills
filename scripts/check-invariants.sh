@@ -259,10 +259,11 @@ while IFS= read -r md; do
     err "$md has an unclosed code fence; everything after it reads as code"
 done < <(find skills -name '*.md' -not -path '*/node_modules/*' | sort)
 
-# 14. `.claude/skills/` がこのリポジトリのスキルと一致している。ここが実体への
-#     シンボリックリンクで埋まっているあいだだけ、このリポジトリで作業する
-#     エージェントが自分のスキルを使える。スキルを足したり改名したりすると
-#     真っ先にずれ、しかも「呼べない」以外の症状が出ないので検査で捕まえる。
+# 14. `.claude/skills/` が、このリポジトリの **昇格していない** スキルと一致して
+#     いる。昇格済みを配るのはプラグインなので、ここに張ると同じスキルが2度並ぶ。
+#     ここが埋まっているあいだだけ下書きをこのリポジトリで呼べる。スキルを足す・
+#     改名する・昇格させるとまずずれ、しかも「呼べない」「2度出る」以外の症状が
+#     出ないので検査で捕まえる。
 scripts/sync-project-skills.sh --check ||
   err ".claude/skills/ is out of sync with skills/; run scripts/sync-project-skills.sh"
 

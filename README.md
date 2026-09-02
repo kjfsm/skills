@@ -117,7 +117,7 @@ npx -y skills add kjfsm/skills
 
 **3つの方法は併用しない。** 同じスキルが2系統で入ると、スラッシュコマンドが重複し、常時読み込まれる description も二重に数えられる。このリポジトリを開発するなら選択肢 A、使うだけなら選択肢 B を選ぶ。
 
-**このリポジトリを clone した場合は、何も入れなくてもスキルが使える。** `.claude/skills/` に(`deprecated/` を除く)全スキルへのシンボリックリンクがコミットされているので、この clone の中で作業するかぎり `/ask-kjfsm` も `/tdd` もそのまま呼べる。選択肢 A と同じ実体を指すため、両方あっても Claude Code はスキルを1回しか読み込まない — 併用の禁止に触れるのは、実体が別になる選択肢 B・C をこの clone の中で重ねたときである。リンクの張り直しは `scripts/sync-project-skills.sh` で、ずれは `scripts/check-invariants.sh` が落とす。
+**このリポジトリを clone した場合、昇格していないスキルは何も入れなくても使える。** `.claude/skills/` に `misc/`・`emdash/`・`personal/`・`in-progress/` のスキルへのシンボリックリンクがコミットされているので、この clone の中で作業するかぎり `/wizard` も `/building-emdash-site` もそのまま呼べる。**昇格済みのスキルはここに張らない** — 配るのはプラグイン(選択肢 B)の役目で、両方から見えると同じスキルがセッション開始時に2度並び、上の併用の禁止がそのまま当たる。この clone で `/ask-kjfsm` や `/tdd` を呼ぶには、選択肢 A か B のどちらかを1つ入れる。リンクの張り直しは `scripts/sync-project-skills.sh` で、ずれは `scripts/check-invariants.sh` が落とす。
 
 どの方法でも、他のエンジニアリング系スキルを使う前にリポジトリごとに一度 **`/setup-repo`** を実行すること。setup 系4工程の入口であり、届き方の違う4つの層を順に敷く:
 

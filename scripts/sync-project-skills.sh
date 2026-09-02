@@ -12,8 +12,11 @@ set -uo pipefail
 # 向けの、メンテナ専用のセットアップである。こちらはリポジトリに **コミットされる**
 # ので、クローンした誰にでも、`~` を書き換えられないクラウドセッションにも届く。
 #
-# `deprecated/` は除く — link-skills.sh と同じ規則である。それ以外は昇格していない
-# バケットも含めて張る: `in-progress/` の下書きは、ここで使ってみて初めて直せる。
+# 張るのは **昇格していない** バケットだけである。昇格済みのスキルはプラグイン
+# `kjfsm-skills` が配るので、ここにも張ると Claude Code がセッション開始時に同じ
+# スキルを2度並べる — 実体は1つでも、名前と description のぶんだけコンテキストを
+# 二重に払う。`deprecated/` は link-skills.sh と同じ規則で除く。`in-progress/` を
+# 張るのは意図的で、下書きはここで呼んでみて初めて直せる。
 #
 # 使い方:
 #   scripts/sync-project-skills.sh           リンクを張り直す(不要なものは消す)
@@ -23,6 +26,9 @@ REPO="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO"
 
 DEST=".claude/skills"
+
+# check-invariants.sh と同じ集合。片方だけ動かすと検査 14. が落ちる。
+PROMOTED_BUCKETS="engineering productivity"
 
 check=0
 if [ "${1:-}" = "--check" ]; then
@@ -48,6 +54,9 @@ names=()
 targets=()
 while IFS= read -r skill_md; do
   src="${skill_md%/SKILL.md}"
+  case " $PROMOTED_BUCKETS " in
+    *" $(basename "$(dirname "$src")") "*) continue ;;
+  esac
   names+=("$(basename "$src")")
   # `.claude/skills/` は2階層下なので、`../..` がリポジトリルートに解決される。
   # 相対にしておくとクローン先のパスに依存しない。
@@ -86,7 +95,8 @@ for i in "${!names[@]}"; do
   [ "$check" -eq 1 ] || ln -sfn "$target" "$link"
 done
 
-# 消す — 改名や退役でリンクだけ残ると、実体の無いスキルが名前だけ生き続ける
+# 消す — 改名・退役・昇格でリンクだけ残ると、プラグインが配るものを二度並べるか、
+# 実体の無いスキルが名前だけ生き続ける
 if [ -d "$DEST" ]; then
   while IFS= read -r stale; do
     [ -n "$stale" ] || continue
@@ -99,7 +109,7 @@ if [ -d "$DEST" ]; then
       fi
     done
     [ "$known" -eq 1 ] && continue
-    note "$stale is stale (no such skill)"
+    note "$stale is stale (promoted, deprecated, or gone)"
     [ "$check" -eq 1 ] || rm -rf "$stale"
   done < <(find "$DEST" -mindepth 1 -maxdepth 1 | sort)
 fi

@@ -54,6 +54,7 @@
     "./skills/engineering/react-router-route-module",
     "./skills/engineering/react-router-worker-tests",
     "./skills/engineering/drizzle-generate-non-interactive",
+    "./skills/engineering/partyserver-on-durable-objects",
     "./skills/engineering/squash-d1-migrations",
     "./skills/engineering/where-to-write-what",
     "./skills/engineering/migrate-d1",

@@ -1,6 +1,6 @@
 ---
 name: dev-bypass-sign-in
-description: 叩くだけでサインイン済みになる開発・E2E 用の入口(dev bypass)を作る。better-auth のアプリで dev サーバーのソーシャルログインやパスワード登録を回避したいとき、シードしたアカウントで座りたいとき、E2E やエージェントからログインの要る画面を駆動したいとき、`testUtils` プラグインの使いどころを決めるとき、既存の bypass の戸が本番の成果物に残っていないか確かめたいとき、`?redirect=` のオープンリダイレクトを塞ぐときに使う。
+description: 叩くだけでサインイン済みになる開発・E2E 用の入口(dev bypass)を作る。ログインの要る画面を E2E やエージェントから駆動したいとき、dev サーバーでソーシャルログインやパスワード登録を踏まずに座りたいとき、better-auth の `testUtils` の使いどころを決めるとき、既存の bypass の戸が本番の成果物に残っていないか確かめたいとき、他のスキルが認証済みのセッションを必要とするときに使う。
 ---
 
 # 開発用のバイパスサインイン
@@ -22,11 +22,13 @@ description: 叩くだけでサインイン済みになる開発・E2E 用の入
 
 **本番の口を通す**のは、サインインの経路にしか無い分岐を踏ませたいときだけ —— OAuth の callback、`account` 行の紐付け、方式ごとのプラグインのフック。**手で潜る**のは better-auth ではない認証のとき。
 
+**選んだものが、この先の読み方を決める。** testUtils なら 2. から順に読む。他の2つなら **2. を飛ばし**、3. の `format=json` と 5. の目印を自分の方式へ読み替える —— **4.・6.・7. はどれを選んでも同じ**である。
+
 **完了基準: どれを選んだかと、その理由を1行で言えること。**
 
 ## 2. testUtils を敷く
 
-`ctx.test` に生える helpers と、版・Cookie の中身・落とし穴は [`TESTUTILS.md`](TESTUTILS.md)。ここが持つのは**組み方**である。
+**書き始める前に [`TESTUTILS.md`](TESTUTILS.md) を一度開く。** あそこの落とし穴(`saveUser` は `account` 行を作らない、hooks の第2引数が `undefined` になる)は**設計判断を変える**ので、実装したあとに読むと作り直しになる。API の全面と Cookie の中身も同じファイルが持つ。
 
 ### 本番の options を1か所から作る
 
@@ -53,14 +55,19 @@ export const createDevAuth = (env: Env) => {
 
 `saveUser` は `internalAdapter.createUser` を通るので **`databaseHooks.user.create` が走る**(before / after とも)。「初回サインインした人が所有者になる」型のロジックはここで踏める —— 直に `INSERT` すると飛ぶ。
 
-**id を固定すれば冪等になる。** 表は1か所に置き、これがそのまま `?as=` の語彙になる。
+**id を固定する。** 表は1か所に置き、これがそのまま `?as=` の語彙になる。
 
 ```ts
 export const SEED = {
   owner: { id: "dev-owner", email: "owner@dev.invalid", name: "Dev Owner" },
   member: { id: "dev-member", email: "member@dev.invalid", name: "Dev Member" },
 } as const;
+
+export type SeedKey = keyof typeof SEED;
+export const isSeedKey = (raw: string): raw is SeedKey => raw in SEED;
 ```
+
+**見てから書く。** `saveUser` は2度目に重複で落ちるので、`ensureSeed` は**種の1人が居るかを見て、居たら1バイトも書かずに戻る。** 2度目以降が何も書かないことが、テストの中から何度でも叩ける条件である。
 
 ### ルート
 
@@ -71,16 +78,18 @@ console.warn(DEV_BYPASS_WARNING);
 const { test } = await createDevAuth(env).$context;
 await ensureSeed(test, db);
 
-const seeded = SEED[url.searchParams.get("as") ?? "owner"];
-if (seeded === undefined) return new Response("Not Found", { status: 404 });
+const as = url.searchParams.get("as") ?? "owner";
+if (!isSeedKey(as)) return new Response("Not Found", { status: 404 });
 
-const { user, token, cookies } = await test.login({ userId: seeded.id });
+const { user, token, cookies } = await test.login({ userId: SEED[as].id });
 
 if (url.searchParams.get("format") === "json") {
   return Response.json({ userId: user.id, token, cookies });
 }
 
-const headers = new Headers({ Location: landingFrom(url.searchParams.get("redirect"), origin) });
+const headers = new Headers({
+  Location: landingFrom(url.searchParams.get("redirect"), url.origin),
+});
 for (const cookie of cookies) headers.append("Set-Cookie", setCookieFrom(cookie));
 
 return new Response(null, { status: 302, headers });
@@ -98,18 +107,20 @@ return new Response(null, { status: 302, headers });
 | Playwright の setup | `?as=owner&format=json` → `context.addCookies(res.cookies)` |
 | HTTP 統合テスト     | 302 を `fetch` して `set-cookie` を拾う                     |
 
-**`TestCookie` は `addCookies()` の入力と同じ形をしている。** `format=json` を足すのはそのためで、Playwright 側に変換コードが要らなくなる。
+**`TestCookie` は `addCookies()` の入力と同じ形をしている。** `format=json` を足すのはそのためで、Playwright 側に変換コードが要らなくなる(他の2つを選んだなら、返す形は自分で決める)。
 
 統合テストは**この URL を叩く**。入口そのものがテストで踏まれるので、腐ったまま気づかない状態にならない。**戸の開閉はハーネスを立てるときに決まるので、開いた側と閉じた側は必ずファイルが分かれる。**
 
 ## 4. 戸を閉じる
 
-**実行時の環境変数1つで開く形にしない。** 開いた先が「誰にでもなれる」なので、デプロイ先の設定ミス1回と釣り合わない。
+**実行時の環境変数1つで開く形にしない。** 開いた先が「誰にでもなれる」ので、デプロイ先の設定ミス1回と釣り合わない。
 
-| 戸       | 何で閉じるか                        | 何が起きるか                              |
-| -------- | ----------------------------------- | ----------------------------------------- |
-| ビルド時 | `import.meta.env.PROD` / `NODE_ENV` | **import ごと畳まれ、testUtils も落ちる** |
-| 実行時   | 環境変数(`ALLOW_DEV_BYPASS` など)   | 成果物を作らない dev サーバーに残る戸     |
+| 戸       | 何で閉じるか                        | どこに書くか                             |
+| -------- | ----------------------------------- | ---------------------------------------- |
+| ビルド時 | `import.meta.env.PROD` / `NODE_ENV` | **呼び出し側(ルーター)の import を畳む** |
+| 実行時   | 環境変数(`ALLOW_DEV_BYPASS` など)   | ハンドラの先頭                           |
+
+**ビルド時の戸をハンドラの中に書かない。** そこで分岐しても、そのモジュールは束に残る —— 畳みたいのは `auth-dev.ts` と testUtils そのものである。
 
 **閉じているときは 404 を返す。403 は「その場は在る」と教えてしまう。**
 
@@ -117,9 +128,12 @@ return new Response(null, { status: 302, headers });
 
 **ソースではなく成果物を見る。** テストは「戸の開いたビルド」を一度作るので、ソースを見る検査は何も守らない。デプロイの手前に `build → 出力の .js を全部 grep` を挟む。
 
-- **目印は `"test-utils"`。** プラグイン id が文字列としてそのまま束に残るので、**自前のマーカーを用意しなくていい**(「本番の口を通す」を選んだ場合だけ、`const WARNING = "…"` を置いてソースから読み出す)。
+- **testUtils なら目印は `"test-utils"`。** プラグイン id が文字列としてそのまま束に残るので、自前のマーカーを用意しなくていい。
+- **他の2つなら目印を自分で置く。** `const WARNING = "…"` をソースに置き、**検査側はその値をソースから読み出す** —— 検査に同じ文字列を書くと、文言を変えた日に黙って必ず緑になる。
 - **1ファイルではなく出力を全部見る。** 束は分割されうる。
 - **「在ること」も見る。** 目印が無いことだけを見る検査は、成果物が空でも認証ごと落ちても緑になる。本番の入口を示す文字列が在ることを同時に確かめる。
+
+**完了基準: 素のビルドで検査が緑、戸を開けたビルドで赤になることを、両方走らせて確かめたこと。**
 
 ## 6. 着地先を検証する — 先頭2文字では足りない
 
@@ -155,4 +169,4 @@ function landingFrom(raw: string | null, origin: string) {
 
 ## 先行例
 
-better-auth を通す形と、自前の認証の下を潜る形の実装2つは [`PRIOR-ART.md`](PRIOR-ART.md)。
+**手が止まったとき**に [`PRIOR-ART.md`](PRIOR-ART.md) を開く —— 戸の閉じ方、シードの持たせ方、着地先の検証を、動いている実装2つで見られる。**どちらも testUtils を使っていない**ので、2. の代わりにはならない。

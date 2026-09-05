@@ -1,6 +1,8 @@
 # 先行例
 
-読む順は **自分が選んだ経路の側から**。両方読む必要は無い。
+**どちらも `testUtils` を使っていない。** 片方はそれが存在する前に書かれ、もう片方は better-auth ではない。読む価値があるのは、**testUtils では埋まらない部分** —— 戸の閉じ方、シードの持たせ方、着地先の検証 —— である。
+
+自分が選んだ経路の側だけ読めばよい。
 
 ## 本番の口を通す — euphotter (better-auth + Cloudflare Workers)
 
@@ -15,11 +17,13 @@
 
 `.dev.vars.example` と `docs/agents/verification.md` に、人間向けの説明と E2E からの叩き方がある。
 
-**写経しない側**: このリポジトリの入口は所有権の取得と種データの投入も抱えている(`dev-seed.ts`)。これはこのアプリのドメインの都合なので、切り離して読む。
+**id token を偽造する部分は、testUtils を選ぶなら要らない。** 残りは要る。
 
-## 下に潜る — emdash CMS (自前の認証)
+**写経しない側**: この入口は所有権の取得と種データの投入も抱えている(`dev-seed.ts`)。これはこのアプリのドメインの都合なので、切り離して読む。
 
-**emdash は better-auth を使っていない**(`arctic` + `@oslojs/*` + 自前の `@emdash-cms/auth`)。参考になるのは**形**であって、better-auth の書き方ではない。
+## 手で潜る — emdash CMS (自前の認証)
+
+**emdash は better-auth を使っていない**(`arctic` + `@oslojs/*` + 自前の `@emdash-cms/auth`)。参考になるのは**形**であって書き方ではない。
 
 入口は2つある。
 
@@ -34,7 +38,7 @@
 - **`?token=1`** は Bearer 専用の口(MCP)のための PAT を同じ入口で発行する。**同じ名前の古いトークンを消してから作り直す** —— 生のトークンは作成時にしか読めないので、溜めずに作り直すほうが使える。
 - **`?content=0`** でスキーマだけ入れ、サンプルコンテンツを飛ばす。**種の量を呼ぶ側が選べる**のは、E2E が固定の件数を数えるときに効く。
 - **リダイレクトは 302 ではなく meta refresh の HTML** を返す。セッションが保存し切ってから遷移させるため、とコメントにある。
-- **`isSafeRedirect` は `startsWith("/") && !startsWith("//") && !includes("\\")` である。** SKILL.md の 5. がこれを破っている —— **先行例をそのまま写さない理由がここにある。**
+- **`isSafeRedirect` は `startsWith("/") && !startsWith("//") && !includes("\\")` である。** SKILL.md の 6. がこれを破っている —— **先行例をそのまま写さない理由がここにある。**
 
 ### ソースの取り出し方(リポジトリが公開されていない)
 
@@ -49,17 +53,4 @@ node -e '
 ' package/dist/astro/routes/api/setup/dev-bypass.mjs.map
 ```
 
-`tar tzf emdash.tgz | grep <探すもの>` で当たりを付ける。同じ手が `better-auth` / `@better-auth/core` にも効くので、**版ごとに動く挙動は、ドキュメントではなく解決済みの実体に訊く。**
-
-## better-auth 側で確かめる場所
-
-自分のプロジェクトが解決した版を見る。パスは `node_modules/` 配下。
-
-| 確かめたいこと                       | ファイル                                            |
-| ------------------------------------ | --------------------------------------------------- |
-| `verifyIdToken` がどの順で見られるか | `@better-auth/core/dist/oauth2/verify-id-token.mjs` |
-| id token 分岐が何を組み立てるか      | `better-auth/dist/api/routes/sign-in.mjs`           |
-| Origin / CSRF がいつ効くか           | `better-auth/dist/api/middlewares/origin-check.mjs` |
-| `auth.api.*` に何が生えているか      | `better-auth/dist/api/index.mjs` の export 一覧     |
-
-**この4つは版ごとに動く。** 手元の挙動が SKILL.md と食い違ったら、まずここを開く。
+`tar tzf emdash.tgz | grep <探すもの>` で当たりを付ける。同じ手が `better-auth` / `@better-auth/core` にも効く。

@@ -13,6 +13,7 @@ description: 新規の Cloudflare Workers フルスタックアプリを、い�
 | --------------- | ------------------------------------------------------------------------- |
 | パッケージ管理  | pnpm                                                                      |
 | フレームワーク  | React Router(framework mode / SSR)+ React                                 |
+| ルーティング    | `react-router-auto-routes`(`app/routes/` のフォルダ構造がそのまま URL)    |
 | ランタイム/配備 | Cloudflare Workers(wrangler + `@cloudflare/vite-plugin`)                  |
 | ビルド          | Vite                                                                      |
 | DB              | Cloudflare D1 + Drizzle ORM                                               |
@@ -32,7 +33,8 @@ description: 新規の Cloudflare Workers フルスタックアプリを、い�
 - スキャフォールドは C3(`pnpm create cloudflare@latest --framework=react-router`)を起点に、各ツールの公式 init(shadcn / oxlint / oxfmt / create-playwright)を実行する。
 - **フラグを足すほど候補が減る init がある。** ここで挙げるのは版ではなく、公式手順を読んでも出てこない**黙って外れる挙動**である。止まった日は、この形を疑って `--help` で候補そのものを出す。
   - C3 は `--lang` を渡すと **言語バリアントを持たないフレームワークをテンプレート候補から落とす**。`--platform` も同じで、プラットフォーム別バリアントを持たないものが外れる。どちらも「指定を通す」ではなく `Unsupported framework: <名前>` になるので、フラグが原因だと読めない。フレームワーク名だけを渡すのが確実
-  - shadcn の init は **リポジトリルートの `tsconfig.json` しか見ない**。React Router のように import エイリアスを分割 tsconfig 側へ置くテンプレートでは `Could not find valid path aliases` で止まるので、ルートにも同値で置く
+  - shadcn の init は **リポジトリルートの `tsconfig.json` しか見ない**。React Router のように import エイリアスを分割 tsconfig 側へ置くテンプレートでは `Could not find valid path aliases` で止まるので、ルートにも同値で置く。**ただし `paths` だけを相対で置き、`baseUrl` は足さない** — 足すと `vite-tsconfig-paths` が裸のモジュール指定子までプロジェクト内解決の対象にし、**Vitest 上でだけ**外部パッケージの named export が消える(`wrangler` の `createTestHarness` が `is not a function` になる)。`tsc` も Node の直 import も通るので、Vitest でしか症状が出ない。TypeScript 4.1 以降 `paths` に `baseUrl` は要らない
+  - `react-router-auto-routes` は `app/routes.ts` を `autoRoutes()` の1行にし、URL を `app/routes/` の配置だけで決める。**フォルダは URL セグメントを作るが `<Outlet />` のネストは作らない** — `_layout.tsx` を置いて初めて包まれる。置き忘れても共有 UI が出ないだけでビルドもテストも通るので、生成された表は `react-router routes` で出して確かめる
 - D1/Drizzle・シークレット・E2E などプロジェクト固有の config は、その時点の公式手順で組む。
 - React Router + Workers は CJS 依存パッケージで統合上の相性問題が出ることがある([cloudflare/workers-sdk#14555](https://github.com/cloudflare/workers-sdk/issues/14555) など)。重い UI ライブラリを足す前に現状を確認する。
 

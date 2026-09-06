@@ -55,8 +55,28 @@ fi
 
 tmux new-session -d -s "$session" -c "$worktree" 'claude'
 
+# worktree は毎回新しいパスなので、初回起動は必ず信頼プロンプトで止まる。
+# 「起動した」と「働き始めた」は別なので、最初の画面まで見て報告する
+sleep "${NEW_SESSION_SETTLE:-5}"
+# 読めなかったときに READY と言わない — 黙って通す false READY が最悪の壊れ方である
+if pane=$(tmux capture-pane -p -t "$session" -S -40 2>/dev/null); then
+  pane=$(printf '%s' "$pane" | grep -v '^[[:space:]]*$' || true)
+  case $pane in
+    *"trust this folder"*) state="BLOCKED  フォルダの信頼を尋ねている — 人間が答えるまで働き始めない" ;;
+    *"sign in"* | *"Sign in"* | *"Login"* | *"log in"*) state="BLOCKED  サインインを求めている" ;;
+    "") state="UNKNOWN  画面が空。attach して目で確かめる" ;;
+    *) state="READY" ;;
+  esac
+else
+  pane=""
+  state="UNKNOWN  画面を読めなかった。attach して目で確かめる"
+fi
+
 echo "session:  $session   (tmux attach -t $session)"
 echo "worktree: $worktree  (detached at origin/${default_branch})"
 echo "copied:   ${copied[*]:-(none)}"
 echo "deps:     ${installed:-(no package.json)}"
+echo "state:    $state"
 echo "cleanup:  git -C $repo worktree remove $worktree"
+echo "--- 最初の画面 ---"
+echo "$pane" | tail -6

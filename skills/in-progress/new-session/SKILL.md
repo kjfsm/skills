@@ -10,7 +10,13 @@ allowed-tools: Bash(bash ${CLAUDE_SKILL_DIR}/scripts/new-session.sh *), Bash(bas
 
 機械的な列は同梱の [scripts/new-session.sh](scripts/new-session.sh) が持つ。ここに残るのは判断だけである。
 
-## 0. 立てるのか、戻すのか
+## 1. どのリポジトリか
+
+呼び名は曖昧なまま来る。`ls ~/github/*/` で解決し、**綴りは当てにしない** — 「akaszmplay」は `akszmplay`、「circle scheduler」は `circle-scheduler` だった。候補が複数に割れたら訊く。
+
+`allowed-tools` の免除は呼び出したターンだけ効く。ここで訊き返すと、ユーザーが答えた次のターンでは切れているので、スクリプトは権限プロンプトを通る。
+
+## 2. 立てるのか、戻すのか
 
 **Windows や WSL の再起動は tmux セッションを丸ごと消すが、worktree と未コミットの編集はディスクに残る。** そこへこのスキルを素直に適用すると、作業の続きがある worktree の隣に空の worktree をもう1つ生やす。
 
@@ -20,7 +26,13 @@ allowed-tools: Bash(bash ${CLAUDE_SKILL_DIR}/scripts/new-session.sh *), Bash(bas
 bash ${CLAUDE_SKILL_DIR}/scripts/resumable.sh <リポジトリのパス>
 ```
 
-`DIRTY` が 0 でない、`AHEAD` が 0 でない、`LAST TALK` が新しい — どれかが立っている worktree は **続きのある作業** である。ユーザーが再開のつもりなら、新しく作らずそこへ戻す:
+上から順に読む。
+
+- **`TMUX` に名前がある** — セッションはまだ生きている。何も作らず `tmux attach -t <名前>` を渡して終わり。
+- **`KIND` が `wt` の行で `DIRTY` か `AHEAD` が 0 でない、または `LAST TALK` が新しい** — 続きのある作業である。ユーザーが再開のつもりなら、新しく作らずそこへ戻す。
+- **`KIND` が `main` の行**は本体のチェックアウトで、大抵 dirty か ahead である。ここでは判定材料にしない — 本体は §3 でも触らない。
+
+`AHEAD` は上流(無ければ既定ブランチ)より先にあるコミット数で、`?` は「先行している」ではなく **比較する基準が無い**(origin/HEAD 未設定)である。これも判定材料にしない。
 
 ```
 tmux new-session -d -s <セッション名> -c <worktree のパス> 'claude --continue'
@@ -32,30 +44,27 @@ tmux new-session -d -s <セッション名> -c <worktree のパス> 'claude --co
 
 戻せるのは worktree が残っている場合に限る。撤去済みの worktree の会話ログはファイルとしては残っているが、作業ツリーが無いので読み物にしかならない。
 
-## 1. どのリポジトリか
-
-呼び名は曖昧なまま来る。`ls ~/github/*/` で解決し、**綴りは当てにしない** — 「akaszmplay」は `akszmplay`、「circle scheduler」は `circle-scheduler` だった。候補が複数に割れたら訊く。
-
-## 2. 走らせる
+## 3. 走らせる
 
 ```
 bash ${CLAUDE_SKILL_DIR}/scripts/new-session.sh <リポジトリのパス> [セッション名]
 ```
 
-origin の既定ブランチを fetch し、`-wt` を付けた worktree を detached で作り、gitignore された `.env*` と `.dev.vars*` を持ち込み、lockfile を見て依存を入れ、tmux で claude を起動する。セッション名も worktree のパスも、埋まっていれば連番でずらす。
+origin の既定ブランチを fetch し、`-wt` を付けた worktree を detached で作り、gitignore された `.env*` と `.dev.vars*` を(下層のものも含めて)持ち込み、lockfile を見て依存を入れ、tmux で claude を起動する。セッション名も worktree のパスも、埋まっていれば連番でずらす。
 
 **常に worktree を作る。** 本体のチェックアウトは触らない — 未コミットの変更を抱えていることがあり、1つの作業ツリーを2つのセッションが踏むと壊れる。「今はクリーンだから直接でよい」は成り立たない: 立てたセッションはこの先ずっと生き、本体はその間に汚れる。
 
 秘匿ファイルの持ち込みが要るのは、それが gitignore されていて worktree に付いてこないからである。無いまま渡すと、最初に dev サーバーを起動した時点で落ちる。`.example` で終わるものは雛形なので持ち込まない。
 
-## 3. 最初の画面まで見て報告する
+## 4. 最初の画面まで見て報告する
 
 **立ち上げた claude が何を映しているかを必ず伝える。** スクリプトは tmux セッションを作ったあと最初の画面を読み、`state:` に判定を、その下に画面の末尾を出す。プロセスが起きたことと、働き始めたことは別である。
 
-- `READY` — 入力待ち。attach のコマンドを渡して終わり。
-- `BLOCKED` — **人間が 1 キー押すまで、そのセッションは何もしない。** 何を訊かれているか(フォルダの信頼、サインイン)と、attach のコマンドを伝える。
+- `READY` — 入力欄が出ている。attach のコマンドを渡して終わり。
+- `BLOCKED` — **人間が 1 キー押すまで、そのセッションは何もしない。** 何を訊かれているかと、attach のコマンドを伝える。ラベルが付いていない BLOCKED は、下に出ている画面をそのまま読んで伝える。
+- `UNKNOWN` — 画面を読めなかった。READY と言い換えない。
 
-worktree は毎回新しいパスなので、**初回起動はほぼ必ずフォルダの信頼プロンプトで止まる**。これは人間に向けた安全ゲートなので、`tmux send-keys` で代わりに答えない — 立てた本人ではない誰かが、見ていないフォルダを信頼したことになる。
+worktree は毎回新しいパスなので、**初回起動はほぼ必ず何かのプロンプトで止まる** — フォルダの信頼、そのリポジトリで初めて見る MCP サーバーの有効化。どれも人間に向けた安全ゲートなので、`tmux send-keys` で代わりに答えない — 立てた本人ではない誰かが、見ていないものを許可したことになる。
 
 複数立てたなら、どれが `BLOCKED` でどれが `READY` かを並べて渡す。ユーザーが次に attach するのは止まっている方である。
 

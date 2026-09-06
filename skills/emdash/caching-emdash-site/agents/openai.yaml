@@ -1,0 +1,3 @@
+interface:
+  display_name: "EmDash サイトのキャッシュ"
+  short_description: "エッジHTMLキャッシュを入れるときの空振りを避ける"

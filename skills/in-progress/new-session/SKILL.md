@@ -3,12 +3,34 @@ name: new-session
 description: 別のリポジトリや別の作業のために、worktree と tmux で独立した新しいセッションを立ち上げる。
 disable-model-invocation: true
 argument-hint: "立ち上げたいリポジトリ(曖昧な呼び名でよい)"
-allowed-tools: Bash(bash ${CLAUDE_SKILL_DIR}/scripts/new-session.sh *)
+allowed-tools: Bash(bash ${CLAUDE_SKILL_DIR}/scripts/new-session.sh *), Bash(bash ${CLAUDE_SKILL_DIR}/scripts/resumable.sh *)
 ---
 
 # 新しいセッションを立てる
 
 機械的な列は同梱の [scripts/new-session.sh](scripts/new-session.sh) が持つ。ここに残るのは判断だけである。
+
+## 0. 立てるのか、戻すのか
+
+**Windows や WSL の再起動は tmux セッションを丸ごと消すが、worktree と未コミットの編集はディスクに残る。** そこへこのスキルを素直に適用すると、作業の続きがある worktree の隣に空の worktree をもう1つ生やす。
+
+だから作る前に、そのリポジトリに戻り先が無いかを見る。
+
+```
+bash ${CLAUDE_SKILL_DIR}/scripts/resumable.sh <リポジトリのパス>
+```
+
+`DIRTY` が 0 でない、`AHEAD` が 0 でない、`LAST TALK` が新しい — どれかが立っている worktree は **続きのある作業** である。ユーザーが再開のつもりなら、新しく作らずそこへ戻す:
+
+```
+tmux new-session -d -s <セッション名> -c <worktree のパス> 'claude --continue'
+```
+
+`--continue` はそのディレクトリの直近の会話を開く。履歴を選ばせるなら `--resume`。**どちらもディレクトリ基準**なので、`-c` を間違えると別の履歴が開く。
+
+新しい作業を始めるのだと分かっているとき、そして戻り先が1つも無いときだけ、下へ進む。
+
+戻せるのは worktree が残っている場合に限る。撤去済みの worktree の会話ログはファイルとしては残っているが、作業ツリーが無いので読み物にしかならない。
 
 ## 1. どのリポジトリか
 

@@ -43,14 +43,17 @@ Cloudflare ダッシュボード → Storage & Databases → D1 → 対象DB →
 
 **完了基準:** `routeRules` のキーがすべて `src/pages` に実在するファイルへ解決する。
 
-### 3. キャッシュから外す経路は2つ書く
+### 3. キャッシュから外す経路は2つ書く。置く場所は取得より後
 
 `Astro.cache.set(false)` と明示的な `Cache-Control` の**両方**が要る。片方だけでは外れない(空振り表の3番)。
 
 ```astro
+// 取得より **後**。`set()` は false 以外の入力で opt-out を解除する。
 Astro.cache?.set(false);
 Astro.response.headers.set("Cache-Control", "private, no-store");
 ```
+
+**公式の「`private, no-store` を付けろ」だけでは足りない。** 空振り表の3番を読むこと。
 
 `Astro.rewrite()` で描かれる 404 は pathname が `/blog/存在しないslug` のままなので、`/blog/[slug]` のルールを**継承する**。`Astro.redirect("/404")` で返す構成なら、その 302 が同じ理由でキャッシュされる。
 
@@ -74,7 +77,16 @@ curl -sS -D - -o /dev/null -H 'Accept: text/html' https://例.com/ | grep -i 'cf
 
 ### 1. `private, no-store` は `routeRules` に踏み越えられる
 
-当たったルールは **`Cloudflare-CDN-Cache-Control`** として応答に載り、Cloudflare のキャッシュ判定では `Cache-Control` より**優先される**。適用は無条件で、既存のヘッダを見ない(`astro/dist/core/cache/runtime/cache.js` の `APPLY_HEADERS` は `response.headers.set` するだけ)。
+**公式の優先順**([CDN-Cache-Control](https://developers.cloudflare.com/cache/concepts/cdn-cache-control/))。Cloudflare がキャッシュ判定に読むのは、上から最初に在るもの**1つだけ**である。
+
+1. Cache Rules の `set_cache_control`(ダッシュボード側)
+2. `Cloudflare-CDN-Cache-Control`
+3. `CDN-Cache-Control`
+4. `Cache-Control`
+
+**2 は下流へ proxy されない** — 「a header only used to control Cloudflare」。3 は間に他のCDNが居る場合のために通される。**だから 2 が効いていても `curl` には映らず、4 だけが見える。**
+
+当たった `routeRules` は 2 として載る。適用は無条件で、既存のヘッダを見ない(`astro/dist/core/cache/runtime/cache.js` の `APPLY_HEADERS` は `response.headers.set` するだけ)。自分で書いた `private, no-store` は 4 なので、順位で負ける。
 
 そして EmDash の request-context middleware は `/_emdash` を**早期 return** するので、管理UIとAPIは route cache の opt-out を通らない。自前で出している `private, no-store` だけが頼りで、それが上書きされる。
 
@@ -94,11 +106,34 @@ if (isEditor && toolbarMode !== false) {
 
 preview トークン経由の下書きは別途 opt-out されているので漏れない。
 
-### 3. `Astro.cache.set(false)` はキャッシュを止めない
+### 3. `private, no-store` はキャッシュを止めない
 
-止めるのは **Astro がヘッダを付けること**だけである。ヘッダの無い応答は Workers Cache の RFC 9111 ヒューリスティック鮮度で **2時間保存される**。
+**公式は「session-dependent なものには `private, no-store` を付けろ」と書いているが、それだけでは止まらない。** 実測: `routeRules` にも載せていない検索ページが、`private, no-store` を返しながら `cf-cache-status: HIT` になる。
 
-`set(false)` は `routeRules` から継承した `maxAge` を打ち消すために要り、明示ヘッダはヒューリスティックを塞ぐために要る。**役割が違うので両方書く。**
+provider の `setHeaders` は `["public"]` を**常に先頭へ積む**:
+
+```js
+const directives = [];
+if (extraDirectives) directives.push(...extraDirectives); // ["public"]
+if (options.maxAge !== void 0) directives.push(`max-age=${options.maxAge}`);
+return directives.length > 0 ? directives.join(", ") : void 0;
+```
+
+`maxAge` が無くても `Cloudflare-CDN-Cache-Control: public` が出る。1番の優先順のとおり、これは `Cache-Control` に勝ち、**しかも下流へ proxy されないので `curl` からは見えない**。
+
+`APPLY_HEADERS` は「`maxAge` 未定義 かつ タグ0件」なら早期 return するが、**描画中に `cacheHint` が1つでも set されるとそこを抜ける**。EmDash は本番の全リクエストで `lastModified` を set し(`applyBuildValidator`。prerender と dev は除く)、取得層も `cacheHint` を set する。つまり**普通のページはまず抜ける**。
+
+逆向きも成り立つ。`set(false)` はヘッダを付けなくするだけなので、**ヘッダの無い応答は RFC 9111 ヒューリスティック鮮度で2時間保存される**。
+
+だから**両方書く**。役割が違う。
+
+**順序依存がある。** `set(false)` は private な `#disabled` を立てるだけで、**後から `set()` が非 false で呼ばれると解除される**。取得より後、フロントマターの末尾に置くこと。
+
+**`Astro.cache.enabled` は安全網にならない。** あれは `set(false)` が触らない素のフィールドなので、取得層によくある `if (astro.cache?.enabled) astro.cache.set(cacheHint)` というガードは opt-out を尊重しない。レイアウトやコンポーネントがページのフロントマターより後に取得すれば、黙って再有効化される。同じ指摘が
+[emdash#1882](https://github.com/emdash-cms/emdash/issues/1882) にある --
+「ideally after `await next()` so downstream/page-level cache hints cannot re-enable caching」。
+あの issue は編集ツールバー入りHTMLが `private, no-store` 付きで Workers Cache に入った報告で、
+**同じ失敗モードである**。
 
 ### 4. MCP 経由の公開はエッジをパージしない
 
@@ -151,7 +186,7 @@ wrangler kv key list --binding CACHE --remote
 上の空振りはどれも書き忘れても何も言わない。ソース走査型のガードテストで留める。
 
 - `routeRules` のキーが `src/pages` に実在するルートだけであること(catch-all と打ち間違いを同時に捕まえる)
-- キャッシュしない経路が明示的な `Cache-Control` を出していること
+- キャッシュしない経路が `set(false)` と明示的な `Cache-Control` を**2行とも**出していること
 - 404 が `Astro.cache.set(false)` を呼んでいること(rewrite 構成)、あるいは `Astro.redirect("/404")` を直接書いていないこと(リダイレクト構成)
 
 **正規表現は行頭に固定する。** 見張る対象の行は、すぐ隣のコメントで理由を説明されている行でもある。緩く書くと散文のほうに当たり、実装を消しても緑のままになる。

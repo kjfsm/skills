@@ -1,12 +1,26 @@
 ---
 name: new-session
-description: 別のリポジトリや別の作業のために、worktree と tmux で独立した新しいセッションを立ち上げる。
+description: 【退役】worktree と tmux でセッションを立てる。Claude Code の `--worktree` と `--tmux` に置き換わった。
 disable-model-invocation: true
 argument-hint: "立ち上げたいリポジトリ(曖昧な呼び名でよい)"
 allowed-tools: Bash(bash ${CLAUDE_SKILL_DIR}/scripts/new-session.sh *), Bash(bash ${CLAUDE_SKILL_DIR}/scripts/resumable.sh *)
 ---
 
 # 新しいセッションを立てる
+
+> **退役。使わないこと。** 下の手順は Claude Code v2.1.263 の組み込みに置き換わった。
+>
+> ```bash
+> cd <リポジトリ>
+> claude -w <名前> --tmux=classic
+> ```
+>
+> これが worktree を `.claude/worktrees/<名前>/` に作り、origin の既定ブランチから
+> 生やし、`.worktreeinclude` にある gitignore されたファイルを持ち込み、tmux
+> セッションを立て、終了時に残すか消すかを訊く。リポジトリ直下に置かれるので
+> フォルダの信頼プロンプトも踏まない — 下の §4 が対処していた症状は起きない。
+>
+> 下に残っている `-wt` サイブリングと手製の tmux 起動は、そのどれとも噛み合わない。
 
 機械的な列は同梱の [scripts/new-session.sh](scripts/new-session.sh) が持つ。ここに残るのは判断だけである。
 

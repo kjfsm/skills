@@ -77,7 +77,16 @@ curl -sS -D - -o /dev/null -H 'Accept: text/html' https://例.com/ | grep -i 'cf
 
 ### 1. `private, no-store` は `routeRules` に踏み越えられる
 
-当たったルールは **`Cloudflare-CDN-Cache-Control`** として応答に載り、Cloudflare のキャッシュ判定では `Cache-Control` より**優先される**。適用は無条件で、既存のヘッダを見ない(`astro/dist/core/cache/runtime/cache.js` の `APPLY_HEADERS` は `response.headers.set` するだけ)。
+**公式の優先順**([CDN-Cache-Control](https://developers.cloudflare.com/cache/concepts/cdn-cache-control/))。Cloudflare がキャッシュ判定に読むのは、上から最初に在るもの**1つだけ**である。
+
+1. Cache Rules の `set_cache_control`(ダッシュボード側)
+2. `Cloudflare-CDN-Cache-Control`
+3. `CDN-Cache-Control`
+4. `Cache-Control`
+
+**2 は下流へ proxy されない** — 「a header only used to control Cloudflare」。3 は間に他のCDNが居る場合のために通される。**だから 2 が効いていても `curl` には映らず、4 だけが見える。**
+
+当たった `routeRules` は 2 として載る。適用は無条件で、既存のヘッダを見ない(`astro/dist/core/cache/runtime/cache.js` の `APPLY_HEADERS` は `response.headers.set` するだけ)。自分で書いた `private, no-store` は 4 なので、順位で負ける。
 
 そして EmDash の request-context middleware は `/_emdash` を**早期 return** するので、管理UIとAPIは route cache の opt-out を通らない。自前で出している `private, no-store` だけが頼りで、それが上書きされる。
 
@@ -110,7 +119,7 @@ if (options.maxAge !== void 0) directives.push(`max-age=${options.maxAge}`);
 return directives.length > 0 ? directives.join(", ") : void 0;
 ```
 
-`maxAge` が無くても `Cloudflare-CDN-Cache-Control: public` が出る。**Cloudflare はこのヘッダをクライアントへ返す前に削除するので、外から見えない。**
+`maxAge` が無くても `Cloudflare-CDN-Cache-Control: public` が出る。1番の優先順のとおり、これは `Cache-Control` に勝ち、**しかも下流へ proxy されないので `curl` からは見えない**。
 
 `APPLY_HEADERS` は「`maxAge` 未定義 かつ タグ0件」なら早期 return するが、**描画中に `cacheHint` が1つでも set されるとそこを抜ける**。EmDash は本番の全リクエストで `lastModified` を set し(`applyBuildValidator`。prerender と dev は除く)、取得層も `cacheHint` を set する。つまり**普通のページはまず抜ける**。
 

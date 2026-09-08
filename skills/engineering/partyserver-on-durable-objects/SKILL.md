@@ -30,10 +30,10 @@ RPC は1リクエストとして課金される。**続く `fetch()` でもう1�
 
 判断はこの1問で決まる —— **その stub で何を呼ぶか。**
 
-| 呼ぶもの | 取り方 | 理由 |
-| --- | --- | --- |
-| `fetch()` / WebSocket の Upgrade | `env.NS.getByName(name)` | `Server.fetch()` が自分で `#ensureInitialized()` を呼ぶ |
-| 自前の RPC メソッド | `await getServerByName(env.NS, name)` | **RPC は初期化を通らない**(→ 2.) |
+| 呼ぶもの                         | 取り方                                | 理由                                                    |
+| -------------------------------- | ------------------------------------- | ------------------------------------------------------- |
+| `fetch()` / WebSocket の Upgrade | `env.NS.getByName(name)`              | `Server.fetch()` が自分で `#ensureInitialized()` を呼ぶ |
+| 自前の RPC メソッド              | `await getServerByName(env.NS, name)` | **RPC は初期化を通らない**(→ 2.)                        |
 
 `setName` の JSDoc 自身が「**`@deprecated` for callers that address DOs via `idFromName()` /
 `getByName()`**」「calling `setName()` is redundant — `this.name` is available automatically
@@ -61,8 +61,13 @@ partyserver は `onStart()` を `ctx.blockConcurrencyWhile()` の中で呼ぶ。
 ```js
 await this.ctx.blockConcurrencyWhile(async () => {
   this.#status = "starting";
-  try { await this.onStart(this.#_props); this.#status = "started"; }
-  catch (e) { this.#status = "zero"; error = e; }
+  try {
+    await this.onStart(this.#_props);
+    this.#status = "started";
+  } catch (e) {
+    this.#status = "zero";
+    error = e;
+  }
 });
 if (error) throw error;
 ```

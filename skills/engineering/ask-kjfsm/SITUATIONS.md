@@ -20,6 +20,10 @@
 - **`/squash-d1-migrations`** — マイグレーションを1本に畳む
 - **`/partyserver-on-durable-objects`** — stub の取り方がそのままリクエスト数になる。素の DO の API は Cloudflare 公式のスキルが持つ
 
+## サインインの要る画面を、人間なしで駆動したい
+
+**`/dev-bypass-sign-in`**。E2E もブラウザを持つエージェントも `curl` も、外部 IdP のリダイレクトの向こうで止まる。叩くだけでサインイン済みになる入口を1本足し、その戸をビルド時に畳んで成果物から検査する。better-auth なら `testUtils` でサインイン方式に依存しない形になる。
+
 ## ロジックを変えない機械的な変更
 
 ディレクトリ再編、大量リネーム、import の一括付け替え → **`/ai-efficiency`**。1ファイルずつ Read/Edit せず、シェルで一括処理して、抜けは typecheck で拾う。

@@ -340,7 +340,55 @@ for manifest in hooks/hooks.json .claude/settings.json; do
     err "$manifest does not wire $hook_script; the repository would ship a discipline it does not run on itself"
 done
 
+# 18. `agents/` のサブエージェントが健全で、呼ぶ側と食い違っていない。プラグインは
+#     このディレクトリを自動で拾う(`plugin.json` に列挙しない — 列挙と走査の両方に
+#     載ると同じエージェントが2度並ぶ)。壊れたときの症状は「そんな subagent_type は
+#     無い」で静かに汎用エージェントへ落ちるか、そもそも起動しないかであり、どちらも
+#     レビューや検証が**通ったように見える**。see CLAUDE.md
+while IFS= read -r agent; do
+  base="$(basename "$agent" .md)"
+  [ "$(field "$agent" "name")" = "$base" ] ||
+    err "$agent declares name \"$(field "$agent" "name")\" but sits at $base.md; subagent_type resolves by name"
+  [ -n "$(field "$agent" "description")" ] ||
+    err "$agent has no description; the model cannot tell when it applies"
+
+  # 階層は起動のたびに選ぶ — 省くと親と同じモデルを継承し、機械的な作業まで
+  # 親の階層で走る。see skills/engineering/delegation
+  [ -n "$(field "$agent" "model")" ] ||
+    err "$agent does not pin a model; it would silently inherit the parent tier"
+
+  grep -rq "\`$base\`" --include='*.md' skills ||
+    err "$agent is named by no skill; nothing routes work to it"
+done < <(find agents -name '*.md' 2>/dev/null | sort)
+
+# verifier がゲートを回せるのは、直せないからである。編集ツールを持った瞬間、
+# 「ゲートは動かさない」は本文のお願いに戻る。see skills/engineering/verification-loop
+if [ ! -f agents/verifier.md ]; then
+  err "agents/verifier.md is gone; /verification-loop would run its gates in the parent again"
+else
+  case "$(field agents/verifier.md "tools")" in
+  *Edit* | *Write*) err "agents/verifier.md may edit; a gate runner that can edit can also move the gate" ;;
+  esac
+fi
+
+# スメルの基準線は standards-reviewer が1部だけ持つ。呼ぶ側にも写すと、貼り忘れた日に
+# 揃っていない方だけが残る(検査 16. と同じ壊れ方)。
+grep -q 'Mysterious Name' agents/standards-reviewer.md ||
+  err "agents/standards-reviewer.md lost the smell baseline; the Standards axis would review against nothing"
+grep -q 'Mysterious Name' skills/engineering/two-axis-review/SKILL.md &&
+  err "skills/engineering/two-axis-review/SKILL.md copies the smell baseline that agents/standards-reviewer.md owns"
+
+grep -q '本物の制約' agents/comment-pruner.md ||
+  err "agents/comment-pruner.md lost the six graded rules; the pass would prune by taste"
+grep -q 'コードの言い直し' skills/engineering/prune-comments/SKILL.md &&
+  err "skills/engineering/prune-comments/SKILL.md copies the graded rules that agents/comment-pruner.md owns"
+
+grep -q 'シームの裏に何を隠すか' agents/interface-designer.md ||
+  err "agents/interface-designer.md lost the five-item output contract; the designs would not be comparable"
+grep -q 'シームの裏に何を隠すか' skills/engineering/codebase-design/DESIGN-IT-TWICE.md &&
+  err "skills/engineering/codebase-design/DESIGN-IT-TWICE.md copies the output contract that agents/interface-designer.md owns"
+
 if [ "$fail" -eq 0 ]; then
-  echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills)"
+  echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills, $(find agents -name '*.md' | wc -l | tr -d ' ') agents)"
 fi
 exit "$fail"

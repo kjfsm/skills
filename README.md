@@ -53,18 +53,19 @@ Fetch https://raw.githubusercontent.com/kjfsm/skills/main/setup.md
 
 3つは **配るものが違う**。スキルの数は現時点の実測値である。
 
-|              | A: シンボリックリンク            | B: プラグイン                          | C: `npx skills`                          |
-| ------------ | -------------------------------- | -------------------------------------- | ---------------------------------------- |
-| スキル       | **52**(`deprecated/` 以外の全部) | **34**(昇格済み集合のみ)               | **56**(全部。`deprecated/` も含む)       |
-| 出力スタイル | 入らない                         | **入る**(有効化は別途)                 | 入らない                                 |
-| 実体         | このリポジトリ(clone が必要)     | `~/.claude/plugins/` のキャッシュ      | コピー先に実ファイル                     |
-| 更新         | `git pull` で即反映              | push のたびに届く(コミット SHA で追随) | 追随しない。`npx skills update` を自分で |
-| スコープ     | ユーザー(`~/.claude/skills`)     | ユーザー / **プロジェクト** / ローカル | プロジェクト、または `--global`          |
-| 向いている人 | このリポジトリ自体を開発する     | ふつうはこちら                         | 実体を手元に置いて改変したい             |
+|                  | A: シンボリックリンク            | B: プラグイン                          | C: `npx skills`                          |
+| ---------------- | -------------------------------- | -------------------------------------- | ---------------------------------------- |
+| スキル           | **52**(`deprecated/` 以外の全部) | **34**(昇格済み集合のみ)               | **56**(全部。`deprecated/` も含む)       |
+| 出力スタイル     | 入らない                         | **入る**(有効化は別途)                 | 入らない                                 |
+| サブエージェント | 入らない                         | **入る**(5体)                          | 入らない                                 |
+| 実体             | このリポジトリ(clone が必要)     | `~/.claude/plugins/` のキャッシュ      | コピー先に実ファイル                     |
+| 更新             | `git pull` で即反映              | push のたびに届く(コミット SHA で追随) | 追随しない。`npx skills update` を自分で |
+| スコープ         | ユーザー(`~/.claude/skills`)     | ユーザー / **プロジェクト** / ローカル | プロジェクト、または `--global`          |
+| 向いている人     | このリポジトリ自体を開発する     | ふつうはこちら                         | 実体を手元に置いて改変したい             |
 
 **`deprecated/` と `in-progress/` を配らないのは B だけである。** C は `--skill` で名前を挙げれば絞れるが、既定は全部入りで、上流で削除したスキルもコピー先には残り続ける。
 
-**出力スタイルを運べるのも B だけである。** A と C でコメントの判定基準を効かせるには `/setup-repo` を実行して `CLAUDE.md` 側に書かせる。
+**サブエージェントと出力スタイルを運べるのも B だけである。** A と C でコメントの判定基準を効かせるには `/setup-repo` を実行して `CLAUDE.md` 側に書かせる。
 
 ### 選択肢 A: ローカルのハーネススキルディレクトリへシンボリックリンクする
 
@@ -146,6 +147,22 @@ npx -y skills add kjfsm/skills
 
 出力スタイルが効くのは**メインの会話だけ**で、サブエージェントには届かない。レビューや調査を子コンテキストに投げたときにも同じ規約を効かせたいなら、`/setup-repo` を実行して `CLAUDE.md` / `AGENTS.md` 側にも書かせること — そちらはサブエージェントにも読まれる。
 
+### サブエージェント
+
+プラグインには5体の[サブエージェント](https://code.claude.com/docs/en/sub-agents)が同梱されている。どれもスキルから起動される — 名前を覚えて呼ぶものではない。
+
+| エージェント         | 呼ぶスキル           | 何を押し出すか                                     |
+| -------------------- | -------------------- | -------------------------------------------------- |
+| `verifier`           | `/verification-loop` | 型チェック・lint・テスト・ビルドの生ログ           |
+| `standards-reviewer` | `/two-axis-review`   | Standards 軸(明文化された標準、スメル、Why not)    |
+| `spec-reviewer`      | `/two-axis-review`   | Spec 軸(元のイシュー/PRD との突き合わせ)           |
+| `comment-pruner`     | `/prune-comments`    | 触れたファイルのコメントを6段のルールで削る1パス   |
+| `interface-designer` | `/codebase-design`   | 制約を1つずつ変えた代替インターフェース案(3体以上) |
+
+理由は並列化ではなく **押し出し** である — 中間のツール結果は子のコンテキストに留まり、親に戻るのは要約だけになる(→ [`/delegation`](./skills/engineering/delegation/SKILL.md))。`verifier` が `Edit` も `Write` も持たないのは意図で、ゲートを回す側がゲートを動かせてはならない。`interface-designer` が同じく持たないのも意図で、案を出す段で手が動いてはならない。`comment-pruner` を分けてあるのは、**直前に自分で書いたコメントは目的が思い出せてしまう分だけ残る**からである。二軸のレビュアーを2体に分けてあるのも同じく意図で、**互いのコンテキストを汚染しないこと自体が成果物である。**
+
+**A と C ではこれらは入らない。** 呼ぶ側のスキルは依頼内容をエージェント側に預けているので、落ちる先は汎用のサブエージェントか手元の実行になり、**規律の本文はそこには無い** — `/two-axis-review` の Standards 軸はスメルの基準線を、`/prune-comments` は6段のルールを失う。この2つを本来の形で使うなら B を選ぶ。
+
 ## これらのスキルが存在する理由
 
 コーディングエージェントで繰り返し起きる4つの失敗モードと、各スキルが当てる対処法:
@@ -201,6 +218,7 @@ npx -y skills add kjfsm/skills
 - **[react-router-worker-tests](./skills/engineering/react-router-worker-tests/SKILL.md)** — SSR フレームワークを `main` に載せた Cloudflare Worker のテストを組む。`applyD1Migrations` が `main` を立ち上げる事実から層を3つに割り、Worker を HTTP で叩く側は `createTestHarness` に渡す。
 - **[drizzle-generate-non-interactive](./skills/engineering/drizzle-generate-non-interactive/SKILL.md)** — TTY の無いところで `drizzle-kit generate` を完走させる。止まるのは rename の判定だけなので、その1問だけ pty 越しに答えを渡す。既定でハイライトされているのはデータが消える側である。
 - **[partyserver-on-durable-objects](./skills/engineering/partyserver-on-durable-objects/SKILL.md)** — partyserver を Durable Object に載せるときの、公式に載らない4点。stub の取り方でリクエスト数が2倍になること、`onStart` が失敗しても DO はリセットされないこと、ハイバネーションで消えるもの、上限。
+- **[dev-bypass-sign-in](./skills/engineering/dev-bypass-sign-in/SKILL.md)** — 叩くだけでサインイン済みになる開発・E2E 用の入口を作る。better-auth なら `testUtils` の `test.login({ userId })` で座り、サインイン方式ごとの書き分けを消す。戸はビルド時に畳んで成果物を grep で検査する。
 - **[where-to-write-what](./skills/engineering/where-to-write-what/SKILL.md)** — コード・テスト・コメント・JSDoc・コミットメッセージ・PR 本文・ADR・docs のどこに何を書くかのルーティング規律: コードには How、テストには What、コミットログには Why、コメントには Why not。
 - **[setup-rules](./skills/engineering/setup-rules/SKILL.md)** — このリポジトリのルールを2層に敷く: `paths:` を持つ rule はその glob を編集するときだけ注入され、スタックに依存しない絶対ルールと追記先の優先順位は毎セッション読まれる側に置く。`/setup-skills` から引き継がれる。
 - **[setup-skills](./skills/engineering/setup-skills/SKILL.md)** — このリポジトリをエンジニアリング系スキル向けに設定する(イシュートラッカー、トリアージラベル、ドメインドキュメントの配置、検証ゲート、応答と記述の規約)。`/setup-repo` の工程 A。

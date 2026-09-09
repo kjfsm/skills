@@ -1,0 +1,5 @@
+interface:
+  display_name: "新しいセッションを立てる"
+  short_description: "worktree と tmux で独立したセッションを立ち上げる"
+policy:
+  allow_implicit_invocation: false

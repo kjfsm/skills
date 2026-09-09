@@ -32,6 +32,7 @@
     "./skills/engineering/setup-hooks",
     "./skills/engineering/setup-repo",
     "./skills/engineering/setup-cf-app",
+    "./skills/engineering/setup-cf-access",
     "./skills/engineering/setup-playwright",
     "./skills/engineering/tend-memory-files",
     "./skills/engineering/tdd",

@@ -243,7 +243,7 @@ npx -y skills add kjfsm/skills
 
 - **[writing-great-skills](./skills/productivity/writing-great-skills/SKILL.md)** — スキルを書く・直すための判断基準と、公式が定める仕様: 予測可能性・情報階層・段階的開示・先導語・失敗モードの語彙に、公式の数値上限と frontmatter の規則をまとめた `OFFICIAL.md` が付く。
 - **[grilling](./skills/productivity/grilling/SKILL.md)** — 決定木のすべての枝が解決するまで、計画・決定・アイデアについてユーザーに容赦なくインタビューする。`grill-me` と `grill-with-docs` の裏にある再利用可能なループ。
-- **[sharpen-request](./skills/productivity/sharpen-request/SKILL.md)** — 「〜を整理したい」「〜を改善したい」のような曖昧な依頼を、範囲・止まる地点・方向と強さ・対象の名指し・1項目ずつ判定できる問い・比べるコスト・目的にしないものを持った指示に研ぐ。指示を出して止まり、作業は合意してから始める。
+- **[sharpen-request](./skills/productivity/sharpen-request/SKILL.md)** — 「〜を整理したい」「〜を改善したい」のような曖昧な依頼を、範囲・止まる地点・方向と強さ・対象の名指し・1項目ずつ判定できる問い・比べるコスト・目的にしないものを持った指示に研ぐ。指示を出して止まり、作業は合意してから始める。モデルが自分から呼んだときは、研ぐ前に使うかをユーザーに聞く。
 
 ### その他のバケット
 

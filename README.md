@@ -205,6 +205,7 @@ npx -y skills add kjfsm/skills
 - **[tdd](./skills/engineering/tdd/SKILL.md)** — レッド・グリーン・リファクタリングのループによるテスト駆動開発。機能を作るのもバグを直すのも、一度に1つの垂直スライスずつ進める。
 - **[create-tests](./skills/engineering/create-tests/SKILL.md)** — Cloudflare Workers のプロジェクトで、テストが1本も無いところから作り始める。何が壊れると困るかから始め、node と workerd の2プロジェクトに分けて、依存の内側から積む。
 - **[rebuild-tests](./skills/engineering/rebuild-tests/SKILL.md)** — Cloudflare Workers のテストスイートを立て直す。vitest.config の複雑さを `vi.mock` の本数の問題として読み替え、消す前に棚卸しし、履歴から復元し、書いたテストは壊して実効性を確かめる。
+- **[prune-tests](./skills/engineering/prune-tests/SKILL.md)** — 既存のテストから削除・統合できるものを洗い出す。「消すと、どんな現実的な不具合を見逃すか」をコストと比べ、件数とカバレッジは目的にしない。判定はサブエージェントがスライスごとに下し、迷ったものはコードを壊して決める。
 - **[migrate-d1](./skills/engineering/migrate-d1/SKILL.md)** — Cloudflare D1 のスキーマを移行する。生成されたテーブル再構築の SQL は D1 では子テーブルを空にするので、消える側を退避して戻す形に書き直し、当てる前に復元点を控える。
 - **[domain-modeling](./skills/engineering/domain-modeling/SKILL.md)** — プロジェクトのドメインモデルを能動的に構築し研ぎ澄ます — 用語集に照らして用語に異議を唱え、エッジケースのシナリオでストレステストし、`CONTEXT.md` と ADR をその場で更新する。
 - **[codebase-design](./skills/engineering/codebase-design/SKILL.md)** — 深いモジュールを設計するための共有された規律と語彙: 小さなインターフェースの裏に多くの振る舞いを隠し、きれいなシームに置き、そのインターフェースを通してテスト可能にする。

@@ -1,5 +1,5 @@
 interface:
   display_name: "実装する"
-  short_description: "スペックやチケットから作業をビルドする"
+  short_description: "スペックやチケットから作業をビルドし PR を出す"
 policy:
   allow_implicit_invocation: false

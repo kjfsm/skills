@@ -33,7 +33,7 @@ Claude Code、Codex、その他 Agent-Skills 標準に準拠したハーネス�
 | 大きすぎて見通せない   | `/wayfinder`                                            |
 | どれを使うか分からない | **`/ask-kjfsm`**                                        |
 
-締めまで持つのは `/implement` である: `/tdd` でビルドし、`/verification-loop` でクリーンランを取り、`/prune-comments` でコメントを削り、`/two-axis-review` でレビューしてからコミットする。**`/implement` はユーザーからしか呼べない** ので、打たなければこの並びは丸ごと走らない。
+締めまで持つのは `/implement` である: `/tdd` でビルドし、`/verification-loop` でクリーンランを取り、`/prune-comments` でコメントを削り、`/two-axis-review` でレビューしてからコミットし、PR を出す。**`/implement` はユーザーからしか呼べない** ので、打たなければこの並びは丸ごと走らない。
 
 複数セッションにまたがる規模なら、`/grill-with-docs` と `/implement` の間に `/to-spec` → `/to-tickets` を挟んでチケットへ割る。規模の判定とフロー全体は `/ask-kjfsm` が持つ。
 
@@ -193,7 +193,7 @@ npx -y skills add kjfsm/skills
 - **[tend-memory-files](./skills/engineering/tend-memory-files/SKILL.md)** — セッション開始時にロードされる指示ファイル(`CLAUDE.md`、`.claude/rules/`)を新規に書く、または監査してトリムする。行数の目安に収め、具体的で矛盾のない指示だけを残す。
 - **[to-spec](./skills/engineering/to-spec/SKILL.md)** — 今の会話をスペックに変換し、イシュートラッカーへ公開する。インタビューはせず、すでに話し合った内容をまとめるだけ。
 - **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — どんな計画・スペック・会話も、それぞれがブロッキングエッジを宣言するトレーサーバレット方式のチケットの集合へ分割する — ローカルファイルへのテキストとして、あるいは実際のトラッカー上のネイティブなブロッキングリンクとして書かれる。
-- **[implement](./skills/engineering/implement/SKILL.md)** — スペックやチケットの集合が記述する作業をビルドする。事前に合意したシームで `/tdd` を駆動し、`/verification-loop` でクリーンランを取り、コミット前に `/two-axis-review` で締めくくる。
+- **[implement](./skills/engineering/implement/SKILL.md)** — スペックやチケットの集合が記述する作業をビルドする。着手前に既定ブランチへ追いつき、事前に合意したシームで `/tdd` を駆動し、`/verification-loop` でクリーンランを取り、`/two-axis-review` を通してから PR を出して締めくくる。
 - **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — 1つのエージェントセッションには収まらない巨大な作業のかたまりを、イシュートラッカー上の調査チケットの共有マップとして計画する — 目的地までの道が明らかになるまで、1つずつ解決していく。
 - **[squash-d1-migrations](./skills/engineering/squash-d1-migrations/SKILL.md)** — 積み上がった D1 のマイグレーションを1本に畳む。合格条件はファイルが減ったことではなく、空の DB に適用した結果が旧チェーンと一致すること。`d1_migrations` は名前を記録しているので、各環境と突き合わせるまでが作業である。
 

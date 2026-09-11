@@ -60,6 +60,7 @@
     "./skills/engineering/squash-d1-migrations",
     "./skills/engineering/where-to-write-what",
     "./skills/engineering/migrate-d1",
+    "./skills/engineering/d1-bound-parameters",
     "./skills/productivity/help-skills",
     "./skills/productivity/grill-me",
     "./skills/productivity/grilling",

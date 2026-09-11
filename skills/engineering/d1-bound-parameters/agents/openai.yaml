@@ -1,0 +1,3 @@
+interface:
+  display_name: "D1 の bound parameter 上限"
+  short_description: "1文100個の上限を SQL 内に閉じるか分割で避ける"

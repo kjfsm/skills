@@ -69,6 +69,15 @@ description: コード・テスト・コメント・JSDoc・コミットメッ�
 
 レビュアーがブランチを checkout せずに判断できるだけの文脈: 何が変わるか、どう確かめたか、どこから読み始めるか、UI ならスクリーンショット。squash マージ運用では PR 本文がそのままメインラインのコミット本文になる — その場合、コミットメッセージの基準がそのまま PR 本文の基準である。
 
+PR が解決する issue は、本文に `Closes #<番号>` を独立した行で置いて GitHub に閉じさせる。過去の PR が使っていないことは、使うなという慣習を意味しない。キーワードの効き方は見た目より狭い([Linking a pull request to an issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue)):
+
+- **既定ブランチ宛ての PR でしか効かない。** 他のブランチ宛て — スタックした PR の上の層 — では黙って無視される
+- **複数の issue には1つずつキーワードを付ける。** `Closes #10, #11` は #10 しか閉じない。`Closes #10, closes #11` と書く
+- **番号をバッククォートで囲まない。** コードになり、リンクにもキーワードにもならない
+- コミットメッセージのキーワードでも issue は閉じるが、**その PR は issue にリンクとして残らない**
+
+本文に文字列があることと、GitHub が紐付けたことは別である。`gh pr view <番号> --json closingIssuesReferences` で確かめる。
+
 ## ADR — モジュールをまたぐ Why not
 
 コメントの Why not が行やファイルの単位で効くのに対し、ADR は複数モジュールにまたがり後戻りしにくい判断を扱う。却下した代替案とその理由もここに書く。コードからは ADR 番号の参照 1 行で指す — 判断の本文を書き写すと、ADR を直した日にコメントが古くなる。

@@ -35,7 +35,7 @@ gh api repos/cloudflare/workers-sdk/contents/fixtures/vitest-plugin-examples/d1/
 1. **壊れたとき、気づけないもの** — 権限判定、所有権スコープ（他人の id は 404 で返す、など）、署名や暗号の検証。壊れても画面は正常に見える
 2. **壊れたとき、取り返しがつかないもの** — 削除の連鎖（FK の cascade）、マイグレーション、課金
 3. **過去に実際に壊れたもの** — 同じ事故は繰り返される。issue や修正コミットが一次情報になる
-4. **Cloudflare でしか壊れないもの** — D1 の bound parameter 上限、`db.batch()` の原子性、Durable Object の alarm と WebSocket hibernation、Queues の ack/retry、そして **タイムゾーン**（Workers は UTC。開発機が UTC でないと暦日が 1 日ずれるクラスのバグを見逃す）
+4. **Cloudflare でしか壊れないもの** — D1 の bound parameter 上限（→ `/d1-bound-parameters`）、`db.batch()` の原子性、Durable Object の alarm と WebSocket hibernation、Queues の ack/retry、そして **タイムゾーン**（Workers は UTC。開発機が UTC でないと暦日が 1 日ずれるクラスのバグを見逃す）
 
 この 4 つに当たらないものは後回しでよい。テストの本数を目標にしない。
 

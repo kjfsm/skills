@@ -196,3 +196,4 @@ curl -s \
 
 - **プラグイン自身の設定を読む / 書く**(Block Kit の `/admin` ルート、`form_submit` / `block_action`)→ [`PLUGIN-SETTINGS.md`](PLUGIN-SETTINGS.md)
 - **MCP が公開していない情報を直接SQLで読む**(`wrangler d1 execute`、テーブル種別、シークレットの扱い)→ [`D1-SQL.md`](D1-SQL.md)
+- **MCP にツールが無い操作をRESTで行う / MCP で書いたのにサイトに出ない**(ウィジェット、repeater、`snapshot`、下書き止まりの `content_update`)→ [`BEYOND-MCP.md`](BEYOND-MCP.md)

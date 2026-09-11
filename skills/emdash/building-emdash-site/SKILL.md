@@ -64,7 +64,8 @@ APIの使い方を調べたいなら、まず公式を読むこと。
 
 1. **画像フィールドは文字列ではなくオブジェクト。** `<img src={post.data.featured_image} />`と書くと
    `[object Object]`がレンダリングされる。`"emdash/ui"`の`<Image image={post.data.featured_image} />`を
-   使う(生の`<img>`を使うなら`.src`。上記の食い違い1も参照)。
+   使う。**ローカルにアップロードした画像は`src`を持たない**ので、`.src`で画像の有無を判定すると
+   ローカル画像だけが静かに消える(上記の食い違い1も参照)。
 
 2. **`entry.id`と`entry.data.id`は別物。** `entry.id`はスラッグ(URLで使用)。`entry.data.id`は
    データベースのULID(`getEntryTerms`、`Comments`など、実際のIDを必要とするAPI呼び出しで使用)。
@@ -86,7 +87,7 @@ APIの使い方を調べたいなら、まず公式を読むこと。
    **[references/astro-react-interop.md](references/astro-react-interop.md)**。
 
 7. **`seed/seed.json`は稼働中サイトのマイグレーション手段ではない。** シードはDBが空のときの
-   最初のリクエストでのみ適用される。詳細は
+   最初のリクエストでのみ適用され、しかもそこで入るのは**スキーマだけでコンテンツは入らない**。詳細は
    [references/schema-and-seed.md](references/schema-and-seed.md)。
 
 ## ファイル構成
@@ -109,7 +110,7 @@ my-site/
 ## 実行と検証
 
 ```bash
-npx emdash dev          # devサーバー起動(マイグレーション+シード適用、型生成)
+npx emdash dev          # devサーバー起動(マイグレーション、型生成。空DBならシードのスキーマ部分だけ適用)
 ```
 
 管理UIは`http://localhost:4321/_emdash/admin`。
@@ -118,10 +119,10 @@ npx emdash dev          # devサーバー起動(マイグレーション+シー�
 
 いずれも「公式との差分」だけを書いている。今のタスクに関係するファイルだけを読むこと。
 
-| ファイル                                                                     | 内容                                                                          |
-| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| [references/configuration.md](references/configuration.md)                   | Cloudflare前提の`astro.config.mjs` / `wrangler.jsonc`の実例、型生成の実際     |
-| [references/schema-and-seed.md](references/schema-and-seed.md)               | シードの適用タイミングの罠、`supports`、フィールドタイプの実際の形状          |
-| [references/querying-and-rendering.md](references/querying-and-rendering.md) | `cacheHint`、`orderBy`、事前ロードされる`bylines`/`terms`、`edit`属性         |
-| [references/site-features.md](references/site-features.md)                   | バイライン、検索の前提条件、ページコントリビューション、レイアウトの型        |
-| [references/astro-react-interop.md](references/astro-react-interop.md)       | shadcn/ui(React)を`.astro`から使う際の子要素の制約(EmDashではなくAstro側の話) |
+| ファイル                                                                     | 内容                                                                                                                           |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| [references/configuration.md](references/configuration.md)                   | Cloudflare前提の`astro.config.mjs` / `wrangler.jsonc`の実例、型生成の実際                                                      |
+| [references/schema-and-seed.md](references/schema-and-seed.md)               | シードの適用タイミングと範囲、`supports`と`has_seo`/`routable`、フィールドタイプの実際の形状、MCPで作れない`repeater`/`widget` |
+| [references/querying-and-rendering.md](references/querying-and-rendering.md) | `cacheHint`、`orderBy`、事前ロードされる`bylines`/`terms`、SEO値、ローカル画像の`src`                                          |
+| [references/site-features.md](references/site-features.md)                   | バイライン、検索の前提条件、コアウィジェットの決め打ち、ページコントリビューション                                             |
+| [references/astro-react-interop.md](references/astro-react-interop.md)       | shadcn/ui(React)を`.astro`から使う際の子要素の制約(EmDashではなくAstro側の話)                                                  |

@@ -6,6 +6,6 @@
 
 - **[building-emdash-site](./building-emdash-site/SKILL.md)** — サイト構築時の落とし穴、公式ドキュメントが実装とズレている箇所(画像フィールドの `src`、`orderBy`、`cacheHint`、`supports`)、公式に一覧のない `emdash/ui` コンポーネント。EmDash の作業はまずここから。
 - **[caching-emdash-site](./caching-emdash-site/SKILL.md)** — Workers Cache でエッジHTMLキャッシュを入れるときの空振り。`routeRules` の catch-all が管理画面を巻き込むこと、`toolbar: false` が編集用応答の opt-out を落とすこと、`Astro.cache.set(false)` がキャッシュを止めないこと、MCP がエッジをパージしないこと、`Server-Timing` の `cache.hit` が KV ではないこと。
-- **[creating-plugins](./creating-plugins/SKILL.md)** — 公式が扱っていない npm 配布の `format: "standard"` ディスクリプタ形式と、Block Kit の未文書化ブロック。
-- **[emdash-cli](./emdash-cli/SKILL.md)** — エージェントから叩くときの自動公開の挙動、`--published`、Portable Text ⇄ markdown の変換仕様。
-- **[local-mcp-access](./local-mcp-access/SKILL.md)** — ローカル dev サーバーの MCP エンドポイント(`/_emdash/api/mcp`)をブラウザなしで叩く。`dev-bypass` + トークン API 経由での PAT 発行(MCP は bearer 専用で、公式の「セッション Cookie も使える」は実装と食い違う)、コア MCP ツールが公開していないプラグイン管理設定の読み書き、`wrangler d1 execute` による D1 テーブルの直接参照。
+- **[creating-plugins](./creating-plugins/SKILL.md)** — 公式が扱っていない npm 配布の `format: "standard"` ディスクリプタ形式、Block Kit の未文書化ブロック、`fields` を持たない Portable Text ブロックが管理エディタで壊れること。
+- **[emdash-cli](./emdash-cli/SKILL.md)** — エージェントから叩くときの自動公開の挙動、`--published`、Portable Text ⇄ markdown の変換仕様、本番の D1 から `export-seed` でシードを作り直す手順。
+- **[local-mcp-access](./local-mcp-access/SKILL.md)** — ローカル dev サーバーの MCP エンドポイント(`/_emdash/api/mcp`)をブラウザなしで叩く。`dev-bypass` + トークン API 経由での PAT 発行(MCP は bearer 専用で、公式の「セッション Cookie も使える」は実装と食い違う)、コア MCP ツールが公開していないプラグイン管理設定の読み書き、MCP にツールの無い操作を REST で行う方法、`wrangler d1 execute` による D1 テーブルの直接参照。

@@ -47,6 +47,12 @@ import { WidgetArea } from "emdash/ui";
 </aside>
 ```
 
+**コアウィジェットのうち2つはコレクション名`posts`決め打ち。** `core:recent-posts`と`core:archives`は
+`getEmDashCollection("posts")`をハードコードしており、リンク先も`/posts/<slug>`・`/archives/YYYY/MM`で
+固定。ブログのコレクションが`posts`でないサイトでは、エラーなく空の`<ul>`を描く。`core:search`もボタンの
+文言と`aria-label`が`Search`固定で、変えられるのは`placeholder`だけ。これらが合わないなら、コアの
+ウィジェットを置かずに自前のコンポーネントを書く。
+
 細かく制御したいときだけ`getWidgetArea`で手組みする。
 
 ## 検索の前提条件

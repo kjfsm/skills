@@ -61,6 +61,11 @@ npx emdash content get posts 01ABC123 --raw         # Portable Text→markdown�
 詳細は`building-emdash-site`スキルの`references/configuration.md`(取り込んでいれば
 `.agents/skills/building-emdash-site/references/configuration.md`)。
 
+## 本番からシードを作り直す(`export-seed`)
+
+公式の`wrangler d1 export` → `export-seed`の経路はEmDashのD1では通らず、出力もそのままでは使えない。
+手順と取りこぼしは **[EXPORT-SEED.md](./EXPORT-SEED.md)**。
+
 ## 編集フロー
 
 Portable Text ⇄ markdownの自動変換、未知ブロックの扱い、rawモードは

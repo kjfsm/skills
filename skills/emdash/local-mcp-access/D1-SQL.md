@@ -45,7 +45,15 @@ npx wrangler d1 execute <database_name> --remote \
 ### 主なテーブル種別
 
 - `ec_<collection>`(例: `ec_blog`、`ec_works`) — 各コレクションの
-  コンテンツ本体。
+  コンテンツ本体。列の並び(`status` / `live_revision_id` / `draft_revision_id`
+  など)は`supports`に関わらず全コレクション共通なので、コレクションの設定の
+  違いはここを見ても分からない。
+- `_emdash_collections` — コレクションの設定。`supports`(JSON配列)に加えて、
+  実際に効く`has_seo` / `routable`の列、シード由来のままか(`source = 'seed'`)
+  個別に変えたか(`'manual'`)を持つ。
+- `_emdash_fields` — フィールド定義。`widget`列と`options`(JSON)列が別にある。
+- `_emdash_seo` — エントリごとのSEO値(`collection`, `content_id`, `seo_title`, ...)。
+  `ec_*`の列には入らない。
 - `options` — サイト設定(`site:`プレフィックス)**に加えて**、in-process
   (native)としてロードされているプラグインの `ctx.kv` の実体もここに入る
   ——キー名は `plugin:<plugin-id>:settings:<key>` の形。sandboxed前提の

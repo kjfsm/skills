@@ -105,8 +105,16 @@ const seo = getSeoMeta(post, {
   path: `/posts/${slug}`,
   defaultOgImage: featuredImageUrl, // 任意のフォールバック
 });
-// { title, description, canonical, ogImage, robots }
+// { title, description, ogTitle, ogDescription, ogImage, canonical, robots }
 ```
+
+**`siteUrl`は省かない。** 管理画面のSEOパネルで設定したOG画像は`/_emdash/api/media/file/<id>.jpg`の
+ルート相対で保存されていて、`siteUrl`が無いと相対パスのまま`og:image`に出る(SNSのクローラは読めない)。
+
+エントリごとのSEO値は、コレクションの`has_seo`が1のときだけ`entry.data.seo`
+(`{ title, description, image, canonical, noIndex }`)として載る。`getEmDashEntry`でも
+`getEmDashCollection`でも載るが、生成型`emdash-env.d.ts`には現れない —— 自前で型を書かず、
+`emdash`の`ContentSeo`型と`getContentSeo(entry)`を使う。保存先は`ec_*`の列ではなく`_emdash_seo`テーブル。
 
 ## 画像の描画
 
@@ -117,11 +125,17 @@ import { Image } from "emdash/ui";
 {/* 正しい */}
 <Image image={post.data.featured_image} />
 
-{/* 生の<img>を使うなら .src(.url ではない) */}
-{post.data.featured_image?.src && (
-	<img src={post.data.featured_image.src} alt={post.data.featured_image.alt || ""} />
-)}
+{/* 有無の判定はオブジェクトで行う */}
+{post.data.featured_image && <Image image={post.data.featured_image} />}
+
+{/* 誤り — ローカル画像は src を持たないので、常に false になって画像が消える */}
+{post.data.featured_image?.src && <img src={post.data.featured_image.src} />}
 
 {/* 誤り — オブジェクトなので [object Object] になる */}
 <img src={post.data.featured_image} />
 ```
+
+**ローカルにアップロードした画像は`src`を持たない。** 保存時の正規化が`provider: "local"`の値から
+`src`を消し、読み出し側も既存の`src`を整えるだけで作り直さない。配信URLは描画時に`<Image>`が
+組み立てる。`.src`で分岐すると外部URLの画像だけが表示され、ローカル画像は例外もなく「画像なし」に
+落ちる。自前で有無を判定するなら`!!(fi.src || fi.id || fi.meta?.storageKey)`。

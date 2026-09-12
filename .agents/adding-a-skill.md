@@ -113,6 +113,6 @@ scripts/check-invariants.sh
 
 ## 退役させるとき
 
-`deprecated/` へ移す。`scripts/link-skills.sh` と `scripts/sync-project-skills.sh` はどちらもこのバケットを除外するので、走らせ直せばローカルのハーネスからも `.claude/skills/` からも消える。
+`deprecated/` へ移し、`deprecated/README.md` に **なぜ退役したかと、代わりに使うもの** を1行で書く — 書かないと、同じものをもう一度作る。`scripts/link-skills.sh` と `scripts/sync-project-skills.sh` はどちらもこのバケットを除外するので、走らせ直せばローカルのハーネスからも `.claude/skills/` からも消える。
 
 `plugin.json` とトップレベル `README.md` からは消える必要がある(検査が要求する)。`ask-kjfsm` からも消す。他のスキルがその名前を文中呼び出ししていないか `grep` で確かめる — 呼ばれたまま退役したスキルは、実行時に静かに何も起きない。

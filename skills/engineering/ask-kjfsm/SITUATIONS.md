@@ -17,6 +17,7 @@
 - **`/react-router-route-module`**(React Router framework mode)— 認可の強制点は `middleware`、レイアウトが持つ値は `<Outlet context>`
 - **`/drizzle-generate-non-interactive`** — TTY を求めるのは rename の判定だけ
 - **`/migrate-d1`** — 再構築の生成物は D1 で子表を空にする
+- **`/d1-bound-parameters`** — D1 の bound parameter は1文100個まで。SQL の中に閉じてから分割する
 - **`/squash-d1-migrations`** — マイグレーションを1本に畳む
 - **`/partyserver-on-durable-objects`** — stub の取り方がそのままリクエスト数になる。素の DO の API は Cloudflare 公式のスキルが持つ
 

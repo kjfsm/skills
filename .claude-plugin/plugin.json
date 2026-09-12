@@ -37,6 +37,7 @@
     "./skills/engineering/tdd",
     "./skills/engineering/create-tests",
     "./skills/engineering/rebuild-tests",
+    "./skills/engineering/prune-tests",
     "./skills/engineering/to-spec",
     "./skills/engineering/to-tickets",
     "./skills/engineering/wayfinder",

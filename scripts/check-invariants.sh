@@ -388,6 +388,11 @@ grep -q 'シームの裏に何を隠すか' agents/interface-designer.md ||
 grep -q 'シームの裏に何を隠すか' skills/engineering/codebase-design/DESIGN-IT-TWICE.md &&
   err "skills/engineering/codebase-design/DESIGN-IT-TWICE.md copies the output contract that agents/interface-designer.md owns"
 
+grep -q 'モックの自己検証' agents/test-auditor.md ||
+  err "agents/test-auditor.md lost the six categories; the audit would prune by taste"
+grep -q 'モックの自己検証' skills/engineering/prune-tests/SKILL.md &&
+  err "skills/engineering/prune-tests/SKILL.md copies the categories that agents/test-auditor.md owns"
+
 if [ "$fail" -eq 0 ]; then
   echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills, $(find agents -name '*.md' | wc -l | tr -d ' ') agents)"
 fi

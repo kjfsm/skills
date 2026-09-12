@@ -1,0 +1,3 @@
+interface:
+  display_name: "テストを削る"
+  short_description: "削除・統合できるテストを、見逃す不具合とコストで洗い出す"

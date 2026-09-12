@@ -2,17 +2,6 @@
   "outputStyle": "kjfsm",
   "permissions": {
     "allow": [
-      "Bash(ls:*)",
-      "Bash(cat:*)",
-      "Bash(find:*)",
-      "Bash(sort:*)",
-      "Bash(grep:*)",
-      "Bash(cd:*)",
-      "Bash(git status:*)",
-      "Bash(git branch:*)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(git show:*)",
       "Bash(scripts/check-invariants.sh)",
       "Bash(scripts/list-skills.sh)",
       "Bash(scripts/sync-project-skills.sh)",

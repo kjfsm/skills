@@ -46,6 +46,8 @@ src/packages/
 
 ### 2. dependency-cruiser をインストールする
 
+pnpm なら、入れる前に `pnpm up --latest` で既存の依存を最新にする(ワークスペースなら `-r`)。範囲を無視してメジャーまで上がるので、typecheck が通るのを確かめて別コミットにしてから次へ進む — 混ぜると、赤くなったときに上げた依存と境界ルールの切り分けがつかない。
+
 検出したパッケージマネージャーで `dependency-cruiser` を devDependency としてインストールする。
 
 **完了の条件:** `dependency-cruiser` が `devDependencies` に入っていること。

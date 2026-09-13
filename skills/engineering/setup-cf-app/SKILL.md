@@ -31,6 +31,7 @@ description: 新規の Cloudflare Workers フルスタックアプリを、い�
 `cloudflare` / `wrangler` / `react-router-framework-mode` / `shadcn` / `durable-objects` / `better-auth-best-practices`。
 
 - スキャフォールドは C3(`pnpm create cloudflare@latest --framework=react-router`)を起点に、各ツールの公式 init(shadcn / oxlint / oxfmt / create-playwright)を実行する。
+- **C3 の直後、各ツールの init より前に `pnpm up --latest` を実行する。** テンプレートが固定している版は最新から遅れていることがあり、その上に init を重ねると古い版に合わせた config ができる。範囲を無視してメジャーまで上がるので、テンプレートにある typecheck と build が通るのを確かめ、別コミットにしてから init へ進む — 混ぜると、赤くなったときに上げた依存と足したものの切り分けがつかない。
 - **フラグを足すほど候補が減る init がある。** ここで挙げるのは版ではなく、公式手順を読んでも出てこない**黙って外れる挙動**である。止まった日は、この形を疑って `--help` で候補そのものを出す。
   - C3 は `--lang` を渡すと **言語バリアントを持たないフレームワークをテンプレート候補から落とす**。`--platform` も同じで、プラットフォーム別バリアントを持たないものが外れる。どちらも「指定を通す」ではなく `Unsupported framework: <名前>` になるので、フラグが原因だと読めない。フレームワーク名だけを渡すのが確実
   - shadcn の init は **リポジトリルートの `tsconfig.json` しか見ない**。React Router のように import エイリアスを分割 tsconfig 側へ置くテンプレートでは `Could not find valid path aliases` で止まるので、ルートにも同値で置く。**ただし `paths` だけを相対で置き、`baseUrl` は足さない** — 足すと `vite-tsconfig-paths` が裸のモジュール指定子までプロジェクト内解決の対象にし、**Vitest 上でだけ**外部パッケージの named export が消える(`wrangler` の `createTestHarness` が `is not a function` になる)。`tsc` も Node の直 import も通るので、Vitest でしか症状が出ない。TypeScript 4.1 以降 `paths` に `baseUrl` は要らない

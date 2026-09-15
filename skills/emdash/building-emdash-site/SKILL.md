@@ -119,10 +119,11 @@ npx emdash dev          # devサーバー起動(マイグレーション、型�
 
 いずれも「公式との差分」だけを書いている。今のタスクに関係するファイルだけを読むこと。
 
-| ファイル                                                                     | 内容                                                                                                                           |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| [references/configuration.md](references/configuration.md)                   | Cloudflare前提の`astro.config.mjs` / `wrangler.jsonc`の実例、型生成の実際                                                      |
-| [references/schema-and-seed.md](references/schema-and-seed.md)               | シードの適用タイミングと範囲、`supports`と`has_seo`/`routable`、フィールドタイプの実際の形状、MCPで作れない`repeater`/`widget` |
-| [references/querying-and-rendering.md](references/querying-and-rendering.md) | `cacheHint`、`orderBy`、事前ロードされる`bylines`/`terms`、SEO値、ローカル画像の`src`                                          |
-| [references/site-features.md](references/site-features.md)                   | バイライン、検索の前提条件、コアウィジェットの決め打ち、ページコントリビューション                                             |
-| [references/astro-react-interop.md](references/astro-react-interop.md)       | shadcn/ui(React)を`.astro`から使う際の子要素の制約(EmDashではなくAstro側の話)                                                  |
+| ファイル                                                                     | 内容                                                                                                                                                        |
+| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [references/configuration.md](references/configuration.md)                   | Cloudflare前提の`astro.config.mjs` / `wrangler.jsonc`の実例、型生成の実際                                                                                   |
+| [references/schema-and-seed.md](references/schema-and-seed.md)               | シードの適用タイミングと範囲、`supports`と`has_seo`/`routable`、フィールドタイプの実際の形状、MCPで作れない`repeater`/`widget`                              |
+| [references/querying-and-rendering.md](references/querying-and-rendering.md) | `cacheHint`、`orderBy`、事前ロードされる`bylines`/`terms`、SEO値、ローカル画像の`src`                                                                       |
+| [references/site-features.md](references/site-features.md)                   | バイライン、検索の前提条件、コアウィジェットの決め打ち、ページコントリビューション                                                                          |
+| [references/astro-react-interop.md](references/astro-react-interop.md)       | shadcn/ui(React)を`.astro`から使う際の子要素の制約(EmDashではなくAstro側の話)                                                                               |
+| [references/access-auth.md](references/access-auth.md)                       | `auth: access()`で管理画面をCloudflare Accessに任せるときの保護範囲とbypassするパス、デプロイ順の締め出し、ロールの出どころ、Accessから外しても残るトークン |

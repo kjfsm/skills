@@ -25,7 +25,10 @@ Worker を Access で塞ぐときの **3層ルール** を宣言する。**画�
 | **自前認証パス** | `bypass`       | everyone               | アプリ自身が認証を持つパス。Access のヘッダを通せない経路のため開ける |
 
 - `session_duration` は **168h** に揃える。
-- 人間層は **reusable policy を1本作って使い回す**。メールを増やすときの編集箇所が1つで済む。
+- 人間層は **reusable policy を1本作って使い回す**。メールアドレスは policy に直書きせず、Zero Trust の **List**(型は User email addresses)に置いて `email_list` ルールで参照する。人の出入りはリストの編集だけで済み、CSV で一括投入もできる。Access の policies ページのセレクタ表にリストは載っていないが、API スキーマには `email_list: { id }` がある。
+- **List と rule group(API では `group`)を取り違えない。** List は同じ型の値を並べた名簿、rule group は Include / Require / Exclude の条件の束(個人・IdP のグループ・サービストークンを混在できる)。名簿だけなら List、「名簿に載っていて、かつ Google でログインした」のような条件ごと複数のアプリで使い回すなら、List を中に入れた rule group にする。公式に両者を比べたページは無い。
+- **rule group は IdP のグループではない。** アプリが IdP のグループでロールを振る実装(EmDash の `roleMapping` など)に、rule group や List は届かない。
+- **メール系のセレクタはログイン時にしか評価されない。** リストから外しても、アプリのセッションが切れるまでは入れたまま。すぐ止めたいときは Access の Users で Revoke する。
 - bypass 層は「アプリ側に認証がある」ことを確認できたパスだけに、範囲を最小に切って当てる。
 
 ## 1. 経路を洗い出す

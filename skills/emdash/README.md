@@ -4,7 +4,7 @@
 
 **これらのスキルは EmDash API の一次情報源ではない。** 一次情報源は公式ドキュメント <https://docs.emdashcms.com/>(MCP サーバー `https://docs.emdashcms.com/mcp` の `search_docs` でも引ける)。各スキルには、**公式に書かれていないこと**と**公式が実装と食い違っていること**だけを書く。公式を読めば分かる内容をここに複製しない —— 複製は必ず古くなるため。
 
-- **[building-emdash-site](./building-emdash-site/SKILL.md)** — サイト構築時の落とし穴、公式ドキュメントが実装とズレている箇所(画像フィールドの `src`、`orderBy`、`cacheHint`、`supports`)、公式に一覧のない `emdash/ui` コンポーネント。EmDash の作業はまずここから。
+- **[building-emdash-site](./building-emdash-site/SKILL.md)** — サイト構築時の落とし穴、公式ドキュメントが実装とズレている箇所(画像フィールドの `src`、`orderBy`、`cacheHint`、`supports`)、公式に一覧のない `emdash/ui` コンポーネント、管理画面を Cloudflare Access に任せるときに bypass するパスと締め出し。EmDash の作業はまずここから。
 - **[caching-emdash-site](./caching-emdash-site/SKILL.md)** — Workers Cache でエッジHTMLキャッシュを入れるときの空振り。`routeRules` の catch-all が管理画面を巻き込むこと、`toolbar: false` が編集用応答の opt-out を落とすこと、`Astro.cache.set(false)` がキャッシュを止めないこと、MCP がエッジをパージしないこと、`Server-Timing` の `cache.hit` が KV ではないこと。
 - **[creating-plugins](./creating-plugins/SKILL.md)** — 公式が扱っていない npm 配布の `format: "standard"` ディスクリプタ形式、Block Kit の未文書化ブロック、`fields` を持たない Portable Text ブロックが管理エディタで壊れること。
 - **[emdash-cli](./emdash-cli/SKILL.md)** — エージェントから叩くときの自動公開の挙動、`--published`、Portable Text ⇄ markdown の変換仕様、本番の D1 から `export-seed` でシードを作り直す手順。

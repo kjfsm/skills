@@ -1,0 +1,3 @@
+interface:
+  display_name: "EmDash を上げる"
+  short_description: "EmDash を上げ、テンプレート由来のコードを新しい版の書き方へ追いつかせる"

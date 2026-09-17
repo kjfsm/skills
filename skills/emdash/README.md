@@ -1,6 +1,13 @@
 # EmDash
 
-[EmDash](https://docs.emdashcms.com) で作った Astro + Cloudflare のサイト専用のスキル群。EmDash を使わないプロジェクトでは何の役にも立たないので、plugin では promote していない。EmDash サイトのリポジトリ側で `npx skills` を使って個別に取り込む。
+[EmDash](https://docs.emdashcms.com) で作った Astro + Cloudflare のサイト専用のスキル群。EmDash を使わないプロジェクトでは何の役にも立たないので、`kjfsm-skills` には昇格させず、別プラグイン `kjfsm-emdash` で配る。EmDash サイトのリポジトリで、プロジェクトのスコープに入れる:
+
+```bash
+claude plugin marketplace add kjfsm/skills --scope project
+claude plugin install kjfsm-emdash@kjfsm --scope project
+```
+
+`npx skills` で入れたコピーが残っていれば消す — 同じスキルが2度並ぶ。
 
 **これらのスキルは EmDash API の一次情報源ではない。** 一次情報源は公式ドキュメント <https://docs.emdashcms.com/>(MCP サーバー `https://docs.emdashcms.com/mcp` の `search_docs` でも引ける)。各スキルには、**公式に書かれていないこと**と**公式が実装と食い違っていること**だけを書く。公式を読めば分かる内容をここに複製しない —— 複製は必ず古くなるため。
 

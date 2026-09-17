@@ -44,23 +44,20 @@ cd <名前> && git init && git add -A && git commit -m "create emdash の雛形"
 
 **完了基準:** `grep -n "my-emdash" wrangler.jsonc` が何も出さない。ここでコミットする。
 
-### 4. 同梱スキルを kjfsm 版へ差し替える
+### 4. 同梱スキルを kjfsm 版のプラグインへ差し替える
 
-雛形の `.agents/skills/` には公式版の `building-emdash-site`・`creating-plugins`・`emdash-cli` が入っており、`.claude/skills` はそこへのシンボリックリンクである。kjfsm/skills の `emdash/` バケットに同名のスキルがあり、公式に無い落とし穴はそちらが持つ。同じディレクトリ名なので、公式版を消してから入れる:
+雛形の `.agents/skills/` には公式版の `building-emdash-site`・`creating-plugins`・`emdash-cli` が入っており、`.claude/skills` はそこへのシンボリックリンクである。同じ名前のスキルを、公式に無い落とし穴つきでプラグイン `kjfsm-emdash` が配るので、公式版を消してからプロジェクトのスコープで入れる:
 
 ```bash
 rm -rf .agents/skills/{building-emdash-site,creating-plugins,emdash-cli}
-npx -y skills add kjfsm/skills --agent claude-code --yes \
-  --skill building-emdash-site --skill creating-plugins --skill emdash-cli \
-  --skill local-mcp-access --skill caching-emdash-site \
-  --skill patching-emdash --skill updating-emdash
+claude plugin marketplace add kjfsm/skills --scope project
+claude plugin install kjfsm-emdash@kjfsm --scope project
 ```
 
-- 入れる一覧は [kjfsm/skills の `skills/emdash/`](https://github.com/kjfsm/skills/tree/main/skills/emdash) に並ぶものすべて。増えていたら足す。
-- `--skill` は **1つずつ繰り返す**。カンマ区切りで渡すと、選択に失敗して一覧を出したまま終わる。
-- 入れたスキルはコピーなので、更新は `npx skills update` で行う。
+- `--scope project` は `.claude/settings.json` に書くので、コミットすれば clone した全員に届く。更新は push のたびに届き、`npx skills update` は要らない。
+- 公式版を残すと、同じ名前のスキルが2つ並ぶ。`.agents/skills/` が空になったら、`.claude/skills` のリンクごと消してよい。
 
-**完了基準:** `ls .claude/skills/` に上の名前が並び、`head -3 .claude/skills/building-emdash-site/SKILL.md` の description が日本語である。ここでコミットする。
+**完了基準:** `.claude/settings.json` の `enabledPlugins` に `kjfsm-emdash@kjfsm` があり、`.agents/skills/` に公式版が残っていない。ここでコミットする。
 
 ### 5. 依存を入れて、最新に追いつかせる
 

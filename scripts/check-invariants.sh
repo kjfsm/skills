@@ -169,6 +169,17 @@ while IFS= read -r skill_md; do
     [ "$(charlen "$desc")" -le 1024 ] || err "$name: description is $(charlen "$desc") characters; the spec caps it at 1024"
   fi
 
+  # 8b. 引用符なしの値が YAML として読める。上の `field` は1行を切り出すだけで YAML を
+  #     解釈しないので、ここを通っても `npx skills` のような厳密なパーサーはスキルごと
+  #     読み飛ばす。依存を足さずに済むよう、実際に踏んだ2つの形だけを弾く。
+  while IFS= read -r line; do
+    value="${line#*: }"
+    case "$value" in
+      *': '* | *' #'*) err "$name: '${line%%:*}' contains ': ' or ' #' unquoted; wrap the value in double quotes" ;;
+      [\`@%\&\*\!\[\{]*) err "$name: '${line%%:*}' starts with a YAML indicator unquoted; wrap the value in double quotes" ;;
+    esac
+  done < <(frontmatter "$skill_md" | grep -E '^[a-z-]+: [^"'"'"'|>]')
+
   # 9. 本文が推奨の行数の予算に収まっている
   fm_end="$(awk 'NR==1 && $0!="---" {print 0; exit} NR>1 && $0=="---" {print NR; exit}' "$skill_md")"
   body_lines="$(($(wc -l <"$skill_md") - ${fm_end:-0}))"

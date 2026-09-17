@@ -1,0 +1,3 @@
+interface:
+  display_name: "EmDash にパッチを当てる"
+  short_description: "EmDash 本体の不具合を pnpm パッチで直すか判断し、作り、上げるときに作り直す"

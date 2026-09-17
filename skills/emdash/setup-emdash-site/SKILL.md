@@ -13,26 +13,25 @@ description: 新しい EmDash サイトを Cloudflare Workers 向けに `create 
 
 ### 1. ユーザーに聞く
 
-次の4つはユーザーの世界の事実なので、推測で埋めずに聞く。テンプレートは推奨を付けて選ばせる。
+次の3つはユーザーの世界の事実なので、推測で埋めずに聞く。テンプレートは推奨を付けて選ばせる。
 
 | 聞くこと                 | 選択肢                                                                                                                                                                                        |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | テンプレート             | **`blog`(推奨)** / `portfolio` / `marketing` / `starter`([中身](https://github.com/emdash-cms/templates))。`blog` を推すのは、やることリストの判定済みの表が `blog-cloudflare` にしか無いから |
 | プロジェクト名と置き場所 | ディレクトリ名。Worker・D1・R2 の名前にも使う                                                                                                                                                 |
 | Cloudflare のアカウント  | `pnpm wrangler whoami` に複数出るならどれか                                                                                                                                                   |
-| サンドボックスプラグイン | Workers の有料プランなら有効にできる。無料プランなら無効                                                                                                                                      |
 
-**完了基準:** 4つが決まり、`node --version` が 22.16 以上、`pnpm wrangler whoami` がログイン済みを返す。
+**完了基準:** 3つが決まり、`node --version` が 22.16 以上、`pnpm wrangler whoami` がログイン済みを返す。
 
 ### 2. 雛形を作り、そのままコミットする
 
 ```bash
 pnpm create emdash@latest <名前> --template cloudflare:<テンプレート> --pm pnpm --no-install --no-sandboxed-plugins --yes
-# 有料プランで有効にするなら --sandboxed-plugins
 cd <名前> && git init && git add -A && git commit -m "create emdash の雛形"
 ```
 
 - **`--yes` を外すと、フラグで渡していない項目を対話で聞き、TTY の無いところでは止まる。** 逆に `--yes` 付きでは、省いた項目が黙って既定値(`cloudflare`・`blog`)で埋まる — 手順 1 で決めた値は全部フラグで渡す。`--template` は `cloudflare:<テンプレート>` の形で、プラットフォームも一緒に決める。
+- **サンドボックスのプラグインは既定で無効にする(`--no-sandboxed-plugins`)。** 有効にするには Worker Loader の binding が要り、これは Workers の有料プランでしか使えない。`--yes` だけでも無効になるが、あとから読んで意図が分かるように明示する。無効にしても `astro.config.mjs` の `sandboxed: [...]` は残り、そこに並んだプラグインは読み込まれない — 片付けは手順 5 のやることリストが扱う。有料プランで使うと決めたら、あとから [Plugin Sandbox](https://docs.emdashcms.com/deployment/plugin-sandbox/) の手順で有効にする。
 - **git は初期化されない。** 手を入れる前の雛形だけのコミットを作っておくと、あとで `git diff <そのコミット>` がそのまま「テンプレートからどこを変えたか」になる — `updating-emdash` がテンプレート由来のコードを直すときの足場になる。
 - `.env` に `EMDASH_ENCRYPTION_KEY` が書かれる(gitignore 済み)。**パスワードマネージャーへ控えるようユーザーに伝える。** 失うと、暗号化して保存された設定値が読めなくなる。
 
@@ -83,6 +82,8 @@ pnpm dev   # http://localhost:4321/
 ### 7. 本番へ出す
 
 公式の [Cloudflare へのデプロイ](https://docs.emdashcms.com/deployment/cloudflare/) に沿う(`pnpm build` → `pnpm wrangler deploy`。D1 と R2 は初回デプロイで作られ、マイグレーションは最初のリクエストで当たる)。公式に無い注意:
+
+- **デプロイ手順のページの `wrangler.jsonc` の例は、`worker_loaders` が有効になっている。** 手順 2 で無効にしたので、この行は写さない(Worker Loader の binding は無料プランではデプロイできない)。
 
 - **本番の管理画面は、ユーザーが1人もいないあいだ、URL に最初に来た人が管理者を作れる。** 管理者作成の API はユーザー数しか見ていない。デプロイしたら **すぐに** ユーザーに本番の `/_emdash/admin/` で初回セットアップを済ませてもらう。先に閉じたいなら、デプロイ前に `setup-cf-access` スキルで管理画面に Cloudflare Access を掛ける。
 - `EMDASH_ENCRYPTION_KEY` は `pnpm wrangler secret put EMDASH_ENCRYPTION_KEY` で入れる。値は手順 2 と同じく控えてもらう。

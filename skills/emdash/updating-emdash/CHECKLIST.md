@@ -187,7 +187,7 @@
 ### Worker Loader が無いとサンドボックスのプラグインは読み込まれない
 
 - **判定:** `grep -qE '^\s*"worker_loaders"' wrangler.jsonc || grep -n "sandboxed:" astro.config.mjs`(行頭に限るのは、`--no-sandboxed-plugins` がこのキーを `//` でコメントアウトして残すから)
-- **対応:** `--no-sandboxed-plugins` で作ると `worker_loaders` はコメントアウトされるが、`astro.config.mjs` の `sandboxed: [...]` は残る。このままでは、そこに並べたプラグインは **黙って読み込まれない**(起動時に "Plugin sandbox is configured but not available" の警告だけが出る)。有料プランならコメントを外す。無料プランなら `sandboxed` から外す — `plugins: []` へ移して同じプロセスで動かせるかは、プラグインの形式による(`creating-plugins` スキルの形式の表)。
+- **対応:** `--no-sandboxed-plugins` で作ると `worker_loaders` はコメントアウトされるが、`astro.config.mjs` の `sandboxed: [...]` は残る。このままでは、そこに並べたプラグインは **黙って読み込まれない**(起動時に "Plugin sandbox is configured but not available" の警告だけが出る)。有料プランならコメントを外す。無料プランなら `sandboxed` から外すか、`plugins: []` へ移して同じプロセスで動かす。移すと隔離も資源の制限も無くなるので、プラグインにサイト本体と同じ権限を渡すことになる(公式の [Capabilities & Security](https://docs.emdashcms.com/plugins/creating-plugins/capabilities/))。
 - **本番:** デプロイ後のログ(`pnpm wrangler tail`)に上の警告が出ていないことを確かめる。
 
 ### 一覧のエントリにも `edit` が付くようになった

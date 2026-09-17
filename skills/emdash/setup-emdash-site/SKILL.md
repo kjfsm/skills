@@ -65,9 +65,9 @@ npx -y skills add kjfsm/skills --agent claude-code --yes \
 
 ### 5. 依存を入れて、最新に追いつかせる
 
-`pnpm install` のあと、**`updating-emdash` スキルを呼び、「セットアップ直後」として進める。** テンプレートは依存の版だけが最新で、コードは数版前の書き方のまま残っているので、雛形のままでは新しい版の機能が効かない箇所がある。
+**`updating-emdash` スキルを呼ぶ。** テンプレートは依存の版だけが最新で、コードは数版前の書き方のまま残っているので、雛形のままでは新しい版の機能が効かない箇所がある。`pnpm install` からコミットの切り方まで、あちらの手順に従う。
 
-コミットの切り方は `updating-emdash` の手順に従う(`pnpm install` で生まれた `pnpm-lock.yaml` は、その最初のコミットに含める)。
+終わると、最初のデプロイのあとにやる本番の作業が返ってくる。手順 7 まで持っておく。
 
 ### 6. 手元で動かす
 
@@ -86,7 +86,7 @@ pnpm dev   # http://localhost:4321/
 
 - **本番の管理画面は、ユーザーが1人もいないあいだ、URL に最初に来た人が管理者を作れる。** 管理者作成の API はユーザー数しか見ていない。デプロイしたら **すぐに** ユーザーに本番の `/_emdash/admin/` で初回セットアップを済ませてもらう。先に閉じたいなら、デプロイ前に `setup-cf-access` スキルで管理画面に Cloudflare Access を掛ける。
 - `EMDASH_ENCRYPTION_KEY` は `pnpm wrangler secret put EMDASH_ENCRYPTION_KEY` で入れる。値は手順 2 と同じく控えてもらう。
-- `wrangler.jsonc` の cron は毎分(`* * * * *`)で入っている。頻度は `updating-emdash` のやることリストの「cron の頻度を決める」で決める。
+- 手順 5 で返ってきた本番の作業を、初回セットアップのあとに行う(SEO パネルの `supports`、検索の索引、サイドバーの並び順など)。
 - エッジキャッシュを入れるなら `caching-emdash-site` スキルを呼ぶ。
 - `account_id` やカスタムドメインなど、デプロイのために `wrangler.jsonc` を変えたらコミットする。`dev` で生成型 `emdash-env.d.ts` や `worker-configuration.d.ts` が変わっていれば、それも別のコミットにする。
 

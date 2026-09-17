@@ -9,4 +9,4 @@
 - **[creating-plugins](./creating-plugins/SKILL.md)** — 公式が扱っていない npm 配布の `format: "standard"` ディスクリプタ形式、Block Kit の未文書化ブロック、`fields` を持たない Portable Text ブロックが管理エディタで壊れること。
 - **[emdash-cli](./emdash-cli/SKILL.md)** — エージェントから叩くときの自動公開の挙動、`--published`、Portable Text ⇄ markdown の変換仕様、本番の D1 から `export-seed` でシードを作り直す手順。
 - **[local-mcp-access](./local-mcp-access/SKILL.md)** — ローカル dev サーバーの MCP エンドポイント(`/_emdash/api/mcp`)をブラウザなしで叩く。`dev-bypass` + トークン API 経由での PAT 発行(MCP は bearer 専用で、公式の「セッション Cookie も使える」は実装と食い違う)、コア MCP ツールが公開していないプラグイン管理設定の読み書き、MCP にツールの無い操作を REST で行う方法、`wrangler d1 execute` による D1 テーブルの直接参照。
-- **[patching-emdash](./patching-emdash/SKILL.md)** — EmDash 本体の不具合を pnpm パッチで直す判断と手順。当てる前に上流の修正・issue・サイト側の回避を確かめる順序、実行時に読まれるのが `dist/` であること、peer 違いの複数インストールで `pnpm patch` が非 TTY で止まるときの手作り、版付きキーと上げるたびの作り直し、本番でしか通らない経路の前後比較。
+- **[patching-emdash](./patching-emdash/SKILL.md)** — EmDash 本体の不具合を pnpm パッチで直す判断と手順。当てる前に上流の修正・issue・サイト側の回避を確かめる順序、実行時に読まれるのが `dist/` であること、peer 違いの複数インストールで `pnpm patch` が非 TTY で止まるときの手作り、版付きキーと上げるたびの作り直し、`patches/README.md` の台帳、本番でしか通らない経路の前後比較。

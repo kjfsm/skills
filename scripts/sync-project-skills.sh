@@ -12,10 +12,10 @@ set -uo pipefail
 # 向けの、メンテナ専用のセットアップである。こちらはリポジトリに **コミットされる**
 # ので、クローンした誰にでも、`~` を書き換えられないクラウドセッションにも届く。
 #
-# 張るのは **昇格していない** バケットだけである。昇格済みのスキルはプラグイン
-# `kjfsm-skills` が配るので、ここにも張ると Claude Code がセッション開始時に同じ
-# スキルを2度並べる — 実体は1つでも、名前と description のぶんだけコンテキストを
-# 二重に払う。`deprecated/` は link-skills.sh と同じ規則で除く。`in-progress/` を
+# 張るのは **どのプラグインも配らない** バケットだけである。昇格済みは
+# `kjfsm-skills` が、`emdash/` と `personal/` はそれぞれ専用のプラグインが配るので、
+# ここにも張ると入れた人のセッションで同じスキルが2度並ぶ — 実体は1つでも、名前と
+# description のぶんだけコンテキストを二重に払う。`deprecated/` は link-skills.sh と同じ規則で除く。`in-progress/` を
 # 張るのは意図的で、下書きはここで呼んでみて初めて直せる。
 #
 # 使い方:
@@ -27,9 +27,9 @@ cd "$REPO"
 
 DEST=".claude/skills"
 
-# check-invariants.sh の PROMOTED_BUCKETS と同じ集合。検査 14. はこの定数で --check
-# するので、あちらだけ動かしても 14. は通ってしまう — 揃えるのは手で確かめる。
-PROMOTED_BUCKETS="engineering productivity"
+# check-invariants.sh の PROMOTED_BUCKETS と PLUGIN_BUCKETS を合わせた集合。検査 14. は
+# この定数で --check するので、あちらだけ動かしても 14. は通ってしまう — 揃えるのは手で確かめる。
+SHIPPED_BUCKETS="engineering productivity emdash personal"
 
 check=0
 if [ "${1:-}" = "--check" ]; then
@@ -55,7 +55,7 @@ names=()
 targets=()
 while IFS= read -r skill_md; do
   src="${skill_md%/SKILL.md}"
-  case " $PROMOTED_BUCKETS " in
+  case " $SHIPPED_BUCKETS " in
     *" $(basename "$(dirname "$src")") "*) continue ;;
   esac
   names+=("$(basename "$src")")
@@ -110,7 +110,7 @@ if [ -d "$DEST" ]; then
       fi
     done
     [ "$known" -eq 1 ] && continue
-    note "$stale is stale (promoted, deprecated, or gone)"
+    note "$stale is stale (shipped by a plugin, deprecated, or gone)"
     [ "$check" -eq 1 ] || rm -rf "$stale"
   done < <(find "$DEST" -mindepth 1 -maxdepth 1 | sort)
 fi

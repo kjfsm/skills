@@ -1,6 +1,6 @@
-スキルは `skills/` 配下のバケットフォルダに整理されている。**昇格済み**は `engineering/` と `productivity/` の2つだけで、そこにあるスキルだけがトップレベルの `README.md` と `.claude-plugin/plugin.json` の `skills` 配列に載る — 残りのバケット(`misc/`、`emdash/`、`personal/`、`in-progress/`、`deprecated/`)はどちらにも現れてはならない(双方向とも検査 4. が弾く)。各バケットが何のためにあり、なぜ昇格していないかは、そのバケットの `README.md` の冒頭にある。
+スキルは `skills/` 配下のバケットフォルダに整理されている。**昇格済み**は `engineering/` と `productivity/` の2つだけで、そこにあるスキルだけがトップレベルの `README.md` と `.claude-plugin/plugin.json` の `skills` 配列に載る — 残りのバケット(`misc/`、`emdash/`、`personal/`、`in-progress/`、`deprecated/`)はどちらにも現れてはならない(双方向とも検査 4. が弾く)。ただし `emdash/` と `personal/` は、同じマーケットプレイスの別プラグイン(`kjfsm-emdash` / `kjfsm-personal`)として配る — 実体は `skills/<バケット>/` のまま、`plugins/<バケット>/skills/` にシンボリックリンクを1本ずつ張る(検査 4b.)。理由と却下した手は [.agents/adr/0005-ship-buckets-as-side-plugins.md](./.agents/adr/0005-ship-buckets-as-side-plugins.md)。各バケットが何のためにあり、なぜ昇格していないかは、そのバケットの `README.md` の冒頭にある。
 
-このリポジトリ自体が単一プラグイン `kjfsm-skills` の Claude Code マーケットプレイスでもある。そう決めた理由は [.agents/adr/0002-ship-as-a-claude-code-plugin.md](./.agents/adr/0002-ship-as-a-claude-code-plugin.md) にある。**`version` はどこにも置かない** — `plugin.json` と `marketplace.json` の **両方** から省いてあるあいだだけ、push した内容がインストール済みユーザーへ更新として届く(検査 11. が両方を見る)。マニフェストの他の決まりと、触ったあとに走らせるものは [.agents/adding-a-skill.md](./.agents/adding-a-skill.md) が持つ。
+このリポジトリ自体が、`kjfsm-skills` を中心とする Claude Code マーケットプレイスでもある。そう決めた理由は [.agents/adr/0002-ship-as-a-claude-code-plugin.md](./.agents/adr/0002-ship-as-a-claude-code-plugin.md) にある。**`version` はどこにも置かない** — `plugin.json`(`plugins/*/` のものを含む)と `marketplace.json` の **両方** から省いてあるあいだだけ、push した内容がインストール済みユーザーへ更新として届く(検査 11. が両方を見る)。マニフェストの他の決まりと、触ったあとに走らせるものは [.agents/adding-a-skill.md](./.agents/adding-a-skill.md) が持つ。
 
 サブエージェントは `agents/` に置く。プラグインはこのディレクトリを **自動で拾う** ので、`plugin.json` には列挙しない — 列挙と走査の両方に載ると同じエージェントが2度並ぶ(スキルの `.claude/skills/` と同じ壊れ方)。**バケットの区別はここには無い**: `agents/` に置いたものは全部配られるので、まだ配りたくない下書きは `.claude/agents/` に置く(そちらはこのリポジトリでしか見えない)。このリポジトリで "agents" と名の付くものは3つあり、混ぜない — 配るサブエージェントの `agents/`、Codex 向けのメタデータ `skills/*/*/agents/openai.yaml`、このリポジトリ自身の設計文書 `.agents/`。
 
@@ -18,7 +18,7 @@
 
 このリポジトリは [mattpocock/skills](https://github.com/mattpocock/skills) の日本語訳から出発した独立フォークで、git 上の共通祖先が無い。本家のどこまでを突き合わせ済みか、何を意図的に取り込んでいないか、差分をどう測るかは [.agents/upstream-sync.md](./.agents/upstream-sync.md) にある — 本家由来のスキルを直すときは、そこを見てから決める。
 
-このリポジトリは自分のスキルを自分自身で使う。`.claude/skills/` に **昇格していない** バケット(`deprecated/` を除く)のスキルの実体へのシンボリックリンクがコミットされているので、クローンした誰にでも、`~` を持ち越せないクラウドセッションにも届く。**昇格済みはここに張らない** — 配るのはプラグインの役目で、両方から見えると Claude Code はセッション開始時に同じスキルを2度並べ、name と description のぶんだけ毎セッション二重に払う。張り直すのは `scripts/sync-project-skills.sh`、ずれの検出は検査 14. が行う。`in-progress/` を張るのは意図的である: 下書きは実際に呼んでみて初めて直せる。
+このリポジトリは自分のスキルを自分自身で使う。`.claude/skills/` に **どのプラグインも配らない** バケット(`misc/` と `in-progress/`)のスキルの実体へのシンボリックリンクがコミットされているので、クローンした誰にでも、`~` を持ち越せないクラウドセッションにも届く。**プラグインで配るもの(昇格済み、`emdash/`、`personal/`)はここに張らない** — 配るのはプラグインの役目で、両方から見えると Claude Code はセッション開始時に同じスキルを2度並べ、name と description のぶんだけ毎セッション二重に払う。張り直すのは `scripts/sync-project-skills.sh`、ずれの検出は検査 14. が行う。`in-progress/` を張るのは意図的である: 下書きは実際に呼んでみて初めて直せる。
 
 ユーザーとのやり取りは日本語で行う。コミットメッセージと PR 本文もこのリポジトリの慣習に従って日本語である(識別子とファイル名は英語)。
 

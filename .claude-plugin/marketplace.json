@@ -12,6 +12,20 @@
       "description": "実務のエンジニアリングのための kjfsm のエージェントスキル集 — グリリング、スペック/チケットフロー、TDD、コードレビュー、ドメインモデリングなど。",
       "category": "engineering",
       "keywords": ["engineering", "skills", "tdd", "code-review", "grilling"]
+    },
+    {
+      "name": "kjfsm-emdash",
+      "source": "./plugins/emdash",
+      "description": "EmDash CMS(Astro + Cloudflare)のサイト専用のスキル集。EmDash のサイトのリポジトリに --scope project で入れる。",
+      "category": "development",
+      "keywords": ["emdash", "astro", "cloudflare", "cms"]
+    },
+    {
+      "name": "kjfsm-personal",
+      "source": "./plugins/personal",
+      "description": "kjfsm 個人の作業環境に紐づいたスキル集。",
+      "category": "productivity",
+      "keywords": ["personal"]
     }
   ]
 }

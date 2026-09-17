@@ -17,6 +17,9 @@ err() {
 }
 
 PROMOTED_BUCKETS="engineering productivity"
+# バケットごとに専用のプラグイン(plugins/<バケット>/)で配るもの。全員には入れず、
+# 必要なリポジトリや端末で個別に有効にする。see .agents/adr/0005-ship-buckets-as-side-plugins.md
+PLUGIN_BUCKETS="emdash personal"
 PLUGIN=".claude-plugin/plugin.json"
 
 frontmatter() {
@@ -140,6 +143,16 @@ while IFS= read -r skill_md; do
       ;;
   esac
 
+  # 4b. バケット単位のプラグインは、そのバケットのスキルを1本ずつシンボリックリンクで
+  #     持つ。リンク先がマーケットプレイスの中なら、インストール時に実体がコピーされる。
+  case " $PLUGIN_BUCKETS " in
+    *" $bucket "*)
+      side_link="plugins/$bucket/skills/$name"
+      [ "$(readlink "$side_link" 2>/dev/null)" = "../../../skills/$bucket/$name" ] ||
+        err "$name is in $bucket/ but $side_link is not a symlink to ../../../skills/$bucket/$name"
+      ;;
+  esac
+
   # 5. every bucket README lists every skill in its bucket
   grep -q "](\./$name/SKILL\.md)" "skills/$bucket/README.md" ||
     err "$name is missing from skills/$bucket/README.md"
@@ -231,11 +244,25 @@ while IFS= read -r path; do
   [ -f "$path/SKILL.md" ] || err "$PLUGIN lists $path, which has no SKILL.md"
 done < <(sed -n 's|^[[:space:]]*"\(\./skills/[^"]*\)",\{0,1\}$|\1|p' "$PLUGIN")
 
+for bucket in $PLUGIN_BUCKETS; do
+  side="plugins/$bucket"
+  [ -f "$side/.claude-plugin/plugin.json" ] || err "$side/.claude-plugin/plugin.json is missing; skills/$bucket/ ships through it"
+  grep -q "\"source\": \"\./$side\"" .claude-plugin/marketplace.json ||
+    err ".claude-plugin/marketplace.json does not list ./$side; the plugin cannot be installed"
+  # 退役・改名・移動でリンクだけ残ると、実体の無いスキルを配ろうとしてインストール時に消える
+  while IFS= read -r entry; do
+    [ -f "skills/$bucket/$(basename "$entry")/SKILL.md" ] ||
+      err "$entry is stale (no such skill under skills/$bucket/)"
+  done < <(find "$side/skills" -mindepth 1 -maxdepth 1 2>/dev/null | sort)
+done
+
 # 11. `version` はどこにも無い — plugin.json と marketplace.json の両方。
 #     コミット SHA をバージョンとして扱わせる条件が「両方から省く」ことで、片方だけ
 #     書いても更新は止まる。see CLAUDE.md
-! grep -q '^[[:space:]]*"version"' "$PLUGIN" ||
-  err "$PLUGIN has a \"version\" field; it pins the cache key and stops updates from reaching installed users"
+for manifest in "$PLUGIN" plugins/*/.claude-plugin/plugin.json; do
+  ! grep -q '^[[:space:]]*"version"' "$manifest" ||
+    err "$manifest has a \"version\" field; it pins the cache key and stops updates from reaching installed users"
+done
 ! grep -q '"version"' .claude-plugin/marketplace.json ||
   err ".claude-plugin/marketplace.json has a \"version\" field; the commit-SHA versioning needs it omitted from the marketplace entry too"
 

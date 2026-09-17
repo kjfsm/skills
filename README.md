@@ -250,10 +250,10 @@ npx -y skills add kjfsm/skills
 
 ### その他のバケット
 
-昇格していない(プラグインへのエントリなし、上記の README への掲載もなし) — 中身については各バケット自身の `README.md` を参照:
+昇格していない(`kjfsm-skills` へのエントリなし、上記の README への掲載もなし) — 中身については各バケット自身の `README.md` を参照:
 
 - [`skills/misc/`](./skills/misc/README.md) — 残してあるがほとんど使われない
-- [`skills/emdash/`](./skills/emdash/README.md) — [EmDash](https://docs.emdashcms.com) CMS のサイト専用。EmDash を使わないプロジェクトでは無価値
-- [`skills/personal/`](./skills/personal/README.md) — この端末固有のセットアップに紐づく
+- [`skills/emdash/`](./skills/emdash/README.md) — [EmDash](https://docs.emdashcms.com) CMS のサイト専用。EmDash を使わないプロジェクトでは無価値なので、別プラグイン `kjfsm-emdash` でサイトのリポジトリにだけ入れる
+- [`skills/personal/`](./skills/personal/README.md) — この端末固有のセットアップに紐づく。別プラグイン `kjfsm-personal` で自分の端末にだけ入れる
 - [`skills/in-progress/`](./skills/in-progress/README.md) — まだ出荷準備が整っていない下書き
 - [`skills/deprecated/`](./skills/deprecated/README.md) — もう使われていない

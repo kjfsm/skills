@@ -10,4 +10,17 @@ PATCH /zones/{zone_id}/cache/tiered_cache_smart_topology_enable   {"value": "on"
 
 MISS をわざと起こして測るには、クエリ文字列を付ける。`routeRules` は pathname だけを見て当たる一方、Cloudflare のキャッシュキーにはクエリが入る。
 
-`Server-Timing` に出るのは middleware から内側だけである。**TTFB と `mw` の差**が、往復と isolate の起動にかかった時間になる。Placement の後でも、isolate が冷えているときは TTFB が 1 秒を超える(`mw` は 150 ms 程度)。
+`Server-Timing` に出るのは middleware から内側だけである。**TTFB と `mw` の差**が、往復と isolate の起動にかかった時間になる。
+
+## Placement の後に残る遅さは2つの型に分かれる
+
+5 秒おきに1本ずつ、クエリ文字列を変えて MISS を起こし、**同じ応答から** TTFB と `Server-Timing` を取る(別のリクエストで取ると、遅い回と速い回の数字が混ざる)。実測(primary が SIN、`remote-SIN`、KIX から)では次の2つが別々に出た。
+
+| 型              | 見分け方                                                             | 実測                                                          |
+| --------------- | -------------------------------------------------------------------- | ------------------------------------------------------------- |
+| isolate の初回  | `setup` と `rt` が載っている(isolate の最初のリクエストでしか出ない) | TTFB − `mw` が 1.3–1.4 秒。温まった isolate では 0.25–0.33 秒 |
+| KV のエッジ切れ | 約60秒ごとに 10–15 秒続く。`mw` が跳ねるのに `db.total` は小さいまま | `mw` 400–620 ms、`db.total` 30–90 ms                          |
+
+**isolate の初回**は、上乗せの約1秒が `mw` の**外**にある。middleware より前に走るもの — Worker スクリプトの起動(実測したサイトのバンドルは 13 MB、gzip で 3.3 MB)— と見ているが、起動時間そのものはまだ測っていない。
+
+**KV のエッジ切れ**は `mw` の**中**にある。`@emdash-cms/cloudflare` の `dist/cache/kv.mjs`(0.38)は `kv.get(key, "text")` を `cacheTtl` なしで呼ぶので、colo に置かれた値は KV の既定の 60 秒で切れ、次の読み取りは中央のストレージまで行く。KV の待ちは `db.total` に入らないので、**`mw` と `db.total` の差が開く**ことで見分ける。`kvCache()` に `cacheTtl` を渡すオプションは無い。パッチで延ばすと、無効化に使う epoch キーも同じ `get` を通るので、更新が出るまでの遅延も同じだけ延びる。

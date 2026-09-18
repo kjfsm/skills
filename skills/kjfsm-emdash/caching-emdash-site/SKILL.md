@@ -89,7 +89,7 @@ curl -sS -D - -o /dev/null -H 'Accept: text/html' https://例.com/ | grep -i 'cf
 
 **完了基準:** 管理画面(`/_emdash/admin`)が `BYPASS` であることを確かめている。ここが `HIT` なら catch-all を書いている。
 
-**`swr` があっても、アクセスの少ないサイトでは MISS が残る。** 追い出され方、自分でオンにしない限り off の Smart Tiered Cache、MISS をわざと起こして TTFB を分解する測り方は [MISS.md](./MISS.md)。
+**`swr` があっても、アクセスの少ないサイトでは MISS が残る。** 追い出され方、自分でオンにしない限り off の Smart Tiered Cache、MISS をわざと起こして TTFB を分解する測り方、Placement の後に残る遅さの2つの型は [MISS.md](./MISS.md)。
 
 ## 空振りの一覧
 
@@ -194,6 +194,8 @@ wrangler kv key list --binding CACHE --remote
 ```
 
 読むべきは `db.count`(クエリ本数)と `db.total`(DB合計)で、`db.total == render` ならレンダリング時間はすべてDB待ちである。 `db.last − db.first` が `db.total` に近ければ、クエリは直列に並んでいる。そこで1本あたりの時間(`db.total / db.count`)が数十 ms あるなら、Worker と D1 primary が離れている(手順 1)。
+
+**KV の待ちは `db.total` に入らない。** `mw` が大きいのに `db.total` が小さければ、時間は KV の読み取りに消えている([MISS.md](./MISS.md))。
 
 ### 7. `Astro.cache.set(cacheHint)` は provider が無いと空振りする
 

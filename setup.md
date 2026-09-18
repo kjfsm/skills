@@ -36,13 +36,13 @@ claude plugin marketplace add kjfsm/skills
 claude plugin install kjfsm-skills@kjfsm
 ```
 
-インストールされたことを確認する:
+`kjfsm-skills` は本家の `mattpocock-skills@mattpocock` に依存しているので、本家も一緒に入る。インストールされたことを確認する:
 
 ```
 claude plugin list
 ```
 
-`kjfsm-skills` が一覧に出ていれば成功。
+`kjfsm-skills` と `mattpocock-skills` が一覧に出ていれば成功。
 
 ### B: `npx skills` でコピーとして入れる
 

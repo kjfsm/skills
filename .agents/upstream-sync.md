@@ -9,6 +9,12 @@
 
 次に同期するときは `git clone https://github.com/mattpocock/skills` して、最後に突き合わせた地点を base に下の測り方を回す。この表を更新するのは、実際に突き合わせて取捨を決めたときだけである。
 
+## 同期の対象は訳だけになった
+
+2026-09-18 から、`kjfsm-skills` は本家のプラグイン `mattpocock-skills` に依存している(→ [ADR 0006](./adr/0006-depend-on-upstream-ship-translation-separately.md))。本家の更新は、`kjfsm-skills` を使う人へは本家から直接届く。この文書の手順で手を入れるのは、`skills/matt-skills-jp/` の訳と、本家から離れて `kjfsm-skills` に残した `implement`・`ask-kjfsm`・`setup-skills`・`writing-great-skills` だけである。
+
+訳へ取り込むときは、`kjfsm-skills` のスキルを名指ししない。
+
 ## 起点の確認方法
 
 `ed37663` は推定ではない。フォーク初版(`2747d44`, 2026-07-25)のスキル集合が、本家 `ed37663` の集合と次の差だけで一致した — `ask-matt`→`ask-kjfsm`、`setup-matt-pocock-skills`→`setup-skills`、`personal/obsidian-vault` を落とし、`ai-efficiency` と `setup-cf-app` を足した。次の本家コミット `17f22a3` は `writing-great-skills` を `writing-for-agents` に改名しており、フォークは旧名を持っているので、起点はその手前である。

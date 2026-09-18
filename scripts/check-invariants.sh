@@ -378,7 +378,7 @@ for manifest in hooks/hooks.json .claude/settings.json; do
     err "$manifest does not wire $hook_script; the repository would ship a discipline it does not run on itself"
 done
 
-# 18. `agents/` のサブエージェントが健全で、呼ぶ側と食い違っていない。プラグインは
+# 18. `agents/` と `plugins/*/agents/` のサブエージェントが健全で、呼ぶ側と食い違っていない。プラグインは
 #     このディレクトリを自動で拾う(`plugin.json` に列挙しない — 列挙と走査の両方に
 #     載ると同じエージェントが2度並ぶ)。壊れたときの症状は「そんな subagent_type は
 #     無い」で静かに汎用エージェントへ落ちるか、そもそも起動しないかであり、どちらも

@@ -19,7 +19,7 @@ err() {
 PROMOTED_BUCKETS="engineering productivity"
 # バケットごとに専用のプラグイン(plugins/<バケット>/)で配るもの。全員には入れず、
 # 必要なリポジトリや端末で個別に有効にする。see .agents/adr/0005-ship-buckets-as-side-plugins.md
-PLUGIN_BUCKETS="emdash personal matt-skills-jp"
+PLUGIN_BUCKETS="kjfsm-emdash kjfsm-personal matt-skills-jp"
 PLUGIN=".claude-plugin/plugin.json"
 
 frontmatter() {

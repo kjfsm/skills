@@ -6,7 +6,7 @@
     "name": "kjfsm",
     "url": "https://github.com/kjfsm"
   },
-  "homepage": "https://github.com/kjfsm/skills/tree/main/skills/emdash",
+  "homepage": "https://github.com/kjfsm/skills/tree/main/skills/kjfsm-emdash",
   "repository": "https://github.com/kjfsm/skills",
   "license": "MIT",
   "keywords": ["emdash", "astro", "cloudflare", "cms"]

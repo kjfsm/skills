@@ -16,14 +16,14 @@
     },
     {
       "name": "kjfsm-emdash",
-      "source": "./plugins/emdash",
+      "source": "./plugins/kjfsm-emdash",
       "description": "EmDash CMS(Astro + Cloudflare)のサイト専用のスキル集。EmDash のサイトのリポジトリに --scope project で入れる。",
       "category": "development",
       "keywords": ["emdash", "astro", "cloudflare", "cms"]
     },
     {
       "name": "kjfsm-personal",
-      "source": "./plugins/personal",
+      "source": "./plugins/kjfsm-personal",
       "description": "kjfsm 個人の作業環境に紐づいたスキル集。",
       "category": "productivity",
       "keywords": ["personal"]

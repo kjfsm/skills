@@ -11,7 +11,7 @@
 | バケット                                                 | 配布                                                    | ここに入れるもの                                    |
 | -------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------- |
 | `kjfsm-skills/engineering/` `kjfsm-skills/productivity/` | **される**(`kjfsm-skills` + `npx skills`)               | 他人のリポジトリでも価値を持つもの                  |
-| `emdash/` `personal/`                                    | **入れた場所にだけ**(`kjfsm-emdash` / `kjfsm-personal`) | 特定の CMS のサイト、自分の端末でだけ価値を持つもの |
+| `kjfsm-emdash/` `kjfsm-personal/`                        | **入れた場所にだけ**(`kjfsm-emdash` / `kjfsm-personal`) | 特定の CMS のサイト、自分の端末でだけ価値を持つもの |
 | `matt-skills-jp/`                                        | **本家の代わりに入れた人にだけ**(`matt-skills-jp`)      | 本家をほぼ訳のまま写したもの。自作はここに置かない  |
 | `misc/` `in-progress/` `deprecated/`                     | されない(`npx skills` の個別指定でのみ届く)             | ほとんど使わないもの、下書き、退役したもの          |
 
@@ -19,7 +19,7 @@
 
 本家と同じ名前のスキルは昇格済みのバケットに置かない — `kjfsm-skills` は本家に依存しているので、同じ名前が2度並ぶ(→ [ADR 0006](./adr/0006-depend-on-upstream-ship-translation-separately.md))。
 
-`emdash/`・`personal/`・`matt-skills-jp/` に足したら、`plugins/<バケット>/skills/<名前>` に `../../../skills/<バケット>/<名前>` へのシンボリックリンクを張る(張り忘れは検査 4b. が落とす)。
+`kjfsm-emdash/`・`kjfsm-personal/`・`matt-skills-jp/` に足したら、`plugins/<バケット>/skills/<名前>` に `../../../skills/<バケット>/<名前>` へのシンボリックリンクを張る(張り忘れは検査 4b. が落とす)。
 
 迷ったら `in-progress/` に置く。出荷準備が整っていない下書きの正規の置き場であり、そこに居るあいだは誰にも届かない。
 
@@ -97,7 +97,7 @@ scripts/check-invariants.sh
 
 `version` を両方のマニフェストから省く理由は `CLAUDE.md` が持つ。片方にでも書くと、その文字列が固定のキャッシュキーになって更新が止まる。
 
-昇格していないバケットのスキルは、プラグインではなく利用側リポジトリでの `npx skills` による実体配置で配る(`skills-lock.json` に載り、`npx skills update` で追随できる)。`emdash/` がこの経路の主な利用者である。
+昇格していないバケットのスキルは、プラグインではなく利用側リポジトリでの `npx skills` による実体配置で配る(`skills-lock.json` に載り、`npx skills update` で追随できる)。`kjfsm-emdash/` がこの経路の主な利用者である。
 
 ## 改名するとき
 

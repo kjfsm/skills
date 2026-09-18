@@ -11,7 +11,7 @@
 
 ## 同期の対象は訳だけになった
 
-2026-09-18 から、`kjfsm-skills` は本家のプラグイン `mattpocock-skills` に依存している(→ [ADR 0006](./adr/0006-depend-on-upstream-ship-translation-separately.md))。本家の更新は、`kjfsm-skills` を使う人へは本家から直接届く。この文書の手順で手を入れるのは、`skills/matt-skills-jp/` の訳と、本家から離れて `kjfsm-skills` に残した `implement`・`ask-kjfsm`・`setup-skills`・`writing-great-skills` だけである。
+2026-09-18 から、`kjfsm-skills` は本家のプラグイン `mattpocock-skills` に依存している(→ [ADR 0006](./adr/0006-depend-on-upstream-ship-translation-separately.md))。本家の更新は、`kjfsm-skills` を使う人へは本家から直接届く。この文書の手順で手を入れるのは、`skills/matt-skills-jp/` の訳と、本家から離れて `kjfsm-skills` に残した `implement-and-review`・`ask-kjfsm`・`setup-skills`・`writing-great-skills` だけである。
 
 訳へ取り込むときは、`kjfsm-skills` のスキルを名指ししない。
 
@@ -44,4 +44,4 @@ scripts/upstream-diff.py <本家のクローン先> <base> <head>
 - **`deprecated/` バケットの廃止** — 本家は退役スキルを削除する方針に変えたが、こちらは残す
 - **「Skill ツールを "x" で呼ぶ」という言い回し** — 呼び出しであることを明示する意図は取り込んだが、道具名は出さず `` `x` スキルを呼ぶ `` にしてある。書き分けの規則は `.agents/invocation.md` にある
 - **新スキル `wait-what`** — 中身は「ASD-STE100(航空宇宙の簡易英語規格)で言い直せ」の1文。日本語運用のこのフォークでは規格の裏付けが消えて、中身が残らない
-- **新スキル `implement-spec`**(本家も in-progress)**の並列実行** — worktree ごとの実装サブエージェントとマージャで最大限に並列化する形は、各チケットのゲートを末尾の `code-review` 1回に薄めており、`implement` + `verification-loop` + `two-axis-review` の直列チェーンと正面衝突する。ゲートを薄めてまで欲しくなったときに別途決める。(「チケットは手順のリストではなくタスクグラフである」という捉え方だけは `implement` に1文で取り込んだ。)
+- **新スキル `implement-spec`**(本家も in-progress)**の並列実行** — worktree ごとの実装サブエージェントとマージャで最大限に並列化する形は、各チケットのゲートを末尾の `code-review` 1回に薄めており、`implement-and-review` + `verification-loop` + `two-axis-review` の直列チェーンと正面衝突する。ゲートを薄めてまで欲しくなったときに別途決める。(「チケットは手順のリストではなくタスクグラフである」という捉え方だけは `implement-and-review` に1文で取り込んだ。)

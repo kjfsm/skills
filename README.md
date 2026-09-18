@@ -2,7 +2,7 @@
 
 Claude Code、Codex、その他 Agent-Skills 標準に準拠したハーネス向けのエージェントスキル(スラッシュコマンドと振る舞い) — 雰囲気で書くコーディングではなく、実務のエンジニアリングのために使う。
 
-[mattpocock/skills](https://github.com/mattpocock/skills) を日本語訳し、kjfsm 向けに調整した独立フォークから出発した。**本家由来のスキル(`/tdd`、`/grill-with-docs`、`/to-spec` など)は、依存先の本家 `mattpocock-skills` がそのまま配る。** このリポジトリの `kjfsm-skills` が持つのは自作のスキルと、本家から離れて自作の流れの中心になったもの(`/implement`、`/ask-kjfsm`、`/setup-skills`、`/writing-great-skills`)である。本家のほぼ訳のままの日本語訳は、別プラグイン [`matt-skills-jp`](./skills/matt-skills-jp/README.md) に分けてある。
+[mattpocock/skills](https://github.com/mattpocock/skills) を日本語訳し、kjfsm 向けに調整した独立フォークから出発した。**本家由来のスキル(`/tdd`、`/grill-with-docs`、`/to-spec` など)は、依存先の本家 `mattpocock-skills` がそのまま配る。** このリポジトリの `kjfsm-skills` が持つのは自作のスキルと、本家から離れて自作の流れの中心になったもの(`/implement-and-review`、`/ask-kjfsm`、`/setup-skills`、`/writing-great-skills`)である。本家のほぼ訳のままの日本語訳は、別プラグイン [`matt-skills-jp`](./skills/matt-skills-jp/README.md) に分けてある。
 
 これらのスキルは小さく、手を加えやすく、組み合わせやすいように設計されている。どのモデルでも動作する。
 
@@ -25,17 +25,17 @@ Claude Code、Codex、その他 Agent-Skills 標準に準拠したハーネス�
 
 ### 毎回の開発
 
-| やりたいこと           | コマンド                                                |
-| ---------------------- | ------------------------------------------------------- |
-| 新機能をつくる         | `/grill-with-docs` で設計を詰める → `/implement` で作る |
-| 何かが壊れている       | `/diagnosing-bugs`                                      |
-| イシューが積み上がった | `/triage`                                               |
-| 大きすぎて見通せない   | `/wayfinder`                                            |
-| どれを使うか分からない | **`/ask-kjfsm`**                                        |
+| やりたいこと           | コマンド                                                           |
+| ---------------------- | ------------------------------------------------------------------ |
+| 新機能をつくる         | `/grill-with-docs` で設計を詰める → `/implement-and-review` で作る |
+| 何かが壊れている       | `/diagnosing-bugs`                                                 |
+| イシューが積み上がった | `/triage`                                                          |
+| 大きすぎて見通せない   | `/wayfinder`                                                       |
+| どれを使うか分からない | **`/ask-kjfsm`**                                                   |
 
-締めまで持つのは `/implement` である: `/tdd` でビルドし、`/verification-loop` でクリーンランを取り、`/prune-comments` でコメントを削り、`/two-axis-review` でレビューしてからコミットし、PR を出す。**`/implement` はユーザーからしか呼べない** ので、打たなければこの並びは丸ごと走らない。
+締めまで持つのは `/implement-and-review` である: `/tdd` でビルドし、`/verification-loop` でクリーンランを取り、`/prune-comments` でコメントを削り、`/two-axis-review` でレビューしてからコミットし、PR を出す。**`/implement-and-review` はユーザーからしか呼べない** ので、打たなければこの並びは丸ごと走らない。
 
-複数セッションにまたがる規模なら、`/grill-with-docs` と `/implement` の間に `/to-spec` → `/to-tickets` を挟んでチケットへ割る。規模の判定とフロー全体は `/ask-kjfsm` が持つ。
+複数セッションにまたがる規模なら、`/grill-with-docs` と `/implement-and-review` の間に `/to-spec` → `/to-tickets` を挟んでチケットへ割る。規模の判定とフロー全体は `/ask-kjfsm` が持つ。
 
 ## インストール
 
@@ -100,7 +100,7 @@ claude plugin marketplace add kjfsm/skills --scope project
 claude plugin install kjfsm-skills@kjfsm --scope project
 ```
 
-`kjfsm-skills` は本家の `mattpocock-skills@mattpocock` に依存しており、インストール時に本家も自動で入る(このマーケットプレイスは `allowCrossMarketplaceDependenciesOn` で `mattpocock` を許可している)。本家の日本語訳 `matt-skills-jp` は同じ名前のスキルを持つので、一緒には入れない。**`/implement` だけは本家と kjfsm の両方に同じ名前で在る** — kjfsm 版は検証とレビューの流れを締めまで持つので、`/implement` を打ったら `kjfsm-skills:implement` の方を選ぶ。
+`kjfsm-skills` は本家の `mattpocock-skills@mattpocock` に依存しており、インストール時に本家も自動で入る(このマーケットプレイスは `allowCrossMarketplaceDependenciesOn` で `mattpocock` を許可している)。本家の日本語訳 `matt-skills-jp` は同じ名前のスキルを持つので、一緒には入れない。本家の `/implement` はビルドまでで、検証とレビューの流れを締めまで持つのは kjfsm の `/implement-and-review` である。
 
 これは `.claude/settings.json` に `extraKnownMarketplaces` と `enabledPlugins` を書き込む。コミットすれば、そのリポジトリで作業する人は何も入れなくてもスキルが有効になる — `npx skills` のようにスキルの実体をリポジトリへコミットせずに済む。
 
@@ -190,7 +190,7 @@ npx -y skills add kjfsm/skills
 - **[ask-kjfsm](./skills/engineering/ask-kjfsm/SKILL.md)** — どのスキルやフローが自分の状況に合うかを尋ねる。このリポジトリのスキルを案内するルーター。
 - **[setup-repo](./skills/engineering/setup-repo/SKILL.md)** — setup 系4工程(規約とドキュメント配置・パス別ルール・CI・フック)の入口。順序と依存はこのスキルが持つ。再実行すると現況を読み、足りない工程と**ずれた箇所だけ**を当てる。
 - **[tend-memory-files](./skills/engineering/tend-memory-files/SKILL.md)** — セッション開始時にロードされる指示ファイル(`CLAUDE.md`、`.claude/rules/`)を新規に書く、または監査してトリムする。行数の目安に収め、具体的で矛盾のない指示だけを残す。
-- **[implement](./skills/engineering/implement/SKILL.md)** — スペックやチケットの集合が記述する作業をビルドする。着手前に既定ブランチへ追いつき、事前に合意したシームで `/tdd` を駆動し、`/verification-loop` でクリーンランを取り、`/two-axis-review` を通してから PR を出して締めくくる。
+- **[implement-and-review](./skills/engineering/implement-and-review/SKILL.md)** — スペックやチケットの集合が記述する作業をビルドする。着手前に既定ブランチへ追いつき、事前に合意したシームで `/tdd` を駆動し、`/verification-loop` でクリーンランを取り、`/two-axis-review` を通してから PR を出して締めくくる。
 - **[squash-d1-migrations](./skills/engineering/squash-d1-migrations/SKILL.md)** — 積み上がった D1 のマイグレーションを1本に畳む。合格条件はファイルが減ったことではなく、空の DB に適用した結果が旧チェーンと一致すること。`d1_migrations` は名前を記録しているので、各環境と突き合わせるまでが作業である。
 
 **モデル呼び出し型**

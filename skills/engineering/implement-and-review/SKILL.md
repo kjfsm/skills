@@ -1,5 +1,5 @@
 ---
-name: implement
+name: implement-and-review
 description: "スペックやチケットの集合に基づいて1つの作業をビルドし、PR を出すところまで進める。"
 argument-hint: "[チケット/スペックの参照(省略可)]"
 disable-model-invocation: true

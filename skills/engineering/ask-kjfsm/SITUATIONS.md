@@ -16,7 +16,7 @@
 
 ## スタック固有の規律
 
-どれも `/implement` と `/tdd` の下敷きになる。呼び出さなくてよい — そのリポジトリのコードを書くときに、モデルが自分で手を伸ばす。
+どれも `/implement-and-review` と `/tdd` の下敷きになる。呼び出さなくてよい — そのリポジトリのコードを書くときに、モデルが自分で手を伸ばす。
 
 - **`/react-router-route-module`**(React Router framework mode)— 認可の強制点は `middleware`、レイアウトが持つ値は `<Outlet context>`
 - **`/drizzle-generate-non-interactive`** — TTY を求めるのは rename の判定だけ
@@ -55,4 +55,4 @@
 - **`/domain-modeling`** — _ドメイン_ の語彙。曖昧な用語に異議を唱え、多義語("account" が3つの役割を兼ねる)を解消し、後戻りしにくい決定を ADR に記録する。`/grill-with-docs` が `CONTEXT.md` を用語集に保つために駆動する。
 - **`/codebase-design`** — モジュールの _形_ の語彙(深さ、シーム、アダプター、レバレッジ、局所性)。小さなインターフェースの裏に多くの振る舞いを隠し、きれいなシームに置く。`/tdd` と `/improve-codebase-architecture` がこの語彙で話す。
 - **`/delegation`** — 作業を _どこで_ 走らせるかの語彙(押し出し、階層、報告の長さ)。読み返さない大量の出力は子コンテキストへ押し出し、探索や事実確認は下位モデル、設計判断は上位モデルへ回す。**スマートゾーン** が1つのコンテキストをどこまで伸ばせるかを扱うのに対し、これは何をそこに入れずに済ませるかを扱う。サブエージェントを起動するスキル(`/two-axis-review`、`/improve-codebase-architecture`、`/wayfinder`)がこの語彙で話す。
-- **`/where-to-write-what`** — 情報の _宛先_ の語彙(コードには How、テストには What、コミットログには Why、コメントには Why not。JSDoc・PR 本文・ADR・docs はこの4本から派生する)。同じ事実は1か所にだけ書き、書きたくなった情報を正しい宛先へ届ける。`/implement` がコミットを書く前に呼ぶ。
+- **`/where-to-write-what`** — 情報の _宛先_ の語彙(コードには How、テストには What、コミットログには Why、コメントには Why not。JSDoc・PR 本文・ADR・docs はこの4本から派生する)。同じ事実は1か所にだけ書き、書きたくなった情報を正しい宛先へ届ける。`/implement-and-review` がコミットを書く前に呼ぶ。

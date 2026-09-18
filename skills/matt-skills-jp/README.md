@@ -9,7 +9,7 @@ claude plugin install matt-skills-jp@kjfsm
 
 **`kjfsm-skills` はこれに依存しない。** 依存先は本家の英語版 `mattpocock-skills@mattpocock` で、`kjfsm-skills` を入れると一緒に入る。このバケットは本家と同じ名前のスキルを持つので、本家と併用すると同じ名前が2度並ぶ — 日本語で読みたい人が本家の代わりに入れるものである。理由は [ADR 0006](../../.agents/adr/0006-depend-on-upstream-ship-translation-separately.md)。
 
-本家から大きく離れて自作の流れの中心になったもの(`implement`・`ask-kjfsm`・`setup-skills`・`writing-great-skills`)は、ここではなく `kjfsm-skills` に残してある。どこまで本家と突き合わせたかは [`.agents/upstream-sync.md`](../../.agents/upstream-sync.md)。
+本家から大きく離れて自作の流れの中心になったもの(`implement-and-review`・`ask-kjfsm`・`setup-skills`・`writing-great-skills`)は、ここではなく `kjfsm-skills` に残してある。どこまで本家と突き合わせたかは [`.agents/upstream-sync.md`](../../.agents/upstream-sync.md)。
 
 訳は自作スキルへの参照を持たない — 片方だけ入れても壊れないように。docs/agents/ の設定は本家の `/setup-matt-pocock-skills` を指したままで、その訳はこのバケットに無い。
 

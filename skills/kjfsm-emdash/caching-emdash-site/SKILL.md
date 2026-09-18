@@ -1,6 +1,6 @@
 ---
 name: caching-emdash-site
-description: EmDash + Cloudflare のサイトに Workers Cache でエッジHTMLキャッシュを入れる。本番のTTFBが遅い・初回表示で白画面が長いとき、`routeRules` や `cacheCloudflare()` を設定するとき、キャッシュから外したい経路(検索・404・管理画面)があるとき、MCPや管理画面で更新したのにサイトに出ないとき、`Server-Timing` の `cache.hit`/`cache.miss` を読むときに使う。公式に無い落とし穴と、公式の素直な読みが実装と食い違う箇所だけを扱う。
+description: EmDash + Cloudflare のサイトに Workers Cache でエッジHTMLキャッシュを入れる。本番のTTFBが遅い・しばらく経ってからの初回表示が遅いとき、D1 のリードレプリカや Worker の Placement を決めるとき、`routeRules` や `cacheCloudflare()` を設定するとき、キャッシュから外したい経路(検索・404・管理画面)があるとき、MCPや管理画面で更新したのにサイトに出ないとき、`Server-Timing` の `cache.hit`/`cache.miss` を読むときに使う。公式に無い落とし穴と、公式の素直な読みが実装と食い違う箇所だけを扱う。
 ---
 
 # EmDash サイトのキャッシュ
@@ -23,15 +23,31 @@ description: EmDash + Cloudflare のサイトに Workers Cache でエッジHTML�
 
 ## 手順
 
-### 1. D1 のリードレプリカを先に有効化する
+### 1. Worker を D1 primary の隣へ寄せる。リードレプリカは使わない
 
-`session: "auto"` を書いてもレプリカは作られない。D1 側でも有効化が要る(公式が明記)。片肺のままだと1クエリ 90–100 ms が直列で積み上がり、**エラーは何も出ない**。
+公式([Deploy to Cloudflare](https://docs.emdashcms.com/deployment/cloudflare/) の Targeted Placement)の推奨は、**Worker を D1 primary の近くで走らせ、`session` は既定の `"disabled"` のまま、read replica を有効にしない**ことである。**`session: "auto"` + read replica で訪問者の近くから読む構成は、この推奨とは逆**である。
 
-Cloudflare ダッシュボード → Storage & Databases → D1 → 対象DB → Settings → Read replication。
+エッジキャッシュが MISS したときの遅さは、ほぼここで決まる。EmDash の SSR は D1 へ**直列に**10往復前後する。実測(primary が SIN、Worker が KIX、`session: "auto"`、read replication `auto`)では、1往復 80–90 ms が積み上がって `db.total` 878 ms / 10 本になった。**read replication を有効にしていても速くならなかった。** Placement で SIN に寄せると、同じページで 10–47 ms になる。**エラーは何も出ない。**
 
-`compatibility_flags` に `global_fetch_strictly_public` がある場合は**有効化しない** — SSR が無言でハングする(公式の Caution、[emdash#1273](https://github.com/emdash-cms/emdash/issues/1273))。
+**primary の colo は D1 の GET API からは分からない** — `running_in_region` は `"APAC"` までしか返さない。クエリ API で1本投げ、`meta` を読む:
 
-**完了基準:** API か管理画面で `read_replication.mode` が `disabled` でなくなっている。
+```
+POST /accounts/{account_id}/d1/database/{database_id}/query   {"sql": "select 1"}
+→ meta.served_by_colo: "SIN", meta.served_by_primary: true
+```
+
+colo からリージョン値への対応表は、Placement のドキュメントにも無い。自分で当てる(SIN → `aws:ap-southeast-1`):
+
+```jsonc
+// wrangler.jsonc
+"placement": { "region": "aws:ap-southeast-1" },
+```
+
+**止める場所は2つある。** `d1({ binding: "DB" })` から `session` を外すことと、D1 側の read replication を `disabled` にすること(API の `PATCH .../d1/database/{id}` に `{"read_replication": {"mode": "disabled"}}`、またはダッシュボードの Settings → Read replication)。後者は DB の設定なので、コードのデプロイでは変わらない。
+
+エッジの HTML キャッシュは Worker の手前(訪問者の近く)に立つので、HIT したときの速さは Placement では変わらない。
+
+**完了基準:** MISS した応答に `cf-placement: remote-<primary の colo>` が付き、`Server-Timing` の `db.total` が数十 ms に収まっている。
 
 ### 2. `routeRules` は公開ルートを1つずつ挙げる
 
@@ -39,7 +55,7 @@ Cloudflare ダッシュボード → Storage & Databases → D1 → 対象DB →
 
 対象は `src/pages/` の公開ルートだけ。`/search` と 404、自前で `Cache-Control` を出しているルート(`rss.xml` など)は載せない。
 
-`maxAge` は「更新してからサイトに出るまでの遅延」でもある。MCP を使う運用なら 60 秒程度まで絞り、`swr` を長く(86400)取って**パージ漏れを時間で吸収する**。`swr` があるので訪問者は待たされない。
+`maxAge` は「更新してからサイトに出るまでの遅延」でもある(公式の例は 300 秒)。許せる遅延で決め、`swr` を長く(86400)取って**パージ漏れを時間で吸収する**。`swr` があるので訪問者は待たされない — ただし、エントリが残っているあいだに限る([MISS.md](./MISS.md))。
 
 **完了基準:** `routeRules` のキーがすべて `src/pages` に実在するファイルへ解決する。
 
@@ -72,6 +88,8 @@ curl -sS -D - -o /dev/null -H 'Accept: text/html' https://例.com/ | grep -i 'cf
 2回叩いて `MISS` → `HIT` になり、キャッシュしない経路が `BYPASS` であることを見る。命中時は `Server-Timing` の値が毎回同一になる — ヘッダごとキャッシュから返っている証拠である。
 
 **完了基準:** 管理画面(`/_emdash/admin`)が `BYPASS` であることを確かめている。ここが `HIT` なら catch-all を書いている。
+
+**`swr` があっても、アクセスの少ないサイトでは MISS が残る。** 追い出され方、自分でオンにしない限り off の Smart Tiered Cache、MISS をわざと起こして TTFB を分解する測り方は [MISS.md](./MISS.md)。
 
 ## 空振りの一覧
 
@@ -175,7 +193,7 @@ return cachedQuery({
 wrangler kv key list --binding CACHE --remote
 ```
 
-読むべきは `db.count`(クエリ本数)と `db.total`(DB合計)で、`db.total == render` ならレンダリング時間はすべてDB待ちである。
+読むべきは `db.count`(クエリ本数)と `db.total`(DB合計)で、`db.total == render` ならレンダリング時間はすべてDB待ちである。 `db.last − db.first` が `db.total` に近ければ、クエリは直列に並んでいる。そこで1本あたりの時間(`db.total / db.count`)が数十 ms あるなら、Worker と D1 primary が離れている(手順 1)。
 
 ### 7. `Astro.cache.set(cacheHint)` は provider が無いと空振りする
 

@@ -29,21 +29,7 @@ description: EmDash + Cloudflare のサイトに Workers Cache でエッジHTML�
 
 エッジキャッシュが MISS したときの遅さは、ほぼここで決まる。EmDash の SSR は D1 へ**直列に**10往復前後する。実測(primary が SIN、Worker が KIX、`session: "auto"`、read replication `auto`)では、1往復 80–90 ms が積み上がって `db.total` 878 ms / 10 本になった。**read replication を有効にしていても速くならなかった。** Placement で SIN に寄せると、同じページで 10–47 ms になる。**エラーは何も出ない。**
 
-**primary の colo は D1 の GET API からは分からない** — `running_in_region` は `"APAC"` までしか返さない。クエリ API で1本投げ、`meta` を読む:
-
-```
-POST /accounts/{account_id}/d1/database/{database_id}/query   {"sql": "select 1"}
-→ meta.served_by_colo: "SIN", meta.served_by_primary: true
-```
-
-colo からリージョン値への対応表は、Placement のドキュメントにも無い。自分で当てる(SIN → `aws:ap-southeast-1`):
-
-```jsonc
-// wrangler.jsonc
-"placement": { "region": "aws:ap-southeast-1" },
-```
-
-**止める場所は2つある。** `d1({ binding: "DB" })` から `session` を外すことと、D1 側の read replication を `disabled` にすること(API の `PATCH .../d1/database/{id}` に `{"read_replication": {"mode": "disabled"}}`、またはダッシュボードの Settings → Read replication)。後者は DB の設定なので、コードのデプロイでは変わらない。
+**この手順は [PLACEMENT.md](./PLACEMENT.md) を読んでから進める** — 下の完了基準に要る primary の colo の調べ方(D1 の GET API では分からない)と `placement` のリージョン値、止める場所が2つあること(`session` と、D1 側の read replication)はそちらにある。
 
 エッジの HTML キャッシュは Worker の手前(訪問者の近く)に立つので、HIT したときの速さは Placement では変わらない。
 
@@ -59,17 +45,24 @@ colo からリージョン値への対応表は、Placement のドキュメン�
 
 **完了基準:** `routeRules` のキーがすべて `src/pages` に実在するファイルへ解決する。
 
-### 3. キャッシュから外す経路は2つ書く。置く場所は取得より後
+### 3. キャッシュから外す判断は middleware に置き、`set(false)` だけ呼ぶ
 
-`Astro.cache.set(false)` と明示的な `Cache-Control` の**両方**が要る。片方だけでは外れない(空振り表の3番)。
+ページのフロントマターではなく、**`await next()` の後**で決める(順序依存は空振り表の3番)。**ヘッダは書かない。**
 
-```astro
-// 取得より **後**。`set()` は false 以外の入力で opt-out を解除する。
-Astro.cache?.set(false);
-Astro.response.headers.set("Cache-Control", "private, no-store");
+```ts
+export const onRequest = defineMiddleware(async (context, next) => {
+  const response = await next();
+  // 200・304 以外(rewrite で描かれる 404 を含む)と /search。304 は条件付きリクエストの再検証なので外さない
+  if (mustNotStore(response.status, context.url.pathname)) context.cache?.set(false);
+  return response;
+});
 ```
 
-**公式の「`private, no-store` を付けろ」だけでは足りない。** 空振り表の3番を読むこと。
+`set(false)` だけで足りるのは、`@astrojs/cloudflare`(14.x)が cache provider の有効なとき、`Cloudflare-CDN-Cache-Control` の無い応答に自分で `no-store` を付けるからである(`dist/utils/response.js` の `applyCloudflareResponseHeaders`)。
+
+**`Cache-Control` を書き足さない。** EmDash の `/_emdash/oauth/authorize` が返す `Response.redirect()` はヘッダが immutable で、`headers.set()` が `TypeError` を投げて **OAuth 認可が 500 になる**(dev で再現、[kjfsm/euphoric-band-site#160](https://github.com/kjfsm/euphoric-band-site/pull/160))。
+
+**レイアウトでヒントを立てるなら `routeRules` に載ったルートに限る。** レイアウトは `await next()` が返ったあと、ストリーミングの中で描かれるので、立てると middleware で断った `/search` が `public` に戻る。
 
 `Astro.rewrite()` で描かれる 404 は pathname が `/blog/存在しないslug` のままなので、`/blog/[slug]` のルールを**継承する**。`Astro.redirect("/404")` で返す構成なら、その 302 が同じ理由でキャッシュされる。
 
@@ -141,11 +134,9 @@ return directives.length > 0 ? directives.join(", ") : void 0;
 
 `APPLY_HEADERS` は「`maxAge` 未定義 かつ タグ0件」なら早期 return するが、**描画中に `cacheHint` が1つでも set されるとそこを抜ける**。EmDash は本番の全リクエストで `lastModified` を set し(`applyBuildValidator`。prerender と dev は除く)、取得層も `cacheHint` を set する。つまり**普通のページはまず抜ける**。
 
-逆向きも成り立つ。`set(false)` はヘッダを付けなくするだけなので、**ヘッダの無い応答は RFC 9111 ヒューリスティック鮮度で2時間保存される**。
+だから止めるのは `set(false)` の側で、`Cache-Control` は要らない(手順 3)。応答を複製してから書けば投げないが、1番の優先順でエッジが読むのはアダプタの `Cloudflare-CDN-Cache-Control` なので、得るものが無い。アダプタのそれは cache provider が有効なときだけで、外した構成ではヘッダの無い応答が RFC 9111 ヒューリスティック鮮度で2時間保存されうる — **provider を外すなら、そのときだけ middleware で `new Response(response.body, response)` に複製してから `no-store` を書く。**
 
-だから**両方書く**。役割が違う。
-
-**順序依存がある。** `set(false)` は private な `#disabled` を立てるだけで、**後から `set()` が非 false で呼ばれると解除される**。取得より後、フロントマターの末尾に置くこと。
+**順序依存がある。** `set(false)` は private な `#disabled` を立てるだけで、**後から `set()` が非 false で呼ばれると解除される**。フロントマターの末尾でも足りない(次の段落)。`await next()` の後の middleware に置く。
 
 **`Astro.cache.enabled` は安全網にならない。** あれは `set(false)` が触らない素のフィールドなので、取得層によくある `if (astro.cache?.enabled) astro.cache.set(cacheHint)` というガードは opt-out を尊重しない。レイアウトやコンポーネントがページのフロントマターより後に取得すれば、黙って再有効化される。同じ指摘が
 [emdash#1882](https://github.com/emdash-cms/emdash/issues/1882) にある --
@@ -165,21 +156,7 @@ return directives.length > 0 ? directives.join(", ") : void 0;
 
 ### 5. byline はオブジェクトキャッシュに乗らない
 
-公式の「What gets cached」はコンテンツクエリ・サイト設定・メニュー・taxonomy用語を挙げ、**byline は入っていない**。実装でも `getBylineBySlug()` は `requestCached()` だけを通り、`cachedQuery` を呼ばない。
-
-`CacheNamespace.BYLINES` は存在するが、byline を保存するためではなく**コンテンツクエリのキーに畳み込む epoch** である。byline を編集するとコンテンツのキャッシュは飛ぶが、byline 自体は毎回DBを引く。
-
-レイアウトから全ページで byline を読む構成なら、サイト側で載せられる:
-
-```ts
-return cachedQuery({
-  namespace: CacheNamespace.BYLINES,
-  key: `operator:${slug}`,
-  load: () => getBylineBySlug(slug),
-});
-```
-
-無効化は書かなくてよい(`BYLINES` の epoch は EmDash 自身が bump する)。TTL も省けば `defaultTtl` に乗る。**`cachedQuery` は公開エクスポートだが公式ドキュメントには無い** — 壊れたら元の呼び出しに戻せる形に閉じておく。
+公式の「What gets cached」に byline は無く、実装でも毎回DBを引く。レイアウトから全ページで読む構成なら、サイト側で `cachedQuery` に載せられる — [BYLINE.md](./BYLINE.md)。
 
 ### 6. `Server-Timing` の `cache.hit` / `cache.miss` は KV ではない
 
@@ -206,7 +183,8 @@ wrangler kv key list --binding CACHE --remote
 上の空振りはどれも書き忘れても何も言わない。ソース走査型のガードテストで留める。
 
 - `routeRules` のキーが `src/pages` に実在するルートだけであること(catch-all と打ち間違いを同時に捕まえる)
-- キャッシュしない経路が `set(false)` と明示的な `Cache-Control` を**2行とも**出していること
-- 404 が `Astro.cache.set(false)` を呼んでいること(rewrite 構成)、あるいは `Astro.redirect("/404")` を直接書いていないこと(リダイレクト構成)
+- middleware が `await next()` の**後**で `set(false)` を呼んでいること
+- その middleware が応答ヘッダを書いていないこと(`Response.redirect()` で投げる)。これは「無いこと」の検査なので、**行頭に固定した `^\s*const \w+ = await next\(\);` から後ろだけを切り出して**見る — 全文に当てると、理由を書いた冒頭の JSDoc に当たって正しい実装が赤になる。式は変数名に依存させない(`\.headers\.(?:set|append|delete)\(`)
+- 404 を status で見分けていること(rewrite 構成では pathname が元のまま)、あるいは `Astro.redirect("/404")` を直接書いていないこと(リダイレクト構成)
 
 **正規表現は行頭に固定する。** 見張る対象の行は、すぐ隣のコメントで理由を説明されている行でもある。緩く書くと散文のほうに当たり、実装を消しても緑のままになる。

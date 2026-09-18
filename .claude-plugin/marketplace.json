@@ -10,7 +10,7 @@
     {
       "name": "kjfsm-skills",
       "source": "./",
-      "description": "実務のエンジニアリングのための kjfsm のエージェントスキル集 — グリリング、スペック/チケットフロー、TDD、コードレビュー、ドメインモデリングなど。",
+      "description": "実務のエンジニアリングのための kjfsm のエージェントスキル集 — 実装後の検証とレビュー、リポジトリの setup、テストの立て直し、コメントの刈り込み、Cloudflare Workers / D1 の落とし穴など。本家 mattpocock-skills を土台にする。",
       "category": "engineering",
       "keywords": ["engineering", "skills", "tdd", "code-review", "grilling"]
     },

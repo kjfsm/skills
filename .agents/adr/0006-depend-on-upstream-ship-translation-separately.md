@@ -10,6 +10,7 @@
 - 本家を**ほぼ訳のまま**写した 17 本は `skills/matt-skills-jp/` へ移し、ADR 0005 と同じ形の別プラグイン `matt-skills-jp` で配る。これは日本語で読みたい人が、本家の**代わりに**入れるものである。
 - 本家から離れて自作の流れの中心になった `implement-and-review`(本家の `implement` から改名)・`ask-kjfsm`・`setup-skills`・`writing-great-skills` は `kjfsm-skills` に残す。
 - 依存の向きは `kjfsm-skills → 本家` の一方向に揃える。`matt-skills-jp` は自作スキルを名指ししない。
+- 訳しか使わないサブエージェント(`interface-designer`)は `plugins/matt-skills-jp/agents/` に置く。ADR 0005 の「プラグインのディレクトリは `plugin.json` と `skills/` だけを持つ」はここで破れる。
 
 ## 却下した手
 
@@ -24,4 +25,6 @@
 
 ## 覆る条件
 
-- 本家が、`kjfsm-skills` から呼んでいるスキル(`tdd`・`research`・`codebase-design`・`diagnosing-bugs`・`grilling`)を改名したり退役させたりしたら、呼び先を直す。本家の変更を1回で丸ごと受け取りたくなくなったら、`version` の範囲で固定する。ただし範囲の解決はタグ `mattpocock-skills--v<版>` を探すのに対し、本家のタグは `v1.2.3` の形である(2026-09-18 時点)。このままでは範囲に合う版を取りに行けず、読み込むときに範囲を外れていればプラグインが無効になるだけである。
+- 本家が、`kjfsm-skills` の本文から名指ししているスキルを改名したり退役させたりしたら、呼び先を直す。名指ししているものは列挙しない — `grep -rn` で `skills/kjfsm-skills/` を本家のスキル名で引けば、その時点の全部が出る。
+- 本家の `/implement` が次のどちらかを変えたら、`implement-and-review` がユーザーに示す行を作り直す。この行は、引数が本家の本文の**後ろに付く**こと(`$ARGUMENTS` を持たない)と、最後の2手が `/code-review` とコミットであることを前提に、その2手を止めている。
+- 本家の変更を1回で丸ごと受け取りたくなくなったら、`version` の範囲で固定する。ただし範囲の解決はタグ `mattpocock-skills--v<版>` を探すのに対し、本家のタグは `v1.2.3` の形である(2026-09-18 時点)。このままでは範囲に合う版を取りに行けず、読み込むときに範囲を外れていればプラグインが無効になるだけである。

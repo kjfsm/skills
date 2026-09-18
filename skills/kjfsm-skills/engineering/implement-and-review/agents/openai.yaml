@@ -1,5 +1,5 @@
 interface:
   display_name: "実装してレビューする"
-  short_description: "スペックやチケットから作業をビルドし PR を出す"
+  short_description: "本家 /implement でのビルドのあと、検証・レビュー・PR を進める"
 policy:
   allow_implicit_invocation: false

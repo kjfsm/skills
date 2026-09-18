@@ -6,17 +6,20 @@
 
 ## 1. バケットを選ぶ
 
-`skills/<バケット>/<スキル名>/SKILL.md` に置く。バケットが決めるのは**配布されるかどうか**である。
+`skills/<バケット>/<スキル名>/SKILL.md` に置く(昇格済みだけは `skills/kjfsm-skills/<バケット>/<スキル名>/`)。バケットが決めるのは**配布されるかどうか**である。
 
-| バケット                             | 配布                                                    | ここに入れるもの                                    |
-| ------------------------------------ | ------------------------------------------------------- | --------------------------------------------------- |
-| `engineering/` `productivity/`       | **される**(`kjfsm-skills` + `npx skills`)               | 他人のリポジトリでも価値を持つもの                  |
-| `emdash/` `personal/`                | **入れた場所にだけ**(`kjfsm-emdash` / `kjfsm-personal`) | 特定の CMS のサイト、自分の端末でだけ価値を持つもの |
-| `misc/` `in-progress/` `deprecated/` | されない(`npx skills` の個別指定でのみ届く)             | ほとんど使わないもの、下書き、退役したもの          |
+| バケット                                                 | 配布                                                    | ここに入れるもの                                    |
+| -------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------- |
+| `kjfsm-skills/engineering/` `kjfsm-skills/productivity/` | **される**(`kjfsm-skills` + `npx skills`)               | 他人のリポジトリでも価値を持つもの                  |
+| `kjfsm-emdash/` `kjfsm-personal/`                        | **入れた場所にだけ**(`kjfsm-emdash` / `kjfsm-personal`) | 特定の CMS のサイト、自分の端末でだけ価値を持つもの |
+| `matt-skills-jp/`                                        | **本家の代わりに入れた人にだけ**(`matt-skills-jp`)      | 本家をほぼ訳のまま写したもの。自作はここに置かない  |
+| `misc/` `in-progress/` `deprecated/`                     | されない(`npx skills` の個別指定でのみ届く)             | ほとんど使わないもの、下書き、退役したもの          |
 
 判定は1問で済む: **これは他人のリポジトリで価値を持つか。** 持たないなら昇格しないバケットへ入れる — 昇格は後からできる。
 
-`emdash/` か `personal/` に足したら、`plugins/<バケット>/skills/<名前>` に `../../../skills/<バケット>/<名前>` へのシンボリックリンクを張る(張り忘れは検査 4b. が落とす)。
+本家と同じ名前のスキルは昇格済みのバケットに置かない — `kjfsm-skills` は本家に依存しているので、同じ名前が2度並ぶ(→ [ADR 0006](./adr/0006-depend-on-upstream-ship-translation-separately.md))。
+
+`kjfsm-emdash/`・`kjfsm-personal/`・`matt-skills-jp/` に足したら、`plugins/<バケット>/skills/<名前>` に `../../../skills/<バケット>/<名前>` へのシンボリックリンクを張る(張り忘れは検査 4b. が落とす)。
 
 迷ったら `in-progress/` に置く。出荷準備が整っていない下書きの正規の置き場であり、そこに居るあいだは誰にも届かない。
 
@@ -45,7 +48,7 @@ policy:
 
 ## 3. スキルを書く
 
-判断基準は [`/writing-great-skills`](../skills/productivity/writing-great-skills/SKILL.md)、公式の仕様は同じフォルダの [`OFFICIAL.md`](../skills/productivity/writing-great-skills/OFFICIAL.md)。
+判断基準は [`/writing-great-skills`](../skills/kjfsm-skills/productivity/writing-great-skills/SKILL.md)、公式の仕様は同じフォルダの [`OFFICIAL.md`](../skills/kjfsm-skills/productivity/writing-great-skills/OFFICIAL.md)。
 
 数値上限(`name` の形式、`description` の長さ、本文の行数、参照ファイルの階層)は**暗記しなくてよい** — 検査が落とす。`OFFICIAL.md` を引くのは、上限を確かめるためではなく、何をどう書くかを決めるためである。
 
@@ -67,7 +70,7 @@ scripts/check-invariants.sh
 
 ここだけは自分で確認する。
 
-- **`ask-kjfsm` を更新する** — ユーザーが到達できるスキルを追加・改名・削除したとき、あるいはフローへの組み込み方を変えたとき。[`SKILL.md`](../skills/engineering/ask-kjfsm/SKILL.md)(起点)と [`SITUATIONS.md`](../skills/engineering/ask-kjfsm/SITUATIONS.md)(状況で入るもの)の両方を読み直し、新しいスキルが一度も言及されない・古いスキルがまだルーティングされる状態を残さない。**嘘をつくルーターは、無いルーターより悪い。** `SITUATIONS.md` 側に足したら、`SKILL.md` 冒頭のポインタが並べるトリガーにも足す — その文言が到達を決めている。
+- **`ask-kjfsm` を更新する** — ユーザーが到達できるスキルを追加・改名・削除したとき、あるいはフローへの組み込み方を変えたとき。[`SKILL.md`](../skills/kjfsm-skills/engineering/ask-kjfsm/SKILL.md)(起点)と [`SITUATIONS.md`](../skills/kjfsm-skills/engineering/ask-kjfsm/SITUATIONS.md)(状況で入るもの)の両方を読み直し、新しいスキルが一度も言及されない・古いスキルがまだルーティングされる状態を残さない。**嘘をつくルーターは、無いルーターより悪い。** `SITUATIONS.md` 側に足したら、`SKILL.md` 冒頭のポインタが並べるトリガーにも足す — その文言が到達を決めている。
 
   どちらに置くかは **作業の起点になるか** だけで決める。ルーターは呼ばれた瞬間に全文がコンテキストに乗るので、起点にならないものを `SKILL.md` に置くと呼び出しのたびに重くなる。
 
@@ -81,7 +84,7 @@ scripts/check-invariants.sh
 判断は3つ。
 
 1. **配ってよいか。** `agents/` に置いたものは全員に届く。特定の SaaS や MCP に紐づくもの、まだ実際に回していない下書きは `.claude/agents/` に置き、回してから移す — スキルの `in-progress/` に当たる場所である。
-2. **押し出せる出力を抱えているか。** サブエージェントを立てる理由は並列化ではなく押し出しである(→ [`/delegation`](../skills/engineering/delegation/SKILL.md))。**自分の作業を見直させるために立てた子は、コストだけを増やす。** 例外は独立した視点そのものが成果物であるとき(二軸レビュー)。
+2. **押し出せる出力を抱えているか。** サブエージェントを立てる理由は並列化ではなく押し出しである(→ [`/delegation`](../skills/kjfsm-skills/engineering/delegation/SKILL.md))。**自分の作業を見直させるために立てた子は、コストだけを増やす。** 例外は独立した視点そのものが成果物であるとき(二軸レビュー)。
 3. **ツールを絞れるか。** `verifier` がゲートを回せるのは、`Edit` を持っていないからである。本文の禁止はモデルが破れるが、外したツールは破れない。
 
 `model` は必ず書く。省くと親の階層を継承し、機械的な作業まで上位モデルで走る。
@@ -94,7 +97,7 @@ scripts/check-invariants.sh
 
 `version` を両方のマニフェストから省く理由は `CLAUDE.md` が持つ。片方にでも書くと、その文字列が固定のキャッシュキーになって更新が止まる。
 
-昇格していないバケットのスキルは、プラグインではなく利用側リポジトリでの `npx skills` による実体配置で配る(`skills-lock.json` に載り、`npx skills update` で追随できる)。`emdash/` がこの経路の主な利用者である。
+昇格していないバケットのスキルは、プラグインではなく利用側リポジトリでの `npx skills` による実体配置で配る(`skills-lock.json` に載り、`npx skills update` で追随できる)。`kjfsm-emdash/` がこの経路の主な利用者である。
 
 ## 改名するとき
 

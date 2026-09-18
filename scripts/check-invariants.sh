@@ -16,10 +16,12 @@ err() {
   fail=1
 }
 
-PROMOTED_BUCKETS="engineering productivity"
+# バケットは skills/ からの相対パスで数える。葉の名前だけで見ると、どこか別の場所に
+# engineering/ を作った日にそのスキルが昇格済みとして通ってしまう。
+PROMOTED_BUCKETS="kjfsm-skills/engineering kjfsm-skills/productivity"
 # バケットごとに専用のプラグイン(plugins/<バケット>/)で配るもの。全員には入れず、
 # 必要なリポジトリや端末で個別に有効にする。see .agents/adr/0005-ship-buckets-as-side-plugins.md
-PLUGIN_BUCKETS="emdash personal"
+PLUGIN_BUCKETS="kjfsm-emdash kjfsm-personal matt-skills-jp"
 PLUGIN=".claude-plugin/plugin.json"
 
 frontmatter() {
@@ -31,7 +33,11 @@ field() {
 }
 
 listed_in_plugin() {
-  grep -q "\"\./skills/[a-z-]*/$1\"" "$PLUGIN"
+  grep -q "\"\./$1\"" "$PLUGIN"
+}
+
+listed_in_plugin_anywhere() {
+  grep -q "\"\./skills/[a-z/-]*/$1\"" "$PLUGIN"
 }
 
 charlen() {
@@ -102,7 +108,8 @@ seen_names=""
 while IFS= read -r skill_md; do
   dir="$(dirname "$skill_md")"
   name="$(basename "$dir")"
-  bucket="$(basename "$(dirname "$dir")")"
+  bucket_dir="$(dirname "$dir")"
+  bucket="${bucket_dir#skills/}"
 
   # 1. frontmatter parses and `name` matches the directory
   if [ "$(head -1 "$skill_md")" != "---" ]; then
@@ -132,13 +139,13 @@ while IFS= read -r skill_md; do
   # 4. promoted skills ship; unpromoted skills do not
   case " $PROMOTED_BUCKETS " in
     *" $bucket "*)
-      listed_in_plugin "$name" || err "$name is in $bucket/ but missing from $PLUGIN"
-      grep -q "](\./skills/$bucket/$name/SKILL\.md)" README.md ||
+      listed_in_plugin "$dir" || err "$name is in $bucket/ but missing from $PLUGIN"
+      grep -q "](\./$bucket_dir/$name/SKILL\.md)" README.md ||
         err "$name is in $bucket/ but missing from README.md"
       ;;
     *)
-      ! listed_in_plugin "$name" || err "$name is in $bucket/ (not promoted) but listed in $PLUGIN"
-      ! grep -q "](\./skills/$bucket/$name/SKILL\.md)" README.md ||
+      ! listed_in_plugin_anywhere "$name" || err "$name is in $bucket/ (not promoted) but listed in $PLUGIN"
+      ! grep -q "](\./$bucket_dir/$name/SKILL\.md)" README.md ||
         err "$name is in $bucket/ (not promoted) but listed in README.md"
       ;;
   esac
@@ -154,8 +161,8 @@ while IFS= read -r skill_md; do
   esac
 
   # 5. every bucket README lists every skill in its bucket
-  grep -q "](\./$name/SKILL\.md)" "skills/$bucket/README.md" ||
-    err "$name is missing from skills/$bucket/README.md"
+  grep -q "](\./$name/SKILL\.md)" "$bucket_dir/README.md" ||
+    err "$name is missing from $bucket_dir/README.md"
 
   # 6. skill names are unique across buckets — link-skills.sh flattens them
   case " $seen_names " in
@@ -350,7 +357,7 @@ fi
 #     その1行だけが運んでいるため、優先順位の句を別に見るのはハーネス側の「周囲のコードに
 #     合わせろ」と正面からぶつかる唯一の行だからである。
 #     see CLAUDE.md, .agents/adr/0003-never-start-from-init-output.md
-for resident in output-styles/kjfsm.md CLAUDE.md skills/engineering/setup-skills/SKILL.md; do
+for resident in output-styles/kjfsm.md CLAUDE.md skills/kjfsm-skills/engineering/setup-skills/SKILL.md; do
   grep -q 'コミットログには Why、コードコメントには Why not' "$resident" ||
     err "$resident lost the four pillars; without them tests have no destination and the routing lives only in a skill nobody calls"
   grep -q 'コードを読めば分かることは書かない' "$resident" ||
@@ -378,7 +385,7 @@ for manifest in hooks/hooks.json .claude/settings.json; do
     err "$manifest does not wire $hook_script; the repository would ship a discipline it does not run on itself"
 done
 
-# 18. `agents/` のサブエージェントが健全で、呼ぶ側と食い違っていない。プラグインは
+# 18. `agents/` と `plugins/*/agents/` のサブエージェントが健全で、呼ぶ側と食い違っていない。プラグインは
 #     このディレクトリを自動で拾う(`plugin.json` に列挙しない — 列挙と走査の両方に
 #     載ると同じエージェントが2度並ぶ)。壊れたときの症状は「そんな subagent_type は
 #     無い」で静かに汎用エージェントへ落ちるか、そもそも起動しないかであり、どちらも
@@ -391,16 +398,16 @@ while IFS= read -r agent; do
     err "$agent has no description; the model cannot tell when it applies"
 
   # 階層は起動のたびに選ぶ — 省くと親と同じモデルを継承し、機械的な作業まで
-  # 親の階層で走る。see skills/engineering/delegation
+  # 親の階層で走る。see skills/kjfsm-skills/engineering/delegation
   [ -n "$(field "$agent" "model")" ] ||
     err "$agent does not pin a model; it would silently inherit the parent tier"
 
   grep -rq "\`$base\`" --include='*.md' skills ||
     err "$agent is named by no skill; nothing routes work to it"
-done < <(find agents -name '*.md' 2>/dev/null | sort)
+done < <(find agents plugins/*/agents -name '*.md' 2>/dev/null | sort)
 
 # verifier がゲートを回せるのは、直せないからである。編集ツールを持った瞬間、
-# 「ゲートは動かさない」は本文のお願いに戻る。see skills/engineering/verification-loop
+# 「ゲートは動かさない」は本文のお願いに戻る。see skills/kjfsm-skills/engineering/verification-loop
 if [ ! -f agents/verifier.md ]; then
   err "agents/verifier.md is gone; /verification-loop would run its gates in the parent again"
 else
@@ -413,25 +420,25 @@ fi
 # 揃っていない方だけが残る(検査 16. と同じ壊れ方)。
 grep -q 'Mysterious Name' agents/standards-reviewer.md ||
   err "agents/standards-reviewer.md lost the smell baseline; the Standards axis would review against nothing"
-grep -q 'Mysterious Name' skills/engineering/two-axis-review/SKILL.md &&
-  err "skills/engineering/two-axis-review/SKILL.md copies the smell baseline that agents/standards-reviewer.md owns"
+grep -q 'Mysterious Name' skills/kjfsm-skills/engineering/two-axis-review/SKILL.md &&
+  err "skills/kjfsm-skills/engineering/two-axis-review/SKILL.md copies the smell baseline that agents/standards-reviewer.md owns"
 
 grep -q '本物の制約' agents/comment-pruner.md ||
   err "agents/comment-pruner.md lost the six graded rules; the pass would prune by taste"
-grep -q 'コードの言い直し' skills/engineering/prune-comments/SKILL.md &&
-  err "skills/engineering/prune-comments/SKILL.md copies the graded rules that agents/comment-pruner.md owns"
+grep -q 'コードの言い直し' skills/kjfsm-skills/engineering/prune-comments/SKILL.md &&
+  err "skills/kjfsm-skills/engineering/prune-comments/SKILL.md copies the graded rules that agents/comment-pruner.md owns"
 
-grep -q 'シームの裏に何を隠すか' agents/interface-designer.md ||
-  err "agents/interface-designer.md lost the five-item output contract; the designs would not be comparable"
-grep -q 'シームの裏に何を隠すか' skills/engineering/codebase-design/DESIGN-IT-TWICE.md &&
-  err "skills/engineering/codebase-design/DESIGN-IT-TWICE.md copies the output contract that agents/interface-designer.md owns"
+grep -q 'シームの裏に何を隠すか' plugins/matt-skills-jp/agents/interface-designer.md ||
+  err "plugins/matt-skills-jp/agents/interface-designer.md lost the five-item output contract; the designs would not be comparable"
+grep -q 'シームの裏に何を隠すか' skills/matt-skills-jp/codebase-design/DESIGN-IT-TWICE.md &&
+  err "skills/matt-skills-jp/codebase-design/DESIGN-IT-TWICE.md copies the output contract that plugins/matt-skills-jp/agents/interface-designer.md owns"
 
 grep -q 'モックの自己検証' agents/test-auditor.md ||
   err "agents/test-auditor.md lost the six categories; the audit would prune by taste"
-grep -q 'モックの自己検証' skills/engineering/prune-tests/SKILL.md &&
-  err "skills/engineering/prune-tests/SKILL.md copies the categories that agents/test-auditor.md owns"
+grep -q 'モックの自己検証' skills/kjfsm-skills/engineering/prune-tests/SKILL.md &&
+  err "skills/kjfsm-skills/engineering/prune-tests/SKILL.md copies the categories that agents/test-auditor.md owns"
 
 if [ "$fail" -eq 0 ]; then
-  echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills, $(find agents -name '*.md' | wc -l | tr -d ' ') agents)"
+  echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills, $(find agents plugins/*/agents -name '*.md' | wc -l | tr -d ' ') agents)"
 fi
 exit "$fail"

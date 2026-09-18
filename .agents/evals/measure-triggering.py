@@ -19,7 +19,7 @@ Skill か Read でなければ、その時点で非発火と断定する」実�
 使い方
 ------
     python3 .agents/evals/measure-triggering.py \
-        --skill-path skills/productivity/writing-great-skills \
+        --skill-path skills/kjfsm-skills/productivity/writing-great-skills \
         --eval-set .agents/evals/writing-great-skills-trigger.json \
         --model claude-opus-5
 

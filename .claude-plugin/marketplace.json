@@ -5,27 +5,35 @@
     "url": "https://github.com/kjfsm"
   },
   "description": "実務のエンジニアリングのための kjfsm のスキル集を、インストール可能な Claude Code プラグインとして提供する。",
+  "allowCrossMarketplaceDependenciesOn": ["mattpocock"],
   "plugins": [
     {
       "name": "kjfsm-skills",
       "source": "./",
-      "description": "実務のエンジニアリングのための kjfsm のエージェントスキル集 — グリリング、スペック/チケットフロー、TDD、コードレビュー、ドメインモデリングなど。",
+      "description": "実務のエンジニアリングのための kjfsm のエージェントスキル集 — 実装後の検証とレビュー、リポジトリの setup、テストの立て直し、コメントの刈り込み、Cloudflare Workers / D1 の落とし穴など。本家 mattpocock-skills を土台にする。",
       "category": "engineering",
       "keywords": ["engineering", "skills", "tdd", "code-review", "grilling"]
     },
     {
       "name": "kjfsm-emdash",
-      "source": "./plugins/emdash",
+      "source": "./plugins/kjfsm-emdash",
       "description": "EmDash CMS(Astro + Cloudflare)のサイト専用のスキル集。EmDash のサイトのリポジトリに --scope project で入れる。",
       "category": "development",
       "keywords": ["emdash", "astro", "cloudflare", "cms"]
     },
     {
       "name": "kjfsm-personal",
-      "source": "./plugins/personal",
+      "source": "./plugins/kjfsm-personal",
       "description": "kjfsm 個人の作業環境に紐づいたスキル集。",
       "category": "productivity",
       "keywords": ["personal"]
+    },
+    {
+      "name": "matt-skills-jp",
+      "source": "./plugins/matt-skills-jp",
+      "description": "mattpocock/skills のうち、ほぼ訳のままのスキルの日本語訳。kjfsm-skills はこれではなく本家 mattpocock-skills に依存する。",
+      "category": "engineering",
+      "keywords": ["engineering", "skills", "tdd", "grilling", "japanese"]
     }
   ]
 }

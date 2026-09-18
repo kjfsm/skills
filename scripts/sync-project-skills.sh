@@ -13,7 +13,7 @@ set -uo pipefail
 # ので、クローンした誰にでも、`~` を書き換えられないクラウドセッションにも届く。
 #
 # 張るのは **どのプラグインも配らない** バケットだけである。昇格済みは
-# `kjfsm-skills` が、`emdash/` と `personal/` はそれぞれ専用のプラグインが配るので、
+# `kjfsm-skills` が、`kjfsm-emdash/`・`kjfsm-personal/`・`matt-skills-jp/` はそれぞれ専用のプラグインが配るので、
 # ここにも張ると入れた人のセッションで同じスキルが2度並ぶ — 実体は1つでも、名前と
 # description のぶんだけコンテキストを二重に払う。`deprecated/` は link-skills.sh と同じ規則で除く。`in-progress/` を
 # 張るのは意図的で、下書きはここで呼んでみて初めて直せる。
@@ -27,9 +27,11 @@ cd "$REPO"
 
 DEST=".claude/skills"
 
-# check-invariants.sh の PROMOTED_BUCKETS と PLUGIN_BUCKETS を合わせた集合。検査 14. は
-# この定数で --check するので、あちらだけ動かしても 14. は通ってしまう — 揃えるのは手で確かめる。
-SHIPPED_BUCKETS="engineering productivity emdash personal"
+# skills/ 直下のディレクトリ名で数える — プラグインで配るバケットは、配るプラグインの名前の
+# ディレクトリに入っている。check-invariants.sh の PROMOTED_BUCKETS と PLUGIN_BUCKETS が
+# 指す集合と同じで、検査 14. はこの定数で --check するので、あちらだけ動かしても 14. は
+# 通ってしまう — 揃えるのは手で確かめる。
+SHIPPED_BUCKETS="kjfsm-skills kjfsm-emdash kjfsm-personal matt-skills-jp"
 
 check=0
 if [ "${1:-}" = "--check" ]; then
@@ -55,8 +57,9 @@ names=()
 targets=()
 while IFS= read -r skill_md; do
   src="${skill_md%/SKILL.md}"
+  top="${src#skills/}"
   case " $SHIPPED_BUCKETS " in
-    *" $(basename "$(dirname "$src")") "*) continue ;;
+    *" ${top%%/*} "*) continue ;;
   esac
   names+=("$(basename "$src")")
   # `.claude/skills/` は2階層下なので、`../..` がリポジトリルートに解決される。

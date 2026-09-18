@@ -7,38 +7,24 @@
 入力したときだけ到達できる(Claude Code: `disable-model-invocation: true`。Codex: `agents/openai.yaml` の `policy.allow_implicit_invocation: false`)。
 
 - **[ask-kjfsm](./ask-kjfsm/SKILL.md)** — どのスキルやフローが自分の状況に合うかを尋ねる。このリポジトリのスキルを案内するルーター。
-- **[grill-with-docs](./grill-with-docs/SKILL.md)** — プロジェクトのドメインモデルも構築するグリリングセッション。用語を研ぎ澄まし、`CONTEXT.md` と ADR をその場で更新する。
-- **[triage](./triage/SKILL.md)** — トリアージロールのステートマシンに沿ってイシューを進める。
-- **[improve-codebase-architecture](./improve-codebase-architecture/SKILL.md)** — コードベースをスキャンして深化の機会を見つけ、視覚的な HTML レポートとして提示し、選んだものについてグリリングする。
 - **[setup-repo](./setup-repo/SKILL.md)** — setup 系4工程(規約とドキュメント配置・パス別ルール・CI・フック)の入口。順序と依存はこのスキルが持つ。再実行すると現況を読み、足りない工程と**ずれた箇所だけ**を当てる。
 - **[tend-memory-files](./tend-memory-files/SKILL.md)** — `CLAUDE.md` と `.claude/rules/` を新規に書く、または監査してトリムする。行数の目安に収め、具体的で矛盾のない指示だけを残す。
-- **[to-spec](./to-spec/SKILL.md)** — 今の会話をスペックに変換し、イシュートラッカーへ公開する。
-- **[to-tickets](./to-tickets/SKILL.md)** — どんな計画・スペック・会話も、それぞれがブロッキングエッジを宣言するトレーサーバレット方式のチケットの集合へ分割する — ローカルファイルへのテキストとして、あるいは実際のトラッカー上のネイティブなブロッキングリンクとして。
 - **[implement](./implement/SKILL.md)** — スペックやチケットの集合が記述する作業をビルドする。着手前に既定ブランチへ追いつき、事前に合意したシームで `/tdd` を駆動し、`/verification-loop` でクリーンランを取り、`/two-axis-review` を通してから PR を出して締めくくる。
-- **[wayfinder](./wayfinder/SKILL.md)** — 1つのエージェントセッションには収まらない巨大な作業のかたまりを、イシュートラッカー上の意思決定チケットの共有マップとして計画し、目的地までの道が明らかになるまで1つずつ解決していく。
 - **[squash-d1-migrations](./squash-d1-migrations/SKILL.md)** — 積み上がった D1 のマイグレーションを1本に畳む。合格条件はファイルが減ったことではなく、空の DB に適用した結果が旧チェーンと一致すること。`d1_migrations` は名前を記録しているので、各環境と突き合わせるまでが作業である。
 
 ## モデル呼び出し型
 
 モデルからもユーザーからも到達できる(モデルが自動的に手を伸ばせるよう、豊富なトリガー表現を持つ)。
 
-- **[prototype](./prototype/SKILL.md)** — デザイン上の問いに答えるための使い捨てプロトタイプを作る: 状態/ロジック向けの共有できる単一 HTML ファイル、あるいは切り替え可能な何通りかの UI バリエーション。
-
-- **[diagnosing-bugs](./diagnosing-bugs/SKILL.md)** — 手強いバグやパフォーマンスのリグレッションのための規律ある診断ループ: 再現 → 最小化 → 仮説立て → 計測 → 修正 → リグレッションテスト。
-- **[research](./research/SKILL.md)** — 信頼度の高い一次情報源に対してある問いを調査し、その発見を引用付きのマークダウンファイルとしてリポジトリに残す。バックグラウンドエージェントとして実行される。
-- **[tdd](./tdd/SKILL.md)** — レッド・グリーン・リファクタリングのループによるテスト駆動開発。機能を作るのもバグを直すのも、一度に1つの垂直スライスずつ進める。
 - **[create-tests](./create-tests/SKILL.md)** — Cloudflare Workers のプロジェクトで、テストが 1 本も無いところから作り始める。何が壊れると困るかから始め、node と workerd の 2 プロジェクトに分けて、依存の内側から積む。
 - **[rebuild-tests](./rebuild-tests/SKILL.md)** — Cloudflare Workers のテストスイートを立て直す。vitest.config の複雑さを `vi.mock` の本数の問題として読み替え、消す前に棚卸しし、履歴から復元し、書いたテストは壊して実効性を確かめる。
 - **[prune-tests](./prune-tests/SKILL.md)** — 既存のテストから削除・統合できるものを洗い出す。「消すと、どんな現実的な不具合を見逃すか」をコストと比べ、件数とカバレッジは目的にしない。判定はサブエージェントがスライスごとに下し、迷ったものはコードを壊して決める。
 - **[migrate-d1](./migrate-d1/SKILL.md)** — Cloudflare D1 のスキーマを移行する。生成されたテーブル再構築の SQL は D1 では子テーブルを空にするので、消える側を退避して戻す形に書き直し、当てる前に復元点を控える。
 - **[d1-bound-parameters](./d1-bound-parameters/SKILL.md)** — D1 の bound parameter は1文100個まで。元データが DB にあるならサブクエリや `INSERT ... SELECT` で SQL の中に閉じ、JS にしか無い値だけをテーブルの列数から分割して1つの `db.batch()` に入れる。
-- **[domain-modeling](./domain-modeling/SKILL.md)** — プロジェクトのドメインモデルを能動的に構築し研ぎ澄ます — 用語に異議を唱え、シナリオでストレステストし、`CONTEXT.md` と ADR をその場で更新する。
-- **[codebase-design](./codebase-design/SKILL.md)** — 深いモジュールを設計するための共有された規律と語彙: 小さなインターフェース、きれいなシーム、インターフェースを通してテスト可能。
 - **[delegation](./delegation/SKILL.md)** — 作業をどこで走らせるかの共有された語彙: 大量の出力を子コンテキストへ押し出し、タスクに見合ったモデル階層に回す。
 - **[verification-loop](./verification-loop/SKILL.md)** — 変更が本当に動くことを **クリーンラン** で確かめる: 記録された検証ゲートを中断なく1回で通し、そのうえで変更した経路を実際に駆動して観測の証拠を残す。
 - **[two-axis-review](./two-axis-review/SKILL.md)** — 固定した基点からの差分に対する二軸レビュー: **Standards**(リポジトリのコーディング標準に従っているか、加えて Fowler のコードスメルの基準を満たしているか)と **Spec**(元になったイシュー/PRD を忠実に実装しているか)。並列のサブエージェントとして実行する。
 - **[prune-comments](./prune-comments/SKILL.md)** — 書かれてしまったコメントを1パスで削る。順序の決まった6段を汚れていないコンテキストで当て、迷ったら Why を残し How を消す非対称の基準で倒す。
-- **[resolving-merge-conflicts](./resolving-merge-conflicts/SKILL.md)** — 進行中の git マージやリベースのコンフリクトを、ハンクごとに、双方の一次情報源にたどれる意図に基づいて解決し、そのうえで操作を完了させる — `--abort` は決して使わない。
 - **[ai-efficiency](./ai-efficiency/SKILL.md)** — 大量のファイル移動・リネーム・import 付け替えを、1ファイルずつ読み書きせずシェルで機械的に処理する: `git mv` で履歴を保ち、相対 import を絶対へ正規化してから一括置換し、抜けの検出は typecheck に委ねる。
 - **[react-router-route-module](./react-router-route-module/SKILL.md)** — React Router（framework mode）の route module に何をどの export へ置くかの規律: 認可の強制点は `middleware`（loader と action の両方の手前を通る）、レイアウトが持つ値は `<Outlet context>` で配る。
 - **[react-router-worker-tests](./react-router-worker-tests/SKILL.md)** — SSR フレームワークを `main` に載せた Cloudflare Worker のテストを組む。`applyD1Migrations` が `main` を立ち上げる事実から層を3つに割り、Worker を HTTP で叩く側は `createTestHarness` に渡す。

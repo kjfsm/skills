@@ -1,0 +1,13 @@
+{
+  "name": "matt-skills-jp",
+  "displayName": "Matt Pocock Skills (日本語訳)",
+  "description": "mattpocock/skills のうち、ほぼ訳のままのスキルの日本語訳 — グリリング、スペック/チケットフロー、TDD、ドメインモデリング、診断など。本家 mattpocock-skills と同じ名前のスキルを持つので、併用しない。",
+  "author": {
+    "name": "kjfsm",
+    "url": "https://github.com/kjfsm"
+  },
+  "homepage": "https://github.com/kjfsm/skills/tree/main/skills/matt-skills-jp",
+  "repository": "https://github.com/kjfsm/skills",
+  "license": "MIT",
+  "keywords": ["engineering", "skills", "tdd", "grilling", "japanese"]
+}

@@ -19,7 +19,7 @@ err() {
 PROMOTED_BUCKETS="engineering productivity"
 # バケットごとに専用のプラグイン(plugins/<バケット>/)で配るもの。全員には入れず、
 # 必要なリポジトリや端末で個別に有効にする。see .agents/adr/0005-ship-buckets-as-side-plugins.md
-PLUGIN_BUCKETS="emdash personal"
+PLUGIN_BUCKETS="emdash personal matt-skills-jp"
 PLUGIN=".claude-plugin/plugin.json"
 
 frontmatter() {
@@ -397,7 +397,7 @@ while IFS= read -r agent; do
 
   grep -rq "\`$base\`" --include='*.md' skills ||
     err "$agent is named by no skill; nothing routes work to it"
-done < <(find agents -name '*.md' 2>/dev/null | sort)
+done < <(find agents plugins/*/agents -name '*.md' 2>/dev/null | sort)
 
 # verifier がゲートを回せるのは、直せないからである。編集ツールを持った瞬間、
 # 「ゲートは動かさない」は本文のお願いに戻る。see skills/engineering/verification-loop
@@ -421,10 +421,10 @@ grep -q '本物の制約' agents/comment-pruner.md ||
 grep -q 'コードの言い直し' skills/engineering/prune-comments/SKILL.md &&
   err "skills/engineering/prune-comments/SKILL.md copies the graded rules that agents/comment-pruner.md owns"
 
-grep -q 'シームの裏に何を隠すか' agents/interface-designer.md ||
-  err "agents/interface-designer.md lost the five-item output contract; the designs would not be comparable"
-grep -q 'シームの裏に何を隠すか' skills/engineering/codebase-design/DESIGN-IT-TWICE.md &&
-  err "skills/engineering/codebase-design/DESIGN-IT-TWICE.md copies the output contract that agents/interface-designer.md owns"
+grep -q 'シームの裏に何を隠すか' plugins/matt-skills-jp/agents/interface-designer.md ||
+  err "plugins/matt-skills-jp/agents/interface-designer.md lost the five-item output contract; the designs would not be comparable"
+grep -q 'シームの裏に何を隠すか' skills/matt-skills-jp/codebase-design/DESIGN-IT-TWICE.md &&
+  err "skills/matt-skills-jp/codebase-design/DESIGN-IT-TWICE.md copies the output contract that plugins/matt-skills-jp/agents/interface-designer.md owns"
 
 grep -q 'モックの自己検証' agents/test-auditor.md ||
   err "agents/test-auditor.md lost the six categories; the audit would prune by taste"
@@ -432,6 +432,6 @@ grep -q 'モックの自己検証' skills/engineering/prune-tests/SKILL.md &&
   err "skills/engineering/prune-tests/SKILL.md copies the categories that agents/test-auditor.md owns"
 
 if [ "$fail" -eq 0 ]; then
-  echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills, $(find agents -name '*.md' | wc -l | tr -d ' ') agents)"
+  echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills, $(find agents plugins/*/agents -name '*.md' | wc -l | tr -d ' ') agents)"
 fi
 exit "$fail"

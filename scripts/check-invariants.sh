@@ -16,7 +16,9 @@ err() {
   fail=1
 }
 
-PROMOTED_BUCKETS="engineering productivity"
+# バケットは skills/ からの相対パスで数える。葉の名前だけで見ると、どこか別の場所に
+# engineering/ を作った日にそのスキルが昇格済みとして通ってしまう。
+PROMOTED_BUCKETS="kjfsm-skills/engineering kjfsm-skills/productivity"
 # バケットごとに専用のプラグイン(plugins/<バケット>/)で配るもの。全員には入れず、
 # 必要なリポジトリや端末で個別に有効にする。see .agents/adr/0005-ship-buckets-as-side-plugins.md
 PLUGIN_BUCKETS="kjfsm-emdash kjfsm-personal matt-skills-jp"
@@ -31,6 +33,10 @@ field() {
 }
 
 listed_in_plugin() {
+  grep -q "\"\./$1\"" "$PLUGIN"
+}
+
+listed_in_plugin_anywhere() {
   grep -q "\"\./skills/[a-z/-]*/$1\"" "$PLUGIN"
 }
 
@@ -103,7 +109,7 @@ while IFS= read -r skill_md; do
   dir="$(dirname "$skill_md")"
   name="$(basename "$dir")"
   bucket_dir="$(dirname "$dir")"
-  bucket="$(basename "$bucket_dir")"
+  bucket="${bucket_dir#skills/}"
 
   # 1. frontmatter parses and `name` matches the directory
   if [ "$(head -1 "$skill_md")" != "---" ]; then
@@ -133,12 +139,12 @@ while IFS= read -r skill_md; do
   # 4. promoted skills ship; unpromoted skills do not
   case " $PROMOTED_BUCKETS " in
     *" $bucket "*)
-      listed_in_plugin "$name" || err "$name is in $bucket/ but missing from $PLUGIN"
+      listed_in_plugin "$dir" || err "$name is in $bucket/ but missing from $PLUGIN"
       grep -q "](\./$bucket_dir/$name/SKILL\.md)" README.md ||
         err "$name is in $bucket/ but missing from README.md"
       ;;
     *)
-      ! listed_in_plugin "$name" || err "$name is in $bucket/ (not promoted) but listed in $PLUGIN"
+      ! listed_in_plugin_anywhere "$name" || err "$name is in $bucket/ (not promoted) but listed in $PLUGIN"
       ! grep -q "](\./$bucket_dir/$name/SKILL\.md)" README.md ||
         err "$name is in $bucket/ (not promoted) but listed in README.md"
       ;;

@@ -27,9 +27,11 @@ cd "$REPO"
 
 DEST=".claude/skills"
 
-# check-invariants.sh の PROMOTED_BUCKETS と PLUGIN_BUCKETS を合わせた集合。検査 14. は
-# この定数で --check するので、あちらだけ動かしても 14. は通ってしまう — 揃えるのは手で確かめる。
-SHIPPED_BUCKETS="engineering productivity kjfsm-emdash kjfsm-personal matt-skills-jp"
+# skills/ 直下のディレクトリ名で数える — プラグインで配るバケットは、配るプラグインの名前の
+# ディレクトリに入っている。check-invariants.sh の PROMOTED_BUCKETS と PLUGIN_BUCKETS が
+# 指す集合と同じで、検査 14. はこの定数で --check するので、あちらだけ動かしても 14. は
+# 通ってしまう — 揃えるのは手で確かめる。
+SHIPPED_BUCKETS="kjfsm-skills kjfsm-emdash kjfsm-personal matt-skills-jp"
 
 check=0
 if [ "${1:-}" = "--check" ]; then
@@ -55,8 +57,9 @@ names=()
 targets=()
 while IFS= read -r skill_md; do
   src="${skill_md%/SKILL.md}"
+  top="${src#skills/}"
   case " $SHIPPED_BUCKETS " in
-    *" $(basename "$(dirname "$src")") "*) continue ;;
+    *" ${top%%/*} "*) continue ;;
   esac
   names+=("$(basename "$src")")
   # `.claude/skills/` は2階層下なので、`../..` がリポジトリルートに解決される。

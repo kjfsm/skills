@@ -2,7 +2,7 @@
 
 問い: 効果的な `CLAUDE.md` とスキルの書き方。Anthropic の公式ドキュメントとブログを優先し、最新のものに絞る。
 
-調査日: 2026-09-12。数値と仕様は取得時点のもの。[`OFFICIAL.md`](../../skills/productivity/writing-great-skills/OFFICIAL.md)(最終突き合わせ 2026-08-09)と重なる項目は要点だけにとどめ、**その後に出た・動いたもの**は [§5](#5-officialmd-に未反映のもの) に分けてある。
+調査日: 2026-09-12。数値と仕様は取得時点のもの。[`OFFICIAL.md`](../../skills/kjfsm-skills/productivity/writing-great-skills/OFFICIAL.md)(最終突き合わせ 2026-08-09)と重なる項目は要点だけにとどめ、**その後に出た・動いたもの**は [§5](#5-officialmd-に未反映のもの) に分けてある。
 
 ## ソース
 

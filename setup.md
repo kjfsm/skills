@@ -103,7 +103,7 @@ B で入れた場合:
 - **ユーザー呼び出し型** — ユーザーが入力したとき(例: `/grill-me`)だけ到達できる。オーケストレーションを担う。エージェントからは起動できない。
 - **モデル呼び出し型** — ユーザーも呼べるし、タスクに合致すればエージェントが自動的に手を伸ばす。再利用可能な規律を保持する。
 
-どのスキルがどのフローに属するかの地図は [`ask-kjfsm`](https://github.com/kjfsm/skills/blob/main/skills/engineering/ask-kjfsm/SKILL.md) が持っている。ユーザーがどれを使えばいいか迷ったら `/ask-kjfsm` を案内する。
+どのスキルがどのフローに属するかの地図は [`ask-kjfsm`](https://github.com/kjfsm/skills/blob/main/skills/kjfsm-skills/engineering/ask-kjfsm/SKILL.md) が持っている。ユーザーがどれを使えばいいか迷ったら `/ask-kjfsm` を案内する。
 
 ### Claude Code 以外のハーネス
 

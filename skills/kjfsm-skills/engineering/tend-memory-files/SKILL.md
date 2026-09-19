@@ -10,7 +10,7 @@ disable-model-invocation: true
 
 CLAUDE.mdはセッション開始のたびに丸ごとコンテキストへ読み込まれる。長くなるほど指示への従いやすさ(adherence)は下がる — 公式ドキュメント([code.claude.com/docs/en/memory](https://code.claude.com/docs/en/memory))は1ファイル200行未満を目安に挙げている。このスキルは新規作成と既存ファイルの手入れの両方を、この一線を守りながら進める。
 
-公式の裏取りが要るときは `/writing-great-skills` の `OFFICIAL.md` §10 を引く。何を入れて何を入れないかについて、ブログと製品ドキュメントが食い違っている箇所と、その裁き方がそこにある。
+公式の裏取りが要るときは `/kjfsm-skills:writing-great-skills` の `OFFICIAL.md` §10 を引く。何を入れて何を入れないかについて、ブログと製品ドキュメントが食い違っている箇所と、その裁き方がそこにある。
 
 ## 分岐
 

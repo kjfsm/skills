@@ -1,6 +1,6 @@
 ---
 name: setup-ci
-description: 記録された検証ゲートを CI に敷き、ローカルの規律を機構に変える。ゲートを強制する仕組みがまだ無いとき（CI が無い、あるいは誰も走らせていない）、CI が `docs/agents/verification.md` とずれてきたとき、`/setup-repo` の工程 C として使う。
+description: 記録された検証ゲートを CI に敷き、ローカルの規律を機構に変える。ゲートを強制する仕組みがまだ無いとき（CI が無い、あるいは誰も走らせていない）、CI が `docs/agents/verification.md` とずれてきたとき、`/kjfsm-skills:setup-repo` の工程 C として使う。
 ---
 
 # CI を敷く
@@ -9,7 +9,7 @@ description: 記録された検証ゲートを CI に敷き、ローカルの規
 
 **要るのはエージェントが嘘をつくからではない。証拠が残らないからである。** 「クリーンランを通した」という申告は、通したという記録ではない。手元と CI で環境が違えば、通ったこと自体が手元限定の事実になる — 生成物が古いまま通る、ローカルにだけ入っているツールで通る、コミットし忘れたファイルがあっても通る。CI が落とすのはたいていこの3つで、いずれも手元では症状が出ない。
 
-**CI は `/verification-loop` の置き換えではない。** ゲートは手元で通したうえで、CI がもう一度通す。CI だけに寄せると、赤を知るのが数分後になり、その間にエージェントは次の変更を積む。
+**CI は `/kjfsm-skills:verification-loop` の置き換えではない。** ゲートは手元で通したうえで、CI がもう一度通す。CI だけに寄せると、赤を知るのが数分後になり、その間にエージェントは次の変更を積む。
 
 これはプロンプト駆動のスキルであり、決定的なスクリプトではない。探索し、見つけたものを提示し、ユーザーと確認し、それから書く。
 
@@ -17,7 +17,7 @@ description: 記録された検証ゲートを CI に敷き、ローカルの規
 
 ### 1. 探索する
 
-- `docs/agents/verification.md` — **ゲートの定義はここが正**。無ければ先に `/setup-skills` の Section D を通す
+- `docs/agents/verification.md` — **ゲートの定義はここが正**。無ければ先に `/kjfsm-skills:setup-skills` の Section D を通す
 - `.github/workflows/` — すでに何かあるか。あるなら追加であって新規作成ではない
 - `package.json` の scripts / `Makefile` / `Taskfile` — verification.md の各行が実際に何を呼ぶか
 - パッケージマネージャとロックファイル、`.node-version` / `.nvmrc` / `engines`

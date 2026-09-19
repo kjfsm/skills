@@ -4,55 +4,55 @@
 
 ## テストの土台が無い、信用できない
 
-`/tdd` はテストを書ける土台を前提にする。Cloudflare Workers のリポジトリでその土台が揃っていない、あるいは信用できないなら、先にこちらを通す。
+`/mattpocock-skills:tdd` はテストを書ける土台を前提にする。Cloudflare Workers のリポジトリでその土台が揃っていない、あるいは信用できないなら、先にこちらを通す。
 
-- **`/create-tests`** — テストが1本も無い
-- **`/rebuild-tests`** — 既存のスイートが遅い・OOM する・`vi.mock` だらけ
-- **`/react-router-worker-tests`** — SSR を `main` に載せていて、1ファイルに十数秒かかる
+- **`/kjfsm-skills:create-tests`** — テストが1本も無い
+- **`/kjfsm-skills:rebuild-tests`** — 既存のスイートが遅い・OOM する・`vi.mock` だらけ
+- **`/kjfsm-skills:react-router-worker-tests`** — SSR を `main` に載せていて、1ファイルに十数秒かかる
 
 ## テストが多すぎる、振る舞いを変えないのに大量に落ちる
 
-**`/prune-tests`**。スタックを問わない。足場(設定・モックの構造)ではなく、書かれてしまった中身が重いときに入る。各テストを「消すと、どんな現実的な不具合を見逃すか」で判定し、削除・統合の候補を並べて止まる — 消すのはユーザーが選んでから。足場ごと崩れているなら先に `/rebuild-tests`。
+**`/kjfsm-skills:prune-tests`**。スタックを問わない。足場(設定・モックの構造)ではなく、書かれてしまった中身が重いときに入る。各テストを「消すと、どんな現実的な不具合を見逃すか」で判定し、削除・統合の候補を並べて止まる — 消すのはユーザーが選んでから。足場ごと崩れているなら先に `/kjfsm-skills:rebuild-tests`。
 
 ## スタック固有の規律
 
-どれも `/implement-and-review` と `/tdd` の下敷きになる。呼び出さなくてよい — そのリポジトリのコードを書くときに、モデルが自分で手を伸ばす。
+どれも `/kjfsm-skills:implement-and-review` と `/mattpocock-skills:tdd` の下敷きになる。呼び出さなくてよい — そのリポジトリのコードを書くときに、モデルが自分で手を伸ばす。
 
-- **`/react-router-route-module`**(React Router framework mode)— 認可の強制点は `middleware`、レイアウトが持つ値は `<Outlet context>`
-- **`/drizzle-generate-non-interactive`** — TTY を求めるのは rename の判定だけ
-- **`/migrate-d1`** — 再構築の生成物は D1 で子表を空にする
-- **`/d1-bound-parameters`** — D1 の bound parameter は1文100個まで。SQL の中に閉じてから分割する
-- **`/squash-d1-migrations`** — マイグレーションを1本に畳む
-- **`/partyserver-on-durable-objects`** — stub の取り方がそのままリクエスト数になる。素の DO の API は Cloudflare 公式のスキルが持つ
+- **`/kjfsm-skills:react-router-route-module`**(React Router framework mode)— 認可の強制点は `middleware`、レイアウトが持つ値は `<Outlet context>`
+- **`/kjfsm-skills:drizzle-generate-non-interactive`** — TTY を求めるのは rename の判定だけ
+- **`/kjfsm-skills:migrate-d1`** — 再構築の生成物は D1 で子表を空にする
+- **`/kjfsm-skills:d1-bound-parameters`** — D1 の bound parameter は1文100個まで。SQL の中に閉じてから分割する
+- **`/kjfsm-skills:squash-d1-migrations`** — マイグレーションを1本に畳む
+- **`/kjfsm-skills:partyserver-on-durable-objects`** — stub の取り方がそのままリクエスト数になる。素の DO の API は Cloudflare 公式のスキルが持つ
 
 ## サインインの要る画面を、人間なしで駆動したい
 
-**`/dev-bypass-sign-in`**。E2E もブラウザを持つエージェントも `curl` も、外部 IdP のリダイレクトの向こうで止まる。叩くだけでサインイン済みになる入口を1本足し、その戸をビルド時に畳んで成果物から検査する。better-auth なら `testUtils` でサインイン方式に依存しない形になる。
+**`/kjfsm-skills:dev-bypass-sign-in`**。E2E もブラウザを持つエージェントも `curl` も、外部 IdP のリダイレクトの向こうで止まる。叩くだけでサインイン済みになる入口を1本足し、その戸をビルド時に畳んで成果物から検査する。better-auth なら `testUtils` でサインイン方式に依存しない形になる。
 
 ## ロジックを変えない機械的な変更
 
-ディレクトリ再編、大量リネーム、import の一括付け替え → **`/ai-efficiency`**。1ファイルずつ Read/Edit せず、シェルで一括処理して、抜けは typecheck で拾う。
+ディレクトリ再編、大量リネーム、import の一括付け替え → **`/kjfsm-skills:ai-efficiency`**。1ファイルずつ Read/Edit せず、シェルで一括処理して、抜けは typecheck で拾う。
 
 ## Worker を公開したが、経路が守られていない
 
-**`/setup-cf-access`**。カスタムドメイン・routes・`workers.dev`・プレビュー URL を洗い出し、3層ルール(人間=指定メール / 機械=サービストークン / アプリ側に認証があるパス=bypass)で塞ぐ。`/setup-cf-app` で立てたアプリを外に出したあと、デプロイのたびに素通りが増えていないかを確かめる地点でもある。
+**`/kjfsm-skills:setup-cf-access`**。カスタムドメイン・routes・`workers.dev`・プレビュー URL を洗い出し、3層ルール(人間=指定メール / 機械=サービストークン / アプリ側に認証があるパス=bypass)で塞ぐ。`/kjfsm-skills:setup-cf-app` で立てたアプリを外に出したあと、デプロイのたびに素通りが増えていないかを確かめる地点でもある。
 
 ## マージやリベースがコンフリクトで止まった
 
-**`/resolving-merge-conflicts`**。ハンクごとに双方の変更の意図をそれぞれの一次情報源までたどってから解決し、そのうえで操作を完了させる — `--abort` で逃げない。フローのどの地点からでも入ってくる、作業を止める種類の割り込みである。
+**`/mattpocock-skills:resolving-merge-conflicts`**。ハンクごとに双方の変更の意図をそれぞれの一次情報源までたどってから解決し、そのうえで操作を完了させる — `--abort` で逃げない。フローのどの地点からでも入ってくる、作業を止める種類の割り込みである。
 
 ## スレッドが埋まった、枝分かれしたい
 
-- **`/handoff`** — 会話をマークダウンファイルへ圧縮する。同じ場所で続けるのではなく、**新しいセッションを開いてそのファイルを参照する** ことでコンテキストを持ち越す。どちら向きにも使える。
+- **`/mattpocock-skills:handoff`** — 会話をマークダウンファイルへ圧縮する。同じ場所で続けるのではなく、**新しいセッションを開いてそのファイルを参照する** ことでコンテキストを持ち越す。どちら向きにも使える。
 - **`/compact`**(組み込み)— **同じ会話の中に留まり**、それより前のやり取りを要約させる。逐語的な履歴を失っても構わない **フェーズ間の意図的な区切り** で使う — 途中で挟むとエージェントが道を見失う。
 
-`/handoff` は分岐し、`/compact` は続行する。
+`/mattpocock-skills:handoff` は分岐し、`/compact` は続行する。
 
 ## プロセスではなく言葉が問題になった
 
 他のスキルの _下敷きとして_ 動く4つのモデル呼び出し型リファレンスがあり、それぞれがその語彙の唯一の情報源である。プロセスではなく **言葉** が問題になったときは、直接使ってよい。
 
-- **`/domain-modeling`** — _ドメイン_ の語彙。曖昧な用語に異議を唱え、多義語("account" が3つの役割を兼ねる)を解消し、後戻りしにくい決定を ADR に記録する。`/grill-with-docs` が `CONTEXT.md` を用語集に保つために駆動する。
-- **`/codebase-design`** — モジュールの _形_ の語彙(深さ、シーム、アダプター、レバレッジ、局所性)。小さなインターフェースの裏に多くの振る舞いを隠し、きれいなシームに置く。`/tdd` と `/improve-codebase-architecture` がこの語彙で話す。
-- **`/delegation`** — 作業を _どこで_ 走らせるかの語彙(押し出し、階層、報告の長さ)。読み返さない大量の出力は子コンテキストへ押し出し、探索や事実確認は下位モデル、設計判断は上位モデルへ回す。**スマートゾーン** が1つのコンテキストをどこまで伸ばせるかを扱うのに対し、これは何をそこに入れずに済ませるかを扱う。`/verification-loop` がゲートの生ログを押し出すときに、この語彙で話す。
-- **`/where-to-write-what`** — 情報の _宛先_ の語彙(コードには How、テストには What、コミットログには Why、コメントには Why not。JSDoc・PR 本文・ADR・docs はこの4本から派生する)。同じ事実は1か所にだけ書き、書きたくなった情報を正しい宛先へ届ける。`/implement-and-review` がコミットを書く前に呼ぶ。
+- **`/mattpocock-skills:domain-modeling`** — _ドメイン_ の語彙。曖昧な用語に異議を唱え、多義語("account" が3つの役割を兼ねる)を解消し、後戻りしにくい決定を ADR に記録する。`/mattpocock-skills:grill-with-docs` が `CONTEXT.md` を用語集に保つために駆動する。
+- **`/mattpocock-skills:codebase-design`** — モジュールの _形_ の語彙(深さ、シーム、アダプター、レバレッジ、局所性)。小さなインターフェースの裏に多くの振る舞いを隠し、きれいなシームに置く。`/mattpocock-skills:tdd` と `/mattpocock-skills:improve-codebase-architecture` がこの語彙で話す。
+- **`/kjfsm-skills:delegation`** — 作業を _どこで_ 走らせるかの語彙(押し出し、階層、報告の長さ)。読み返さない大量の出力は子コンテキストへ押し出し、探索や事実確認は下位モデル、設計判断は上位モデルへ回す。**スマートゾーン** が1つのコンテキストをどこまで伸ばせるかを扱うのに対し、これは何をそこに入れずに済ませるかを扱う。`/kjfsm-skills:verification-loop` がゲートの生ログを押し出すときに、この語彙で話す。
+- **`/kjfsm-skills:where-to-write-what`** — 情報の _宛先_ の語彙(コードには How、テストには What、コミットログには Why、コメントには Why not。JSDoc・PR 本文・ADR・docs はこの4本から派生する)。同じ事実は1か所にだけ書き、書きたくなった情報を正しい宛先へ届ける。`/kjfsm-skills:implement-and-review` がコミットを書く前に呼ぶ。

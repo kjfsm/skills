@@ -1,6 +1,6 @@
 ---
 name: comment-pruner
-description: 差分の中で触れたファイルのコメントを、順序の決まった6段のルールと非対称の残す基準で1パス削る。/prune-comments が起動する。足さない — 書かれなかった Why not を探すのは別のパスの仕事である。
+description: 差分の中で触れたファイルのコメントを、順序の決まった6段のルールと非対称の残す基準で1パス削る。/kjfsm-skills:prune-comments が起動する。足さない — 書かれなかった Why not を探すのは別のパスの仕事である。
 tools: Read, Edit, Grep, Glob, Bash
 model: opus
 ---

@@ -48,7 +48,7 @@ policy:
 
 ## 3. スキルを書く
 
-判断基準は [`/writing-great-skills`](../skills/kjfsm-skills/productivity/writing-great-skills/SKILL.md)、公式の仕様は同じフォルダの [`OFFICIAL.md`](../skills/kjfsm-skills/productivity/writing-great-skills/OFFICIAL.md)。
+判断基準は [`/kjfsm-skills:writing-great-skills`](../skills/kjfsm-skills/productivity/writing-great-skills/SKILL.md)、公式の仕様は同じフォルダの [`OFFICIAL.md`](../skills/kjfsm-skills/productivity/writing-great-skills/OFFICIAL.md)。
 
 数値上限(`name` の形式、`description` の長さ、本文の行数、参照ファイルの階層)は**暗記しなくてよい** — 検査が落とす。`OFFICIAL.md` を引くのは、上限を確かめるためではなく、何をどう書くかを決めるためである。
 
@@ -84,7 +84,7 @@ scripts/check-invariants.sh
 判断は3つ。
 
 1. **配ってよいか。** `agents/` に置いたものは全員に届く。特定の SaaS や MCP に紐づくもの、まだ実際に回していない下書きは `.claude/agents/` に置き、回してから移す — スキルの `in-progress/` に当たる場所である。
-2. **押し出せる出力を抱えているか。** サブエージェントを立てる理由は並列化ではなく押し出しである(→ [`/delegation`](../skills/kjfsm-skills/engineering/delegation/SKILL.md))。**自分の作業を見直させるために立てた子は、コストだけを増やす。** 例外は独立した視点そのものが成果物であるとき(二軸レビュー)。
+2. **押し出せる出力を抱えているか。** サブエージェントを立てる理由は並列化ではなく押し出しである(→ [`/kjfsm-skills:delegation`](../skills/kjfsm-skills/engineering/delegation/SKILL.md))。**自分の作業を見直させるために立てた子は、コストだけを増やす。** 例外は独立した視点そのものが成果物であるとき(二軸レビュー)。
 3. **ツールを絞れるか。** `verifier` がゲートを回せるのは、`Edit` を持っていないからである。本文の禁止はモデルが破れるが、外したツールは破れない。
 
 `model` は必ず書く。省くと親の階層を継承し、機械的な作業まで上位モデルで走る。

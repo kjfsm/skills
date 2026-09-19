@@ -30,7 +30,7 @@ disable-model-invocation: true
 ビルドは本家の `/mattpocock-skills:implement` が持つ。ユーザーからしか呼べないスキルなので、ここからは呼ばず、打つ行を組み立てて示し、**止まる**:
 
 ```
-/mattpocock-skills:implement <実装対象のチケット/スペックの参照> — /mattpocock-skills:code-review とコミットはせず、ビルドが済んだら止まる。その先は /implement-and-review の手順で進める。
+/mattpocock-skills:implement <実装対象のチケット/スペックの参照> — /mattpocock-skills:code-review とコミットはせず、ビルドが済んだら止まる。その先は /kjfsm-skills:implement-and-review の手順で進める。
 ```
 
 本家の `/mattpocock-skills:implement` は最後に `/mattpocock-skills:code-review` とコミットまで済ませる。そのまま流すと、コメントを削る前にコミットされ、この後の二軸レビューと二重になる。引数は本家の本文の後ろに付くので、この1行で最後の2手を止める。

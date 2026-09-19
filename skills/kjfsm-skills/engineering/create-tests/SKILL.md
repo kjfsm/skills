@@ -35,7 +35,7 @@ gh api repos/cloudflare/workers-sdk/contents/fixtures/vitest-plugin-examples/d1/
 1. **壊れたとき、気づけないもの** — 権限判定、所有権スコープ（他人の id は 404 で返す、など）、署名や暗号の検証。壊れても画面は正常に見える
 2. **壊れたとき、取り返しがつかないもの** — 削除の連鎖（FK の cascade）、マイグレーション、課金
 3. **過去に実際に壊れたもの** — 同じ事故は繰り返される。issue や修正コミットが一次情報になる
-4. **Cloudflare でしか壊れないもの** — D1 の bound parameter 上限（→ `/d1-bound-parameters`）、`db.batch()` の原子性、Durable Object の alarm と WebSocket hibernation、Queues の ack/retry、そして **タイムゾーン**（Workers は UTC。開発機が UTC でないと暦日が 1 日ずれるクラスのバグを見逃す）
+4. **Cloudflare でしか壊れないもの** — D1 の bound parameter 上限（→ `/kjfsm-skills:d1-bound-parameters`）、`db.batch()` の原子性、Durable Object の alarm と WebSocket hibernation、Queues の ack/retry、そして **タイムゾーン**（Workers は UTC。開発機が UTC でないと暦日が 1 日ずれるクラスのバグを見逃す）
 
 この 4 つに当たらないものは後回しでよい。テストの本数を目標にしない。
 
@@ -50,7 +50,7 @@ Vitest の `projects` を分ける正当な理由は **ランタイムが違う�
 
 判定ロジックや変換は全部 `node` に置く。workerd に置くと 1 ファイルあたり数秒の起動コストを払うことになり、得るものが無い。
 
-**SSR フレームワークを `main` に載せているなら 3 つになる。** その構成では「Worker を HTTP で叩く層」と「バインディングに直に触る層」を分ける値段が桁で違う — 測り方と割り当ては `/react-router-worker-tests`。
+**SSR フレームワークを `main` に載せているなら 3 つになる。** その構成では「Worker を HTTP で叩く層」と「バインディングに直に触る層」を分ける値段が桁で違う — 測り方と割り当ては `/kjfsm-skills:react-router-worker-tests`。
 
 ```ts
 // vitest.config.ts
@@ -80,7 +80,7 @@ process.env.TZ = process.env.TEST_TZ ?? "UTC";
 
 ## SSR フレームワークを載せているなら、エントリを切り出す
 
-React Router などの SSR フレームワークを使っている場合、`workers/app.ts` のようなエントリは仮想モジュール（`virtual:react-router/server-build`）を import している。**フレームワークの Vite プラグインを vitest の config にも載せれば解決はする** — ただしそのとき、SSR のモジュールグラフが **テストファイルごとに** 変換・評価される（実測 15.2 秒/file）。載せなければ `main` に指定した時点で解決に失敗する。どちらに転んでも、この `main` を全テストの土台にはしない（→ `/react-router-worker-tests`）。
+React Router などの SSR フレームワークを使っている場合、`workers/app.ts` のようなエントリは仮想モジュール（`virtual:react-router/server-build`）を import している。**フレームワークの Vite プラグインを vitest の config にも載せれば解決はする** — ただしそのとき、SSR のモジュールグラフが **テストファイルごとに** 変換・評価される（実測 15.2 秒/file）。載せなければ `main` に指定した時点で解決に失敗する。どちらに転んでも、この `main` を全テストの土台にはしない（→ `/kjfsm-skills:react-router-worker-tests`）。
 
 fetch/queue/scheduled の実体を、SSR ディスパッチャを引数で受け取る関数として切り出す。テストは最小のエントリからそれを組み立て、SSR だけを fake に差し替える。SSR を実際に通す検証は、本番ビルドを起動する `createTestHarness()` の担当になる。
 

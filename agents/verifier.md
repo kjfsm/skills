@@ -1,6 +1,6 @@
 ---
 name: verifier
-description: 記録された検証ゲート(型チェック・lint・テスト・ビルド)を走らせ、生ログを持ち込まずに合否と最初の失敗信号だけを返す。/verification-loop がゲートを回すとき、変更を完了と宣言する前にスイートを通すときに使う。直しはしない。
+description: 記録された検証ゲート(型チェック・lint・テスト・ビルド)を走らせ、生ログを持ち込まずに合否と最初の失敗信号だけを返す。/kjfsm-skills:verification-loop がゲートを回すとき、変更を完了と宣言する前にスイートを通すときに使う。直しはしない。
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---

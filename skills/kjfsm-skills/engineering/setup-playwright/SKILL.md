@@ -69,7 +69,7 @@ Chrome for Testing 151.0.7922.34 (playwright chromium v1234)
 
 ### 5. 検証ゲートと CI に載せる
 
-E2E は `docs/agents/verification.md` の1行になり、そこから CI に写る(→ `/setup-ci`)。**向きは常に verification.md → CI。**
+E2E は `docs/agents/verification.md` の1行になり、そこから CI に写る(→ `/kjfsm-skills:setup-ci`)。**向きは常に verification.md → CI。**
 
 `webServer` にビルドとマイグレーションまで持たせると、手元と CI で E2E の入口が1つになる。CI では `reuseExistingServer: false` にして、前のジョブの残骸を掴ませない。E2E が内部でビルドするなら、CI にビルドの行を重ねて置かない。
 

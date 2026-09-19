@@ -1,6 +1,6 @@
 ---
 name: spec-reviewer
-description: 差分を Spec 軸でレビューする — 元のイシュー/PRD が求めたものを忠実に実装しているか、欠けている要件・スコープの逸脱・誤った実装を挙げる。/two-axis-review が Standards 軸と並列に起動する。コーディング標準は見ない。
+description: 差分を Spec 軸でレビューする — 元のイシュー/PRD が求めたものを忠実に実装しているか、欠けている要件・スコープの逸脱・誤った実装を挙げる。/kjfsm-skills:two-axis-review が Standards 軸と並列に起動する。コーディング標準は見ない。
 tools: Read, Grep, Glob, Bash
 model: opus
 ---

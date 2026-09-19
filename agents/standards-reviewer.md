@@ -1,6 +1,6 @@
 ---
 name: standards-reviewer
-description: 差分を Standards 軸でレビューする — このリポジトリの明文化された標準への違反、Fowler のコードスメルの基準線、そして書かれなかった Why not。/two-axis-review が Spec 軸と並列に起動する。Spec(元のイシュー/PRD)は見ない。
+description: 差分を Standards 軸でレビューする — このリポジトリの明文化された標準への違反、Fowler のコードスメルの基準線、そして書かれなかった Why not。/kjfsm-skills:two-axis-review が Spec 軸と並列に起動する。Spec(元のイシュー/PRD)は見ない。
 tools: Read, Grep, Glob, Bash
 model: opus
 ---

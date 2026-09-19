@@ -9,7 +9,7 @@
 - **[ask-kjfsm](./ask-kjfsm/SKILL.md)** — どのスキルやフローが自分の状況に合うかを尋ねる。このリポジトリのスキルを案内するルーター。
 - **[setup-repo](./setup-repo/SKILL.md)** — setup 系4工程(規約とドキュメント配置・パス別ルール・CI・フック)の入口。順序と依存はこのスキルが持つ。再実行すると現況を読み、足りない工程と**ずれた箇所だけ**を当てる。
 - **[tend-memory-files](./tend-memory-files/SKILL.md)** — `CLAUDE.md` と `.claude/rules/` を新規に書く、または監査してトリムする。行数の目安に収め、具体的で矛盾のない指示だけを残す。
-- **[implement-and-review](./implement-and-review/SKILL.md)** — スペックやチケットの集合が記述する作業を、本家の `/mattpocock-skills:implement` でビルドしてもらってから締める。着手前に既定ブランチへ追いつき、打つ行(`/mattpocock-skills:code-review` とコミットを止める一文付き)を示して止まり、ビルドが済んだら `/verification-loop` でクリーンランを取り、`/prune-comments` と `/two-axis-review` を通してから PR を出す。
+- **[implement-and-review](./implement-and-review/SKILL.md)** — スペックやチケットの集合が記述する作業を、本家の `/mattpocock-skills:implement` でビルドしてもらってから締める。着手前に既定ブランチへ追いつき、打つ行(`/mattpocock-skills:code-review` とコミットを止める一文付き)を示して止まり、ビルドが済んだら `/kjfsm-skills:verification-loop` でクリーンランを取り、`/kjfsm-skills:prune-comments` と `/kjfsm-skills:two-axis-review` を通してから PR を出す。
 - **[squash-d1-migrations](./squash-d1-migrations/SKILL.md)** — 積み上がった D1 のマイグレーションを1本に畳む。合格条件はファイルが減ったことではなく、空の DB に適用した結果が旧チェーンと一致すること。`d1_migrations` は名前を記録しているので、各環境と突き合わせるまでが作業である。
 
 ## モデル呼び出し型
@@ -32,8 +32,8 @@
 - **[partyserver-on-durable-objects](./partyserver-on-durable-objects/SKILL.md)** — partyserver を Durable Object に載せるときの、公式に載らない4点。stub の取り方でリクエスト数が2倍になること、`onStart` が失敗しても DO はリセットされないこと、ハイバネーションで消えるもの、上限。
 - **[dev-bypass-sign-in](./dev-bypass-sign-in/SKILL.md)** — 叩くだけでサインイン済みになる開発・E2E 用の入口を作る。better-auth なら `testUtils` の `test.login({ userId })` で座り、サインイン方式ごとの書き分けを消す。戸はビルド時に畳んで成果物を grep で検査する。
 - **[where-to-write-what](./where-to-write-what/SKILL.md)** — コード・テスト・コメント・JSDoc・コミットメッセージ・PR 本文・ADR・docs のどこに何を書くかのルーティング規律: コードには How、テストには What、コミットログには Why、コメントには Why not。
-- **[setup-rules](./setup-rules/SKILL.md)** — このリポジトリのルールを2層に敷く: `paths:` を持つ rule はその glob を編集するときだけ注入され、スタックに依存しない絶対ルールと追記先の優先順位は毎セッション読まれる側に置く。`/setup-skills` から引き継がれる。
-- **[setup-skills](./setup-skills/SKILL.md)** — このリポジトリをエンジニアリング系スキル向けに設定する(イシュートラッカー、トリアージラベル、ドメインドキュメントの配置、検証ゲート、応答と記述の規約)。`/setup-repo` の工程 A。
+- **[setup-rules](./setup-rules/SKILL.md)** — このリポジトリのルールを2層に敷く: `paths:` を持つ rule はその glob を編集するときだけ注入され、スタックに依存しない絶対ルールと追記先の優先順位は毎セッション読まれる側に置く。`/kjfsm-skills:setup-skills` から引き継がれる。
+- **[setup-skills](./setup-skills/SKILL.md)** — このリポジトリをエンジニアリング系スキル向けに設定する(イシュートラッカー、トリアージラベル、ドメインドキュメントの配置、検証ゲート、応答と記述の規約)。`/kjfsm-skills:setup-repo` の工程 A。
 - **[setup-ci](./setup-ci/SKILL.md)** — 記録された検証ゲートを CI に敷き、ローカルの規律を機構に変える。CI に載らない行(観測・シークレットを要る経路)を分け、必須チェックの設定はユーザーの手に残す。
 - **[setup-hooks](./setup-hooks/SKILL.md)** — 散文では守られないルールを Claude Code のフックへ落として決定的に弾く。落とすのは3条件(すでに破られた・破られても気づけない・入力だけで機械的に判定できる)を満たすものだけ。
 - **[setup-cf-app](./setup-cf-app/SKILL.md)** — 新規の Cloudflare Workers フルスタックアプリを、いつも使う標準ライブラリ構成で立ち上げる。バージョンやフラグは固定せず、各ツールの公式手順で都度組む。

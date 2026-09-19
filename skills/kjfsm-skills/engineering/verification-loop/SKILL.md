@@ -20,7 +20,7 @@ allowed-tools: Bash(bash ${CLAUDE_SKILL_DIR}/scripts/baseline-diff.sh *)
 
 ## 赤を直す
 
-- **一目で原因のわからない赤は `/diagnosing-bugs` に引き渡す。** あちらは信号が無いところに信号を作るスキルであり、ここはすでにある信号を回すスキルである。
+- **一目で原因のわからない赤は `/mattpocock-skills:diagnosing-bugs` に引き渡す。** あちらは信号が無いところに信号を作るスキルであり、ここはすでにある信号を回すスキルである。
 - **変更前から赤だったゲートは、そう述べてから先へ進む。** 切り分けは同梱の [scripts/baseline-diff.sh](scripts/baseline-diff.sh) が行う — `bash ${CLAUDE_SKILL_DIR}/scripts/baseline-diff.sh [--base <ref>] [--extract <regex>] -- <ゲートのコマンド>` を実行する。返ってきた `NEW` が直す対象のすべてで、`PRE` はそのまま報告する。終了コード `2` は「比較できなかった」であり、緑ではない。
 
 - **カスタムチェックを適用する。** `docs/agents/verification.md` の **カスタムチェック** のうち、この差分が触れているものを実行し、違反を `file:line` で挙げてから直す。ここに属するのは決定的に実行できるもの — コマンド、grep、テスト — だけである。判断が要るものは `/two-axis-review` が読む。

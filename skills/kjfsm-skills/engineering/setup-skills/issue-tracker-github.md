@@ -15,7 +15,7 @@
 
 ## トリアージの対象としてのプルリクエスト
 
-**PR を要望の受け口として扱う: いいえ。** _(このリポジトリが外部の PR を機能要望として扱う場合は `yes` に設定する。`/triage` がこのフラグを読む。)_
+**PR を要望の受け口として扱う: いいえ。** _(このリポジトリが外部の PR を機能要望として扱う場合は `yes` に設定する。`/mattpocock-skills:triage` がこのフラグを読む。)_
 
 `yes` に設定されている場合、PR は `gh pr` の相当コマンドを使い、イシューと同じラベルと状態で扱われる:
 
@@ -35,7 +35,7 @@ GitHub の issue を作成する。
 
 ## Wayfinding 操作
 
-`/wayfinder` が使う。**マップ** は単一の issue であり、チケットはその **子** issue である。
+`/mattpocock-skills:wayfinder` が使う。**マップ** は単一の issue であり、チケットはその **子** issue である。
 
 - **マップ**: `wayfinder:map` ラベルの付いた単一の issue で、Notes / Decisions-so-far / Fog の本文を保持する。`gh issue create --label wayfinder:map`。
 - **子チケット**: GitHub のサブイシュー(sub-issues エンドポイントへの `gh api`)としてマップにリンクされた issue。サブイシューが有効になっていない場合は、マップ本文のタスクリストに子を追加し、子の本文の先頭に `Part of #<map>` を置く。ラベル: `wayfinder:<type>`(`research`/`prototype`/`grilling`/`task`)。引き受けられると、そのチケットはマップを進めている開発者に割り当てられる。

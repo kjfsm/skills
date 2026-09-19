@@ -20,7 +20,7 @@
 
 ## Wayfinding 操作
 
-`/wayfinder` が使う。**マップ** はファイルであり、チケットごとに1つの **子** ファイルを持つ。
+`/mattpocock-skills:wayfinder` が使う。**マップ** はファイルであり、チケットごとに1つの **子** ファイルを持つ。
 
 - **マップ**: `.scratch/<effort>/map.md` — Notes / Decisions-so-far / Fog の本文。
 - **子チケット**: `.scratch/<effort>/issues/NN-<slug>.md` に `01` から番号を振り、本文に問いを書く。`Type:` 行がチケットの種類(`research`/`prototype`/`grilling`/`task`)を、`Status:` 行が `claimed`/`resolved` を記録する。

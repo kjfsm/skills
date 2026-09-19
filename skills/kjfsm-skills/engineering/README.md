@@ -9,7 +9,7 @@
 - **[ask-kjfsm](./ask-kjfsm/SKILL.md)** — どのスキルやフローが自分の状況に合うかを尋ねる。このリポジトリのスキルを案内するルーター。
 - **[setup-repo](./setup-repo/SKILL.md)** — setup 系4工程(規約とドキュメント配置・パス別ルール・CI・フック)の入口。順序と依存はこのスキルが持つ。再実行すると現況を読み、足りない工程と**ずれた箇所だけ**を当てる。
 - **[tend-memory-files](./tend-memory-files/SKILL.md)** — `CLAUDE.md` と `.claude/rules/` を新規に書く、または監査してトリムする。行数の目安に収め、具体的で矛盾のない指示だけを残す。
-- **[implement-and-review](./implement-and-review/SKILL.md)** — スペックやチケットの集合が記述する作業を、本家の `/implement` でビルドしてもらってから締める。着手前に既定ブランチへ追いつき、打つ行(`/code-review` とコミットを止める一文付き)を示して止まり、ビルドが済んだら `/verification-loop` でクリーンランを取り、`/prune-comments` と `/two-axis-review` を通してから PR を出す。
+- **[implement-and-review](./implement-and-review/SKILL.md)** — スペックやチケットの集合が記述する作業を、本家の `/mattpocock-skills:implement` でビルドしてもらってから締める。着手前に既定ブランチへ追いつき、打つ行(`/mattpocock-skills:code-review` とコミットを止める一文付き)を示して止まり、ビルドが済んだら `/verification-loop` でクリーンランを取り、`/prune-comments` と `/two-axis-review` を通してから PR を出す。
 - **[squash-d1-migrations](./squash-d1-migrations/SKILL.md)** — 積み上がった D1 のマイグレーションを1本に畳む。合格条件はファイルが減ったことではなく、空の DB に適用した結果が旧チェーンと一致すること。`d1_migrations` は名前を記録しているので、各環境と突き合わせるまでが作業である。
 
 ## モデル呼び出し型

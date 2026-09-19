@@ -2,7 +2,7 @@
 
 Claude Code、Codex、その他 Agent-Skills 標準に準拠したハーネス向けのエージェントスキル(スラッシュコマンドと振る舞い) — 雰囲気で書くコーディングではなく、実務のエンジニアリングのために使う。
 
-[mattpocock/skills](https://github.com/mattpocock/skills) を日本語訳し、kjfsm 向けに調整した独立フォークから出発した。**本家由来のスキル(`/tdd`、`/grill-with-docs`、`/to-spec` など)は、依存先の本家 `mattpocock-skills` がそのまま配る。** このリポジトリの `kjfsm-skills` が持つのは自作のスキルと、本家から離れて自作の流れの中心になったもの(`/implement-and-review`、`/ask-kjfsm`、`/setup-skills`、`/writing-great-skills`)である。本家のほぼ訳のままの日本語訳は、別プラグイン [`matt-skills-jp`](./skills/matt-skills-jp/README.md) に分けてある。
+[mattpocock/skills](https://github.com/mattpocock/skills) を日本語訳し、kjfsm 向けに調整した独立フォークから出発した。**本家由来のスキル(`/mattpocock-skills:tdd`、`/mattpocock-skills:grill-with-docs`、`/mattpocock-skills:to-spec` など)は、依存先の本家 `mattpocock-skills` がそのまま配る。** このリポジトリの `kjfsm-skills` が持つのは自作のスキルと、本家から離れて自作の流れの中心になったもの(`/implement-and-review`、`/ask-kjfsm`、`/setup-skills`、`/writing-great-skills`)である。本家のほぼ訳のままの日本語訳は、別プラグイン [`matt-skills-jp`](./skills/matt-skills-jp/README.md) に分けてある。
 
 これらのスキルは小さく、手を加えやすく、組み合わせやすいように設計されている。どのモデルでも動作する。
 
@@ -25,17 +25,17 @@ Claude Code、Codex、その他 Agent-Skills 標準に準拠したハーネス�
 
 ### 毎回の開発
 
-| やりたいこと           | コマンド                                                           |
-| ---------------------- | ------------------------------------------------------------------ |
-| 新機能をつくる         | `/grill-with-docs` で設計を詰める → `/implement-and-review` で作る |
-| 何かが壊れている       | `/diagnosing-bugs`                                                 |
-| イシューが積み上がった | `/triage`                                                          |
-| 大きすぎて見通せない   | `/wayfinder`                                                       |
-| どれを使うか分からない | **`/ask-kjfsm`**                                                   |
+| やりたいこと           | コマンド                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------ |
+| 新機能をつくる         | `/mattpocock-skills:grill-with-docs` で設計を詰める → `/implement-and-review` で作る |
+| 何かが壊れている       | `/mattpocock-skills:diagnosing-bugs`                                                 |
+| イシューが積み上がった | `/mattpocock-skills:triage`                                                          |
+| 大きすぎて見通せない   | `/mattpocock-skills:wayfinder`                                                       |
+| どれを使うか分からない | **`/ask-kjfsm`**                                                                     |
 
-締めまで持つのは `/implement-and-review` である: 途中で本家の `/implement` を打つ行を示して止まり(ビルドはそこで `/tdd` を駆動する)、済んだら`/verification-loop` でクリーンランを取り、`/prune-comments` でコメントを削り、`/two-axis-review` でレビューしてからコミットし、PR を出す。**`/implement-and-review` はユーザーからしか呼べない** ので、打たなければこの並びは丸ごと走らない。
+締めまで持つのは `/implement-and-review` である: 途中で本家の `/mattpocock-skills:implement` を打つ行を示して止まり(ビルドはそこで `/mattpocock-skills:tdd` を駆動する)、済んだら`/verification-loop` でクリーンランを取り、`/prune-comments` でコメントを削り、`/two-axis-review` でレビューしてからコミットし、PR を出す。**`/implement-and-review` はユーザーからしか呼べない** ので、打たなければこの並びは丸ごと走らない。
 
-複数セッションにまたがる規模なら、`/grill-with-docs` と `/implement-and-review` の間に `/to-spec` → `/to-tickets` を挟んでチケットへ割る。規模の判定とフロー全体は `/ask-kjfsm` が持つ。
+複数セッションにまたがる規模なら、`/mattpocock-skills:grill-with-docs` と `/implement-and-review` の間に `/mattpocock-skills:to-spec` → `/mattpocock-skills:to-tickets` を挟んでチケットへ割る。規模の判定とフロー全体は `/ask-kjfsm` が持つ。
 
 ## インストール
 
@@ -100,7 +100,7 @@ claude plugin marketplace add kjfsm/skills --scope project
 claude plugin install kjfsm-skills@kjfsm --scope project
 ```
 
-`kjfsm-skills` は本家の `mattpocock-skills@mattpocock` に依存しており、インストール時に本家も自動で入る(このマーケットプレイスは `allowCrossMarketplaceDependenciesOn` で `mattpocock` を許可している)。本家の日本語訳 `matt-skills-jp` は同じ名前のスキルを持つので、一緒には入れない。本家の `/implement` はビルドまでで、検証とレビューの流れを締めまで持つのは kjfsm の `/implement-and-review` である。
+`kjfsm-skills` は本家の `mattpocock-skills@mattpocock` に依存しており、インストール時に本家も自動で入る(このマーケットプレイスは `allowCrossMarketplaceDependenciesOn` で `mattpocock` を許可している)。本家の日本語訳 `matt-skills-jp` は同じ名前のスキルを持つので、一緒には入れない。本家の `/mattpocock-skills:implement` はビルドまでで、検証とレビューの流れを締めまで持つのは kjfsm の `/implement-and-review` である。
 
 これは `.claude/settings.json` に `extraKnownMarketplaces` と `enabledPlugins` を書き込む。コミットすれば、そのリポジトリで作業する人は何も入れなくてもスキルが有効になる — `npx skills` のようにスキルの実体をリポジトリへコミットせずに済む。
 
@@ -120,7 +120,7 @@ npx -y skills add kjfsm/skills
 
 **3つの方法は併用しない。** 同じスキルが2系統で入ると、スラッシュコマンドが重複し、常時読み込まれる description も二重に数えられる。このリポジトリを開発するなら選択肢 A、使うだけなら選択肢 B を選ぶ。
 
-**このリポジトリを clone した場合、昇格していないスキルは何も入れなくても使える。** `.claude/skills/` に、どのプラグインも配らない `misc/`・`in-progress/` のスキルへのシンボリックリンクがコミットされているので、この clone の中で作業するかぎり `/wizard` もそのまま呼べる。**昇格済みのスキルはここに張らない** — 配るのはプラグイン(選択肢 B)の役目で、両方から見えると同じスキルがセッション開始時に2度並び、上の併用の禁止がそのまま当たる。この clone で `/ask-kjfsm` や `/tdd` を呼ぶには、選択肢 A か B のどちらかを1つ入れる。**選択肢 A はこの clone のリンクと重ならない** — どちらもこのリポジトリの同じ実体を指すので、Claude Code はスキルを1回しか読み込まない。重なるのは実体が別になる B・C の側である。リンクの張り直しは `scripts/sync-project-skills.sh` で、ずれは `scripts/check-invariants.sh` が落とす。
+**このリポジトリを clone した場合、昇格していないスキルは何も入れなくても使える。** `.claude/skills/` に、どのプラグインも配らない `misc/`・`in-progress/` のスキルへのシンボリックリンクがコミットされているので、この clone の中で作業するかぎり `/mattpocock-skills:wizard` もそのまま呼べる。**昇格済みのスキルはここに張らない** — 配るのはプラグイン(選択肢 B)の役目で、両方から見えると同じスキルがセッション開始時に2度並び、上の併用の禁止がそのまま当たる。この clone で `/ask-kjfsm` や `/mattpocock-skills:tdd` を呼ぶには、選択肢 A か B のどちらかを1つ入れる。**選択肢 A はこの clone のリンクと重ならない** — どちらもこのリポジトリの同じ実体を指すので、Claude Code はスキルを1回しか読み込まない。重なるのは実体が別になる B・C の側である。リンクの張り直しは `scripts/sync-project-skills.sh` で、ずれは `scripts/check-invariants.sh` が落とす。
 
 どの方法でも、他のエンジニアリング系スキルを使う前にリポジトリごとに一度 **`/setup-repo`** を実行すること。setup 系4工程の入口であり、届き方の違う4つの層を順に敷く:
 
@@ -169,17 +169,17 @@ npx -y skills add kjfsm/skills
 
 コーディングエージェントで繰り返し起きる4つの失敗モードと、各スキルが当てる対処法:
 
-**エージェントが望んだ通りに動かなかった。** ミスアライメントはソフトウェア開発で最もよくある失敗モードである — エージェントが理解してくれたと思っていたのに、できあがったものを見て実はそうでなかったと気づく。対処法は **グリリングセッション**: 作り始める前に、作ろうとしているものについて詳細な質問をエージェントにさせることである。`/grill-me`(コードベースなし)と `/grill-with-docs`(コードベースあり)を参照。
+**エージェントが望んだ通りに動かなかった。** ミスアライメントはソフトウェア開発で最もよくある失敗モードである — エージェントが理解してくれたと思っていたのに、できあがったものを見て実はそうでなかったと気づく。対処法は **グリリングセッション**: 作り始める前に、作ろうとしているものについて詳細な質問をエージェントにさせることである。`/mattpocock-skills:grill-me`(コードベースなし)と `/mattpocock-skills:grill-with-docs`(コードベースあり)を参照。
 
-**エージェントが冗長すぎる。** 共有された語彙がなければ、エージェントは1語で済むところに20語を使い、物事の名付け方も一貫しなくなる。対処法は、プロジェクトの専門用語を解読するドキュメントである — `/grill-with-docs` に組み込まれており、グリリングをしながら `CONTEXT.md` と ADR を保守する。
+**エージェントが冗長すぎる。** 共有された語彙がなければ、エージェントは1語で済むところに20語を使い、物事の名付け方も一貫しなくなる。対処法は、プロジェクトの専門用語を解読するドキュメントである — `/mattpocock-skills:grill-with-docs` に組み込まれており、グリリングをしながら `CONTEXT.md` と ADR を保守する。
 
-**コードが動かない。** 何を作るか意識をそろえていても、フィードバックを受け取れずに手探りで進むエージェントは質の悪いコードを生む。対処法は、いつものひとそろいのフィードバックループ — 静的型付け、ブラウザへのアクセス、自動テスト — であり、レッド・グリーン・リファクタリングのループが仕事の大半を担う。`/tdd` と `/diagnosing-bugs` を参照。作り終えた変更が本当に動くかは [`/verification-loop`](./skills/kjfsm-skills/engineering/verification-loop/SKILL.md) が締める — 記録されたゲートを中断なく1回で通し、変更した経路を実際に駆動して観測する。
+**コードが動かない。** 何を作るか意識をそろえていても、フィードバックを受け取れずに手探りで進むエージェントは質の悪いコードを生む。対処法は、いつものひとそろいのフィードバックループ — 静的型付け、ブラウザへのアクセス、自動テスト — であり、レッド・グリーン・リファクタリングのループが仕事の大半を担う。`/mattpocock-skills:tdd` と `/mattpocock-skills:diagnosing-bugs` を参照。作り終えた変更が本当に動くかは [`/verification-loop`](./skills/kjfsm-skills/engineering/verification-loop/SKILL.md) が締める — 記録されたゲートを中断なく1回で通し、変更した経路を実際に駆動して観測する。
 
-**コードベースが泥団子になった。** エージェントはコーディングを劇的に加速させるが、それはソフトウェアのエントロピーも加速させる。対処法は、あらゆる層でコードの設計を気にかけることである — `/to-spec`(スペックを書く前にどのモジュールが影響を受けるか問いを立てる)と `/improve-codebase-architecture`(コードベースが泥団子へと漂流しつつあるのを定期的に捉える)を参照。
+**コードベースが泥団子になった。** エージェントはコーディングを劇的に加速させるが、それはソフトウェアのエントロピーも加速させる。対処法は、あらゆる層でコードの設計を気にかけることである — `/mattpocock-skills:to-spec`(スペックを書く前にどのモジュールが影響を受けるか問いを立てる)と `/mattpocock-skills:improve-codebase-architecture`(コードベースが泥団子へと漂流しつつあるのを定期的に捉える)を参照。
 
 ## リファレンス
 
-これらは1つの軸で分かれる — 誰がそれを呼び出せるか。**ユーザー呼び出し型** のスキルは、あなたが入力したとき(例: `/grill-me`)だけ到達できる。その役目はオーケストレーションである。**モデル呼び出し型** のスキルは、あなたが呼び出すこともできるし、タスクに合致すればエージェントが自動的に手を伸ばすこともできる。それらは再利用可能な規律を保持する。ユーザー呼び出し型のスキルはモデル呼び出し型のスキルを呼び出せるが、別のユーザー呼び出し型のスキルは決して呼び出せない。
+これらは1つの軸で分かれる — 誰がそれを呼び出せるか。**ユーザー呼び出し型** のスキルは、あなたが入力したとき(例: `/mattpocock-skills:grill-me`)だけ到達できる。その役目はオーケストレーションである。**モデル呼び出し型** のスキルは、あなたが呼び出すこともできるし、タスクに合致すればエージェントが自動的に手を伸ばすこともできる。それらは再利用可能な規律を保持する。ユーザー呼び出し型のスキルはモデル呼び出し型のスキルを呼び出せるが、別のユーザー呼び出し型のスキルは決して呼び出せない。
 
 ### Engineering
 
@@ -190,7 +190,7 @@ npx -y skills add kjfsm/skills
 - **[ask-kjfsm](./skills/kjfsm-skills/engineering/ask-kjfsm/SKILL.md)** — どのスキルやフローが自分の状況に合うかを尋ねる。このリポジトリのスキルを案内するルーター。
 - **[setup-repo](./skills/kjfsm-skills/engineering/setup-repo/SKILL.md)** — setup 系4工程(規約とドキュメント配置・パス別ルール・CI・フック)の入口。順序と依存はこのスキルが持つ。再実行すると現況を読み、足りない工程と**ずれた箇所だけ**を当てる。
 - **[tend-memory-files](./skills/kjfsm-skills/engineering/tend-memory-files/SKILL.md)** — セッション開始時にロードされる指示ファイル(`CLAUDE.md`、`.claude/rules/`)を新規に書く、または監査してトリムする。行数の目安に収め、具体的で矛盾のない指示だけを残す。
-- **[implement-and-review](./skills/kjfsm-skills/engineering/implement-and-review/SKILL.md)** — スペックやチケットの集合が記述する作業を、本家の `/implement` でビルドしてもらってから締める。着手前に既定ブランチへ追いつき、打つ行(`/code-review` とコミットを止める一文付き)を示して止まり、ビルドが済んだら `/verification-loop` でクリーンランを取り、`/prune-comments` と `/two-axis-review` を通してから PR を出す。
+- **[implement-and-review](./skills/kjfsm-skills/engineering/implement-and-review/SKILL.md)** — スペックやチケットの集合が記述する作業を、本家の `/mattpocock-skills:implement` でビルドしてもらってから締める。着手前に既定ブランチへ追いつき、打つ行(`/mattpocock-skills:code-review` とコミットを止める一文付き)を示して止まり、ビルドが済んだら `/verification-loop` でクリーンランを取り、`/prune-comments` と `/two-axis-review` を通してから PR を出す。
 - **[squash-d1-migrations](./skills/kjfsm-skills/engineering/squash-d1-migrations/SKILL.md)** — 積み上がった D1 のマイグレーションを1本に畳む。合格条件はファイルが減ったことではなく、空の DB に適用した結果が旧チェーンと一致すること。`d1_migrations` は名前を記録しているので、各環境と突き合わせるまでが作業である。
 
 **モデル呼び出し型**
@@ -232,7 +232,7 @@ npx -y skills add kjfsm/skills
 - **[writing-great-skills](./skills/kjfsm-skills/productivity/writing-great-skills/SKILL.md)** — スキルを書く・直すための判断基準と、公式が定める仕様: 予測可能性・情報階層・段階的開示・先導語・失敗モードの語彙に、公式の数値上限と frontmatter の規則をまとめた `OFFICIAL.md` が付く。
 - **[sharpen-request](./skills/kjfsm-skills/productivity/sharpen-request/SKILL.md)** — 「〜を整理したい」「〜を改善したい」のような曖昧な依頼を、範囲・止まる地点・方向と強さ・対象の名指し・1項目ずつ判定できる問い・比べるコスト・目的にしないものを持った指示に研ぐ。指示を出して止まり、作業は合意してから始める。モデルが自分から呼んだときは、研ぐ前に使うかをユーザーに聞く。
 
-本家由来のスキル(`/grill-me`、`/grill-with-docs`、`/tdd`、`/diagnosing-bugs`、`/to-spec`、`/to-tickets`、`/triage`、`/wayfinder` ほか)は依存先の本家が配るので、ここには載らない。一覧は[本家の README](https://github.com/mattpocock/skills#readme) にある。
+本家由来のスキル(`/mattpocock-skills:grill-me`、`/mattpocock-skills:grill-with-docs`、`/mattpocock-skills:tdd`、`/mattpocock-skills:diagnosing-bugs`、`/mattpocock-skills:to-spec`、`/mattpocock-skills:to-tickets`、`/mattpocock-skills:triage`、`/mattpocock-skills:wayfinder` ほか)は依存先の本家が配るので、ここには載らない。一覧は[本家の README](https://github.com/mattpocock/skills#readme) にある。
 
 ### その他のバケット
 

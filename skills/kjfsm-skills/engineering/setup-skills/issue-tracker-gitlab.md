@@ -16,7 +16,7 @@
 
 ## トリアージの対象としてのマージリクエスト
 
-**MR を要望の受け口として扱う: いいえ。** _(このリポジトリが外部のマージリクエストを機能要望として扱う場合は `yes` に設定する。`/triage` がこのフラグを読む。)_
+**MR を要望の受け口として扱う: いいえ。** _(このリポジトリが外部のマージリクエストを機能要望として扱う場合は `yes` に設定する。`/mattpocock-skills:triage` がこのフラグを読む。)_
 
 `yes` に設定されている場合、MR は `glab mr` の相当コマンドを使い、イシューと同じラベルと状態で扱われる:
 
@@ -36,7 +36,7 @@ GitLab の issue を作成する。
 
 ## Wayfinding 操作
 
-`/wayfinder` が使う。**マップ** は単一の issue であり、チケットはその **子** issue である。
+`/mattpocock-skills:wayfinder` が使う。**マップ** は単一の issue であり、チケットはその **子** issue である。
 
 - **マップ**: `wayfinder:map` ラベルの付いた単一の issue で、Notes / Decisions-so-far / Fog の本文を保持する。`glab issue create --label wayfinder:map`。(ネイティブな epic を持つ GitLab のプランでは、代わりに epic がマップを保持してもよい。ラベル付きの issue はどのプランでも動作する。)
 - **子チケット**: description の先頭に `Part of #<map>` を持ち、`wayfinder:<type>` ラベル(`research`/`prototype`/`grilling`/`task`)を持つ issue。引き受けられると、そのチケットはマップを進めている開発者に割り当てられる。

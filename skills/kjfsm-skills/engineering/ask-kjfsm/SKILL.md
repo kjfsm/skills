@@ -61,6 +61,6 @@ disable-model-invocation: true
 - **`/kjfsm-skills:setup-skills`**(毎セッション)— 他のスキルが前提とする設定一式。**検証ゲートの定義** もここ
 - **`/kjfsm-skills:setup-rules`**(その glob を編集するとき)— `paths:` を持つ rule と絶対ルール。**敷く側** で、監査とトリムは `/kjfsm-skills:tend-memory-files`
 - **`/kjfsm-skills:setup-ci`**(push / PR)— そのゲートを CI で回す。手元で通しても記録は残らない
-- **`/kjfsm-skills:setup-hooks`**(ツール呼び出しのたび)— 散文では守られないものを決定的に弾く。**先回りしない**
+- **`/kjfsm-skills:setup-hooks`**(該当する操作のたび)— 散文では守られないものを、効く範囲の広い層から順に決定的に弾く。**先回りしない**
 
 この4層が敷く規約は `CLAUDE.md` / `AGENTS.md` にも載るが、重複ではない。**出力スタイルはサブエージェントに届かない** — `/kjfsm-skills:two-axis-review` や `/mattpocock-skills:improve-codebase-architecture` が投げる子コンテキストに規約を効かせるのは、こちら側だからである。

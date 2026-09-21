@@ -39,6 +39,7 @@ jobs:
 - **`push: branches: [main]` と `pull_request` の両方** — PR で緑だったものが、マージ後の main で赤くなることがある(別の PR と組み合わさって初めて壊れる)。main 側を見ていないと、次に PR を出した人が他人の赤を踏む
 - **`concurrency` + `cancel-in-progress`** — 同じブランチへ push を重ねたとき、古い実行を打ち切る。付けないとキューが詰まり、最新の結果が最後に届く。`github.ref` を含めるので、ブランチをまたいでは打ち切らない
 - **`permissions: contents: read`** — 既定のトークンは書き込み権限を持つ。CI から push しない以上、渡す理由が無い。事故ったワークフローやサードパーティ Action が押せる範囲を、読み取りに落としておく
+- ⚠️ **`git diff` の基点を使うゲートがあるなら `with: fetch-depth: 0` を足す。** 既定の 1 では merge-base が解決できず、その検査は**落ちずに飛ぶ** — CI は緑のまま、手元でだけ効いている状態になる。要らないなら足さない(clone が重くなる)
 
 ## 2. Node + pnpm
 
@@ -115,7 +116,7 @@ GitLab CI なら `.gitlab-ci.yml` の `stages` に同じ順で並べ、`interrup
 1. 追加後、PR を1本通してジョブを1回実行する(実行していないジョブ名は選択肢に出ない)
 2. Settings → Branches → `main` のルール → **Require status checks to pass before merging** → ジョブ名(上の例なら `verify`)を選ぶ
 3. **Require branches to be up to date before merging** は、main の動きが速いリポジトリでは付けない — マージのたびに全 PR の再実行が要る
-4. `main` への直 push を禁じる絶対ルールがあるなら **Require a pull request before merging** も入れる
+4. **Require a pull request before merging** を入れるかは、`SKILL.md` の手順5が決める(実態を数える)
 
 これはファイルではないので、**エージェントは代わりに設定できない。** ユーザーに手順として渡す。
 

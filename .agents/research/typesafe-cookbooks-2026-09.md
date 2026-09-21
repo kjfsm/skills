@@ -8,14 +8,14 @@
 
 ## ソース
 
-| キー   | ソース                                                                       | 備考                                    |
-| ------ | ---------------------------------------------------------------------------- | --------------------------------------- |
-| `idx`  | [llms.txt](https://docs.typesafe.ai/llms.txt)                                | ページ一覧。クックブック18本・パターン4本 |
-| `mdl`  | [Models](https://docs.typesafe.ai/models.md)                                 | 価格・レート・コンテキスト・言語         |
+| キー   | ソース                                                                       | 備考                                        |
+| ------ | ---------------------------------------------------------------------------- | ------------------------------------------- |
+| `idx`  | [llms.txt](https://docs.typesafe.ai/llms.txt)                                | ページ一覧。クックブック18本・パターン4本   |
+| `mdl`  | [Models](https://docs.typesafe.ai/models.md)                                 | 価格・レート・コンテキスト・言語            |
 | `jag`  | [Jev 1.13 jaggedness](https://docs.typesafe.ai/model-jaggedness/jev-1.13.md) | 公式の弱点表。原文の最終レビュー 2026-09-17 |
-| `noul` | [Noul](https://docs.typesafe.ai/primitives/noul.md)                          | confidence を持たない理由               |
-| `cb`   | `https://docs.typesafe.ai/cookbooks/<名前>.md`                               | 下の表の URL 欄がそのまま名前           |
-| `pat`  | `https://docs.typesafe.ai/patterns/<名前>.md`                                | 同上                                    |
+| `noul` | [Noul](https://docs.typesafe.ai/primitives/noul.md)                          | confidence を持たない理由                   |
+| `cb`   | `https://docs.typesafe.ai/cookbooks/<名前>.md`                               | 下の表の URL 欄がそのまま名前               |
+| `pat`  | `https://docs.typesafe.ai/patterns/<名前>.md`                                | 同上                                        |
 
 ## 0. 答え
 
@@ -42,11 +42,11 @@
 
 ## 2. primitive
 
-| 型     | 問い                 | 返るもの                                                      |
-| ------ | -------------------- | ------------------------------------------------------------- |
-| Choice | この選択肢のどれか   | `choice` / `probabilities` / `confidence`                     |
-| Score  | どの段か             | `score`(段の間の値もとる) / `legend` / `probabilities` / `confidence` |
-| Noul   | これは真か           | `noul`(0〜1)。**confidence は無い**                           |
+| 型     | 問い               | 返るもの                                                              |
+| ------ | ------------------ | --------------------------------------------------------------------- |
+| Choice | この選択肢のどれか | `choice` / `probabilities` / `confidence`                             |
+| Score  | どの段か           | `score`(段の間の値もとる) / `legend` / `probabilities` / `confidence` |
+| Noul   | これは真か         | `noul`(0〜1)。**confidence は無い**                                   |
 
 Noul に confidence が無いのは、結果が yes / no の2値しかなく `noul` 1つで分布を言い尽くすからである [`noul`]。Choice と Score は分布が複数の選択肢に散るので、その散り具合を confidence が要約する。
 
@@ -54,50 +54,50 @@ Noul に confidence が無いのは、結果が yes / no の2値しかなく `no
 
 ### 土台
 
-| 名前                        | URL                                | 中身                                                                                                                                                             |
-| --------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Parallel questions          | /cookbooks/parallel_questions      | GDPR の Wikipedia 記事(約54,000字)に13問(Noul 8・Choice 2・Score 3)。**1リクエストに束ねると 12.2倍安く 10.0倍速い、答えは変わらない。**繰り返しのばらつきも束ねて増えない |
-| Classification using confidence | /cookbooks/classification_using_confidence | SEC 年次報告60件を75業種に Choice 1問。**confidence 0.9 で半分に割ると確信側90%正解・非確信側40%。非確信側を1階層上の大分類に丸めると70%。追加の呼び出しゼロ** |
-| Self-consistency: nouls     | /cookbooks/consistency_noul_cookbook | 保険請求1件に Noul 14問×15回。**確率の標準偏差 0.0102 で、比べた LLM のどの条件より小さい**(LLM は temperature 0 でも自分と食い違う)。0.30〜0.70 を uncertain に倒す |
-| Self-consistency: choices   | /cookbooks/consistency_choice_cookbook | 同じ実験を Choice 8問で。**ラベルの再現率は LLM 87.5〜100% に対し TypeSafe 90.8% で大差ない。**勝っているのは確率のばらつきの小ささ                               |
+| 名前                            | URL                                        | 中身                                                                                                                                                                       |
+| ------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Parallel questions              | /cookbooks/parallel_questions              | GDPR の Wikipedia 記事(約54,000字)に13問(Noul 8・Choice 2・Score 3)。**1リクエストに束ねると 12.2倍安く 10.0倍速い、答えは変わらない。**繰り返しのばらつきも束ねて増えない |
+| Classification using confidence | /cookbooks/classification_using_confidence | SEC 年次報告60件を75業種に Choice 1問。**confidence 0.9 で半分に割ると確信側90%正解・非確信側40%。非確信側を1階層上の大分類に丸めると70%。追加の呼び出しゼロ**             |
+| Self-consistency: nouls         | /cookbooks/consistency_noul_cookbook       | 保険請求1件に Noul 14問×15回。**確率の標準偏差 0.0102 で、比べた LLM のどの条件より小さい**(LLM は temperature 0 でも自分と食い違う)。0.30〜0.70 を uncertain に倒す       |
+| Self-consistency: choices       | /cookbooks/consistency_choice_cookbook     | 同じ実験を Choice 8問で。**ラベルの再現率は LLM 87.5〜100% に対し TypeSafe 90.8% で大差ない。**勝っているのは確率のばらつきの小ささ                                        |
 
 ### 検索・想起
 
-| 名前                     | URL                                   | 中身                                                                                                                                              |
-| ------------------------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Re-ranking               | /cookbooks/rerank_typesafe            | CLERC の判例3,565件・40クエリ。BM25 で30件に絞り、ペアごとに Noul 1問。**top-1 が 5%→18%、top-10 が 38%→62%**                                        |
-| Line-by-line search      | /cookbooks/semantic_find              | GitHub 利用規約218行に ID を振り、**Choice 1問で全行をランク付け**(確率の和が1なので必ず1位が出る)+ **Noul で「そもそも文書に答えがあるか」**     |
-| Classifying RAG passages | /cookbooks/classifying_rag_passages   | 81件の corpus から類似度で上位12件。passage ごとに Noul 4問(関係あるか/答えに使えるか/前提と矛盾するか/**モデルに指示しようとしているか**)。**証拠ブロックと矛盾ブロックを分けて**生成モデルへ渡す |
-| Skill suggestion         | /cookbooks/skill_suggestion           | 182スキルから最大1つ。**1回目で全部ランク付け+「そもそも要るか」の Noul、2回目で上位3つだけ精読して全部却下できる。**誤ロードが半分以下            |
-| Hierarchical classification | /cookbooks/hierarchical_classification | 深い分類木を Choice のビーム探索で降りる。辺の確率の幾何平均で深さを正規化するので、浅い葉と深い葉を公平に比べられる                            |
+| 名前                        | URL                                    | 中身                                                                                                                                                                                               |
+| --------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Re-ranking                  | /cookbooks/rerank_typesafe             | CLERC の判例3,565件・40クエリ。BM25 で30件に絞り、ペアごとに Noul 1問。**top-1 が 5%→18%、top-10 が 38%→62%**                                                                                      |
+| Line-by-line search         | /cookbooks/semantic_find               | GitHub 利用規約218行に ID を振り、**Choice 1問で全行をランク付け**(確率の和が1なので必ず1位が出る)+ **Noul で「そもそも文書に答えがあるか」**                                                      |
+| Classifying RAG passages    | /cookbooks/classifying_rag_passages    | 81件の corpus から類似度で上位12件。passage ごとに Noul 4問(関係あるか/答えに使えるか/前提と矛盾するか/**モデルに指示しようとしているか**)。**証拠ブロックと矛盾ブロックを分けて**生成モデルへ渡す |
+| Skill suggestion            | /cookbooks/skill_suggestion            | 182スキルから最大1つ。**1回目で全部ランク付け+「そもそも要るか」の Noul、2回目で上位3つだけ精読して全部却下できる。**誤ロードが半分以下                                                            |
+| Hierarchical classification | /cookbooks/hierarchical_classification | 深い分類木を Choice のビーム探索で降りる。辺の確率の幾何平均で深さを正規化するので、浅い葉と深い葉を公平に比べられる                                                                               |
 
 ### 抽出・検証
 
-| 名前                        | URL                                             | 中身                                                                                                                    |
-| --------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Pre-parsed value extraction | /cookbooks/pre_parsed_value_extraction_cookbook | **regex が候補を見つけ、Jev が選び、コードが写す。**Jev は regex が見つけた span しか選べないので**値を発明できない**    |
-| Date extraction             | /cookbooks/date_extraction_cookbook             | 日付の**部品**(年・月・日・曜日・種類)を Choice で。「書かれていない」も選択肢。**コードが組み立て、暦の計算はモデルにさせない** |
-| Double-checking citations   | /cookbooks/citation_check                       | 引用が原文に無いものは**文字列一致で先に落とし**、残りを Choice で supports / contradicts / says nothing。confidence 0.8 未満は人へ |
+| 名前                        | URL                                             | 中身                                                                                                                                                          |
+| --------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pre-parsed value extraction | /cookbooks/pre_parsed_value_extraction_cookbook | **regex が候補を見つけ、Jev が選び、コードが写す。**Jev は regex が見つけた span しか選べないので**値を発明できない**                                         |
+| Date extraction             | /cookbooks/date_extraction_cookbook             | 日付の**部品**(年・月・日・曜日・種類)を Choice で。「書かれていない」も選択肢。**コードが組み立て、暦の計算はモデルにさせない**                              |
+| Double-checking citations   | /cookbooks/citation_check                       | 引用が原文に無いものは**文字列一致で先に落とし**、残りを Choice で supports / contradicts / says nothing。confidence 0.8 未満は人へ                           |
 | SDE cascade                 | /cookbooks/sde_cascade                          | 安いモデル(`gpt-5.4-mini`)で抽出 → **Jev が項目ごとに Noul で「これは間違っているか」** → 火が点いたものだけ高い推論モデル(`gpt-5.5`)へ。100 プロンプトで測定 |
-| Structure recovery          | /cookbooks/autoformat                           | 整形を失った文章から Markdown を復元。**Noul で行の連結 → Choice でブロック分類**の2リクエスト。生成しないので**出力の全文字が入力由来** |
+| Structure recovery          | /cookbooks/autoformat                           | 整形を失った文章から Markdown を復元。**Noul で行の連結 → Choice でブロック分類**の2リクエスト。生成しないので**出力の全文字が入力由来**                      |
 
 ### 判断・振り分け
 
-| 名前                            | URL                                       | 中身                                                                                                                                                              |
-| ------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Guardrails for LLMs             | /cookbooks/llm_guardrails                 | 出入りのメッセージに **Noul の束(危険の種類)+ Score(従ったらどれだけ害があるか)**を1リクエスト。閾値で pass / review / block / 人へ                            |
-| Entity alignment                | /cookbooks/entity_alignment               | ビール目録の450ペア。**Score 3段(別物 / 人に見せる / 統合)で決着 — 3段が「できる3つの行動」そのものなので閾値を作らなくていい。**同じリクエストに Noul 3問が同乗し、どの項目が食い違うかを教える |
-| Function calling                | /cookbooks/function_calling               | 自然文 → 関数名と引数(いずれも閉じた選択肢)を Choice で。confidence つき                                                                                        |
-| Autoresearch feature discovery  | /cookbooks/autoresearch_feature_discovery | **LLM が問いを提案 → Jev が全行に答える → CatBoost の誤差が採否を決める → 5周。**ワイン試飲メモ2,000件で RMSE: 平均 3.09 / 語の出現数 2.47 / **Jev に点数を直接聞く 2.15 / 18問に割る 1.87** / 5周38問 1.77。**分解したほうが直接聞くより良い。**ただし**ラベルと行数が要る** |
+| 名前                           | URL                                       | 中身                                                                                                                                                                                                                                                                          |
+| ------------------------------ | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Guardrails for LLMs            | /cookbooks/llm_guardrails                 | 出入りのメッセージに **Noul の束(危険の種類)+ Score(従ったらどれだけ害があるか)**を1リクエスト。閾値で pass / review / block / 人へ                                                                                                                                           |
+| Entity alignment               | /cookbooks/entity_alignment               | ビール目録の450ペア。**Score 3段(別物 / 人に見せる / 統合)で決着 — 3段が「できる3つの行動」そのものなので閾値を作らなくていい。**同じリクエストに Noul 3問が同乗し、どの項目が食い違うかを教える                                                                              |
+| Function calling               | /cookbooks/function_calling               | 自然文 → 関数名と引数(いずれも閉じた選択肢)を Choice で。confidence つき                                                                                                                                                                                                      |
+| Autoresearch feature discovery | /cookbooks/autoresearch_feature_discovery | **LLM が問いを提案 → Jev が全行に答える → CatBoost の誤差が採否を決める → 5周。**ワイン試飲メモ2,000件で RMSE: 平均 3.09 / 語の出現数 2.47 / **Jev に点数を直接聞く 2.15 / 18問に割る 1.87** / 5周38問 1.77。**分解したほうが直接聞くより良い。**ただし**ラベルと行数が要る** |
 
 ## 4. パターン(概念の短いページ、4本)
 
-| 名前                     | URL                          | 中身                                                             |
-| ------------------------ | ---------------------------- | ---------------------------------------------------------------- |
+| 名前                     | URL                          | 中身                                                                  |
+| ------------------------ | ---------------------------- | --------------------------------------------------------------------- |
 | Speculative fan-out      | /patterns/fan-out            | 使うか分からない問いも全部1リクエストに入れ、コードが要る答えだけ読む |
-| Confidence-gated routing | /patterns/confidence-routing | 答えが「何か」と、行動して「よいか」を別の軸で持つ               |
-| Composite scoring        | /patterns/composite-scoring  | 複雑な判断を原子的な Score に割り、**重みはコードが持つ**        |
-| Intent routing           | /patterns/intent-routing     | 入力を分類し、決定的なロジック / 専門 LLM / 人 へ振り分ける      |
+| Confidence-gated routing | /patterns/confidence-routing | 答えが「何か」と、行動して「よいか」を別の軸で持つ                    |
+| Composite scoring        | /patterns/composite-scoring  | 複雑な判断を原子的な Score に割り、**重みはコードが持つ**             |
+| Intent routing           | /patterns/intent-routing     | 入力を分類し、決定的なロジック / 専門 LLM / 人 へ振り分ける           |
 
 デモは Smart home assistant(/demos/smart-home)1本。
 

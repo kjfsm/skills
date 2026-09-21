@@ -7,12 +7,11 @@
 1. [`permissions.deny`](#1-permissionsdeny)
 2. [検査スクリプトを git hook と CI から呼ぶ](#2-検査スクリプトを-git-hook-と-ci-から呼ぶ)
 3. [Claude フックの共通の骨格](#3-claude-フックの共通の骨格)
-4. [Bash 経由の書き込みまで止める](#4-bash-経由の書き込みまで止める)
-5. [`--no-verify` を止める（自己スコープ版）](#5---no-verify-を止める自己スコープ版)
-6. [セッション開始時に環境を用意する](#6-セッション開始時に環境を用意する)
-7. [応答を終える前に型チェックを通す](#7-応答を終える前に型チェックを通す)
-8. [settings.json への配線](#8-settingsjson-への配線)
-9. [検査のしかた](#9-検査のしかた)
+4. [`--no-verify` を止める（自己スコープ版）](#4---no-verify-を止める自己スコープ版)
+5. [セッション開始時に環境を用意する](#5-セッション開始時に環境を用意する)
+6. [応答を終える前に型チェックを通す](#6-応答を終える前に型チェックを通す)
+7. [settings.json への配線](#7-settingsjson-への配線)
+8. [検査のしかた](#8-検査のしかた)
 
 ## 1. `permissions.deny`
 
@@ -22,23 +21,19 @@ gitignore 済みのファイルの保護は、ここで終わる。スクリプ�
 {
   "permissions": {
     "deny": [
-      "Read(.dev.vars)",
-      "Edit(.dev.vars)",
-      "Write(.dev.vars)",
-      "Read(.env)",
-      "Edit(.env)",
-      "Write(.env)",
-      "Read(.env.local)",
-      "Edit(.env.local)",
-      "Write(.env.local)"
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.dev.vars.*)",
+      "Read(!.dev.vars.example)"
     ]
   }
 }
 ```
 
-- ⚠️ **ツール呼び出しにしか掛からない。** `Bash` 経由の書き込み(`sed -i`、`pnpm install` による lock の書き換え)は通る。散文側で「これも守られる」と書かない
-- **`Read` も塞ぐのは、事故ではなく転記を止めるためである。** `cat .env` は Bash 経由で通るので、ここで防げるのは秘密がまるごとコンテキストへ乗り、要約や報告に写ることだけ。「通ってよい操作を止めない」にここだけ例外を作るのは、流出が取り返しのつかない側だからである。**在るかどうかを確かめたいだけなら `.example` を読む**
-- ⚠️ **glob が巻き込む先を実物で確かめる。** `.dev.vars.*` と書くと `.dev.vars.example` まで塞ぐ — 追跡されていて、他のスキルが編集し、検査スクリプトが読むファイルである。**1つずつ列挙するほうが安い**
+- **参照されるのは `Read(...)` と `Edit(...)` だけ。** `Write(...)` / `NotebookEdit(...)` / `MultiEdit(...)` のパス付きルールは受理されたうえで**一度も見られない**(起動時に警告が出る)。`Read` の deny は同じパスへの `Edit` と `Write` も塞ぐので、秘密のファイルは `Read` 1行で済む。**`NotebookEdit` だけは `Read` に含まれない** — どのツールにも触らせないパスには `Edit(...)` も並べる
+- **Bash の中も見る。** 出力リダイレクトの先(`> .env`)と、Claude Code が知っているファイルコマンド(`cat`、`head`、`tail`、`sed`、`tee`)の引数は、同じ `Read` / `Edit` の規則で判定される。⚠️ **素通しするのはパスを名指ししない読み書きである** — `grep -r pattern .`、`pnpm install` による lock の書き換え、Python や Node のスクリプトが自分で開くファイル
+- **`Read` も塞ぐのは、事故ではなく転記を止めるためである。** 防いでいるのは、秘密がまるごとコンテキストへ乗り、要約や報告に写ること。「通ってよい操作を止めない」にここだけ例外を作るのは、流出が取り返しのつかない側だからである。**在るかどうかを確かめたいだけなら `.example` を読む**
+- **巻き込む先は `!` で抜く。** `.dev.vars.*` は `.dev.vars.example` まで塞ぐ — 追跡されていて、他のスキルが編集し、検査スクリプトが読むファイルである。⚠️ **抜きたい規則より後ろに置いたときだけ効く。**先頭に置いた `!` は何も抜かない。届く範囲は**同じ設定ファイルの中だけ**で、`//`・`~/`・`/` でアンカーした規則にも、ディレクトリを丸ごと塞いだ中の1ファイルにも届かない
 - ⚠️ **素の名前(`"NotebookEdit"`)を書くと、そのツール定義がペイロードから消える。** 引数付き(`"Edit(...)"`)はそうならない。詳細は `/kjfsm-skills:tend-memory-files`
 - 追跡されている生成物(`pnpm-lock.yaml`、`worker-configuration.d.ts`)はここではなく 2 — commit に届くので、「再生成して diff が出たら落とす」が本来の検査である
 
@@ -95,8 +90,9 @@ pre-push:
 ```
 
 - **pre-commit は1秒未満に保つ。** 越えたものは pre-push へ。毎コミット待たされると `--no-verify` が現実的な選択肢に見え始める
+- ⚠️ **全件走査は、該当ファイルが0本のあいだ黙っている。** 1本入った日に初めて鳴り、それが誤爆なら `git commit` がその日から恒久的に止まる。差分で書けば、走査するのは触った分だけになる
 - **CI も同じコマンドを呼ぶ**(`/kjfsm-skills:setup-ci`)。⚠️ merge-base を使う検査は checkout に `fetch-depth: 0` が要る — 既定の 1 では解決できず、検査が**黙って飛ぶ**
-- **誤爆を潰す。** 禁止パターンを素の grep で探すと、その禁止を説明しているコメント本文に当たる。コメントとクォート内を落としてから判定する
+- **誤爆を潰す。** 禁止パターンを素の grep で探すと、その禁止を説明しているコメント本文や、ヒアドキュメントに書いた例に当たる。コメント・クォート内・ヒアドキュメントを落としてから判定する
 - **例外は理由付きの定数に登録する** — `KNOWN_*` のような配列に「なぜ安全か」を添える。許可そのものが確認の記録になる
 - `prepare: "lefthook install"` を `package.json` に入れる。入れないと clone した人のところで1本も走らない
 
@@ -128,40 +124,7 @@ command -v jq >/dev/null || exit 0   # 判定できないなら通す
 
 ⚠️ **最後の行が要る。** `jq` が無い環境で拒否側に倒すと、フックが壊れた瞬間に何も実行できなくなる。無出力の `exit 0` は通常の権限フローへ戻る。
 
-## 4. Bash 経由の書き込みまで止める
-
-`permissions.deny` は `Edit` / `Write` しか見ない。**`sed -i` まで止めたいと決めたとき**だけ、この形を足す。
-
-```bash
-# .claude/hooks/block-generated-edits.sh
-GENERATED='app/db/auth-schema\.ts|worker-configuration\.d\.ts|app/shadcn/'
-REGEN='それぞれの再生成コマンドは .claude/rules/generated-files.md にある'
-
-tool="$(jq -r '.tool_name // empty' <<<"$input")"
-
-case "$tool" in
-  Edit | Write | NotebookEdit)
-    path="$(jq -r '.tool_input.file_path // empty' <<<"$input")"
-    [[ "$path" =~ $GENERATED ]] &&
-      deny "$path は生成物なので手で編集しない。$REGEN。生成元(スキーマ定義・wrangler.jsonc・ルートファイル)を直して作り直す。"
-    ;;
-  Bash)
-    cmd="$(jq -r '.tool_input.command // empty' <<<"$input")"
-    # 書き込む形のコマンドだけを見る。grep や cat は素通しする
-    [[ "$cmd" =~ (sed[[:space:]]+-i|tee|[[:space:]]*\>|dd[[:space:]]) ]] &&
-      [[ "$cmd" =~ $GENERATED ]] &&
-      deny "そのコマンドは生成物に書き込む。$REGEN。"
-    ;;
-esac
-
-exit 0
-```
-
-- **`GENERATED` は実パスを書く。** ディレクトリ名だけの広いパターンにすると、通ってよい編集を巻き込む
-- **理由に再生成の手段を書く。** 「禁止」だけだと、モデルは別の書き込み経路を探し始める
-- `Bash` 側は**書き込む形**に限定する。読み取りまで弾くと、生成物を確認することすらできなくなる
-
-## 5. `--no-verify` を止める（自己スコープ版）
+## 4. `--no-verify` を止める（自己スコープ版）
 
 git hook 自身を飛ばすフラグなので、git hook には原理的に置けない。**`~/.claude/settings.json` に1本**置き、スコープは実行時に決める。
 
@@ -191,7 +154,7 @@ exit 0
 
 ⚠️ **リポジトリ非依存だから user-level、ではない。** user-level に置けるのは、**該当しないリポジトリで黙って何もしない**と書けるものだけである。実態を見ずに全プロジェクトへ配ると、設計どおりの作業を毎日止める。
 
-## 6. セッション開始時に環境を用意する
+## 5. セッション開始時に環境を用意する
 
 ```bash
 # .claude/hooks/session-start.sh
@@ -204,7 +167,7 @@ cd "$CLAUDE_PROJECT_DIR" || exit 0
 - クラウドセッション(`CLAUDE_CODE_REMOTE=true`)でだけ走らせたいなら、その環境変数で分岐する
 - 重い準備は `"async": true` を付けて背後で走らせられる。ただし最初のツール呼び出しが準備完了を待たない点に注意する
 
-## 7. 応答を終える前に型チェックを通す
+## 6. 応答を終える前に型チェックを通す
 
 ```bash
 # .claude/hooks/stop-typecheck.sh — Stop イベント
@@ -220,19 +183,16 @@ out="$(pnpm typecheck 2>&1)" || {
 
 ⚠️ **数秒で終わるものだけ置く。** 応答のたびに走る。テストや E2E は CI が持つ(`/kjfsm-skills:setup-ci`)。ここを重くすると、体感の遅さの原因が見えないまま蓄積する。
 
-## 8. settings.json への配線
+## 7. settings.json への配線
 
 ```json
 {
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Edit|Write|NotebookEdit|Bash",
+        "matcher": "Bash",
         "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/block-generated-edits.sh"
-          }
+          { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/block-<何>.sh" }
         ]
       }
     ],
@@ -254,20 +214,19 @@ out="$(pnpm typecheck 2>&1)" || {
 - `$CLAUDE_PROJECT_DIR` を引用符で囲む — パスに空白があると引用なしでは壊れる
 - ⚠️ **プラグイン由来のフックを `.claude/settings.json` へ重ねて登録しない。** プラグインの `hooks/hooks.json` は自動で拾われるので、二重発火になる。`/hooks` で登録数を見れば1行で分かる
 
-## 9. 検査のしかた
+## 8. 検査のしかた
 
 **両方向を試す。** 通す側が壊れたフックは、動いて見えて作業を止める。
 
 ```bash
-h=.claude/hooks/block-generated-edits.sh
+h=~/.claude/hooks/block-no-verify.sh
 
-echo '{"tool_name":"Edit","tool_input":{"file_path":"app/db/auth-schema.ts"}}' | "$h"; echo "exit=$?"
-echo '{"tool_name":"Edit","tool_input":{"file_path":"app/db/index.ts"}}'       | "$h"; echo "exit=$?"
-echo '{"tool_name":"Bash","tool_input":{"command":"sed -i s/a/b/ app/db/auth-schema.ts"}}' | "$h"; echo "exit=$?"
-echo '{"tool_name":"Bash","tool_input":{"command":"grep -n foo app/db/auth-schema.ts"}}'  | "$h"; echo "exit=$?"
+echo '{"tool_name":"Bash","tool_input":{"command":"git commit --no-verify -m x"}}'             | "$h"; echo "exit=$?"
+echo '{"tool_name":"Bash","tool_input":{"command":"git commit -m \"--no-verify は使わない\""}}' | "$h"; echo "exit=$?"
+echo '{"tool_name":"Bash","tool_input":{"command":"git push --dry-run"}}'                      | "$h"; echo "exit=$?"
 ```
 
-1番目と3番目は `"permissionDecision":"deny"` を含む JSON、2番目と4番目は**無出力**。**4つとも `exit=0`** になる。
+1番目だけが `"permissionDecision":"deny"` を含む JSON、残り2つは**無出力**。**3つとも `exit=0`** になる。2番目が誤爆、3番目が `-n` の取り違えで、**どちらも弾く側だけ試していると見つからない**。
 
 検査スクリプト(2)は、**弾く入力・通す入力・誤爆しそうな入力**を実際にワーキングツリーへ作って走らせる。ユニットテストはそのうえで書く — テストだけでは「実際に `pnpm check` から呼ばれているか」が確かめられない。
 

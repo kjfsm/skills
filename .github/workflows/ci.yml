@@ -1,12 +1,33 @@
 name: CI
 
+# ゲートを回すのは PR だけ。`push: main` でもゲートを回すと、マージのたびに PR で緑にしたのと
+# 同じ木をもう一度検証することになり、実行数がちょうど倍になる。
+#
+# それでも push を完全には捨てない。既定ブランチのスコープへキャッシュを書けるのは
+# push / schedule / workflow_dispatch の実行だけで、PR の実行が作ったキャッシュはその PR の
+# 中でしか復元できないため。paths で絞ってあるのは、キーが動かないかぎり温め直しが要らないから。
+# https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching
+#
+# ready_for_review を types に足してあるのは、Ready にした時点で1回走らせるため。
 on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
-  pull_request:
+    paths:
+      - pnpm-lock.yaml
+      - package.json
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # main の実行は打ち切らない。打ち切るとキャッシュが書かれないまま終わる。
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   check:
+    # draft の PR でも既定では走ってしまうので、ここで弾く。
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -116,7 +116,7 @@ GitLab CI なら `.gitlab-ci.yml` の `stages` に同じ順で並べ、`interrup
 1. 追加後、PR を1本通してジョブを1回実行する(実行していないジョブ名は選択肢に出ない)
 2. Settings → Branches → `main` のルール → **Require status checks to pass before merging** → ジョブ名(上の例なら `verify`)を選ぶ
 3. **Require branches to be up to date before merging** は、main の動きが速いリポジトリでは付けない — マージのたびに全 PR の再実行が要る
-4. `main` への直 push を禁じる絶対ルールがあるなら **Require a pull request before merging** も入れる
+4. **Require a pull request before merging** を入れるかは、`SKILL.md` の手順5が決める(実態を数える)
 
 これはファイルではないので、**エージェントは代わりに設定できない。** ユーザーに手順として渡す。
 

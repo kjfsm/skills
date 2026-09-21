@@ -37,6 +37,7 @@ gitignore 済みのファイルの保護は、ここで終わる。スクリプ�
 ```
 
 - ⚠️ **ツール呼び出しにしか掛からない。** `Bash` 経由の書き込み(`sed -i`、`pnpm install` による lock の書き換え)は通る。散文側で「これも守られる」と書かない
+- **`Read` も塞ぐのは、事故ではなく転記を止めるためである。** `cat .env` は Bash 経由で通るので、ここで防げるのは秘密がまるごとコンテキストへ乗り、要約や報告に写ることだけ。「通ってよい操作を止めない」にここだけ例外を作るのは、流出が取り返しのつかない側だからである。**在るかどうかを確かめたいだけなら `.example` を読む**
 - ⚠️ **glob が巻き込む先を実物で確かめる。** `.dev.vars.*` と書くと `.dev.vars.example` まで塞ぐ — 追跡されていて、他のスキルが編集し、検査スクリプトが読むファイルである。**1つずつ列挙するほうが安い**
 - ⚠️ **素の名前(`"NotebookEdit"`)を書くと、そのツール定義がペイロードから消える。** 引数付き(`"Edit(...)"`)はそうならない。詳細は `/kjfsm-skills:tend-memory-files`
 - 追跡されている生成物(`pnpm-lock.yaml`、`worker-configuration.d.ts`)はここではなく 2 — commit に届くので、「再生成して diff が出たら落とす」が本来の検査である
@@ -47,29 +48,31 @@ gitignore 済みのファイルの保護は、ここで終わる。スクリプ�
 
 ```ts
 // scripts/check-migrations.ts
-// 適用済み（origin/main にある）マイグレーションの改変・削除を弾く。
+// 適用済み（共有済み）マイグレーションの改変・削除を弾く。
 // 存在の有無ではなく merge-base との差分で見るのは、生成直後の手直しを通すため。
 import { execFileSync } from "node:child_process";
 
-const base = execFileSync("git", ["merge-base", "origin/main", "HEAD"], {
-  encoding: "utf8",
-}).trim();
-const changed = execFileSync(
-  "git",
-  ["diff", "--name-status", "--diff-filter=MDR", base, "--", "drizzle/"],
-  {
-    encoding: "utf8",
-  },
-);
+// 既定ブランチ名はリポジトリごとに書き換える。origin/HEAD から引かないのは、
+// clone のしかたによっては張られておらず、そのとき検査が落ちずに飛ぶため。
+const BASE_REF = "origin/main";
 
 export function main(): number {
+  const base = execFileSync("git", ["merge-base", BASE_REF, "HEAD"], { encoding: "utf8" }).trim();
+  const changed = execFileSync(
+    "git",
+    ["diff", "--name-status", "--diff-filter=MDR", base, "--", "drizzle/"],
+    { encoding: "utf8" },
+  );
+
   const offenders = changed.split("\n").filter(Boolean);
   if (offenders.length === 0) return 0;
   for (const line of offenders) console.error(`適用済みのマイグレーションを変更している: ${line}`);
   return 1;
 }
 
-// import 時に走らせない — ユニットテストから述語だけを呼べるようにする
+// import 時に走らせない — ユニットテストから述語だけを呼べるようにする。
+// git を叩くのも main() の中に置く（モジュールスコープに出すと import だけで走り、
+// この行の意図が満たされない）
 if (process.argv[1]?.endsWith("check-migrations.ts")) process.exit(main());
 ```
 
@@ -85,6 +88,8 @@ pre-commit:
 
 pre-push:
   jobs:
+    # check-migrations はここで名指ししない — `pnpm check` が呼ぶ。
+    # 配線を2か所に書くと、片方だけ直った日にもう片方が嘘をつく
     - name: verify
       run: pnpm check && pnpm test
 ```
@@ -173,8 +178,13 @@ cmd="$(jq -r '.tool_input.command // empty' <<<"$input")"
 # コミットメッセージ自体が弾かれるのが、この検査の典型的な誤爆である
 bare="$(sed -E "s/'[^']*'//g; s/\"[^\"]*\"//g" <<<"$cmd")"
 
-[[ "$bare" =~ (--no-verify|--no-gpg-sign|commit\.gpgsign=false) ]] &&
-  deny "ゲートを飛ばさない。落ちた根本原因(型・lint・テスト)を直してから通す。"
+msg="ゲートを飛ばさない。落ちた根本原因(型・lint・テスト)を直してから通す。"
+
+[[ "$bare" =~ --no-verify ]] && deny "$msg"
+
+# `git commit -n` は --no-verify と等価。`git push -n` は --dry-run なので巻き込まない
+[[ "$bare" =~ git[[:space:]]+commit([[:space:]]|$) ]] &&
+  [[ "$bare" =~ [[:space:]]-[a-zA-Z]*n ]] && deny "$msg"
 
 exit 0
 ```

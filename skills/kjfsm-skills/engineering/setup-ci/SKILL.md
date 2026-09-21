@@ -18,6 +18,7 @@ description: 記録された検証ゲートを CI に敷き、ローカルの規
 ### 1. 探索する
 
 - `docs/agents/verification.md` — **ゲートの定義はここが正**。無ければ先に `/kjfsm-skills:setup-skills` の Section D を通す
+- `.claude/hooks/` と `.claude/settings.json` / `lefthook.yml` — **手元にしか無い検査**。ここにあって CI にも検証ゲートにも同じ述語が無いものは、クローンでも CI でも効いていない(手順2)
 - `.github/workflows/` — すでに何かあるか。あるなら追加であって新規作成ではない
 - `package.json` の scripts / `Makefile` / `Taskfile` — verification.md の各行が実際に何を呼ぶか
 - パッケージマネージャとロックファイル、`.node-version` / `.nvmrc` / `engines`
@@ -38,6 +39,12 @@ verification.md の各行を1つずつ見て、**CI で走るか**を決める�
 
 **載らないと決めた行は、verification.md 側にそう書く。** 書かないと、次に読む人が「CI が見ているはず」と思って飛ばす。
 
+そのうえで**逆向きにも数える。** 探索で見つけた手元だけの検査(Claude Code のフック、git hook)のうち、CI にも verification.md にも同じ述語が無いものを挙げる。これは「CI に載っていない」のではなく、**クローンした人にも CI にも存在しない検査**である。
+
+> 弾ける述語なら、`scripts/check-<何>.ts` に1本置いて `docs/agents/verification.md` のゲートに畳み、git hook と CI の両方からそのコマンドを呼ぶ。層の割り当ては `/kjfsm-skills:setup-hooks` が決める。
+
+**ここを飛ばすと、CI を敷いたのに守られる範囲が増えない。** 緑は増えるので、症状は出ない。
+
 ### 3. ジョブの割り方を決める
 
 既定は **1ジョブ直列・速い順**。型チェック → lint / format → テスト → ビルド → E2E。落ちたら以降は走らない。
@@ -51,6 +58,8 @@ verification.md の各行を1つずつ見て、**CI で走るか**を決める�
 テンプレートと各行の理由は [github-actions.md](./github-actions.md) にある。
 
 **verification.md の順序をそのまま写す。** CI 側で並べ替えると、手元で落ちる場所と CI で落ちる場所が食い違う。
+
+⚠️ **`git diff` の基点を使う検査があるなら、checkout に `fetch-depth: 0` を足す。** 既定の 1 では merge-base が解決できず、その検査は落ちるのではなく**黙って飛ぶ** — CI は緑のまま、手元でだけ効いている状態になる。
 
 **ステップは verification.md の行と 1:1 にする。** CI にだけ存在するステップを足さない — 足したものは手元で走らないので、いずれ CI だけが赤くなる。ゲートを増やしたいなら verification.md に足してから CI に反映する。**向きは常に verification.md → CI である。**
 
@@ -66,7 +75,7 @@ verification.md の各行を1つずつ見て、**CI で走るか**を決める�
 
 ジョブ名は追加後1度実行しないと選択肢に出ない。先に PR を1本通す。
 
-`main` への直 push を禁じている絶対ルールがあるなら、同じ画面の **Require a pull request before merging** も入れる — 散文のルールが設定と一致していないと、どちらが正か判断する場面が生まれる。
+**Require a pull request before merging は、実態を数えてから決める。** 絶対ルールの項目3は「原則 直 push しない」であって禁止ではない — `git log --first-parent` で PR 経由がほぼ全件のリポジトリなら入れてよく、`main` で直接作業するのが設計のリポジトリでは入れない。設定で止めるのは、散文より強い決定である。
 
 ### 6. 越えない線
 

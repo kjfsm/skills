@@ -6,5 +6,6 @@
 - **[design-an-interface](./design-an-interface/SKILL.md)** — 並列サブエージェントを使い、モジュールに対して根本的に異なる複数のインターフェース設計を生成する。
 - **[new-session](./new-session/SKILL.md)** — worktree と tmux で独立したセッションを立ち上げる。Claude Code の `--worktree` / `--tmux` が同じことをするようになったので、手製の `-wt` サイブリングと tmux 起動は残すと組み込みから逸れる方へ誘導する。
 - **[qa](./qa/SKILL.md)** — ユーザーが会話形式でバグを報告し、エージェントが GitHub イシューを作成するインタラクティブな QA セッション。
+- **[setup-pre-commit](./setup-pre-commit/SKILL.md)** — husky + lint-staged の pre-commit フックを敷く。git hook の層は `/kjfsm-skills:setup-hooks` が持つようになり、そちらは lefthook を既定にし、pre-commit を1秒未満に保つ(型チェックとテストは pre-push と CI)。このスキルはどちらの判断とも逆を敷く。
 - **[request-refactor-plan](./request-refactor-plan/SKILL.md)** — ユーザーへのインタビューを通じて小さなコミット単位のリファクタ計画を作成し、GitHub イシューとして登録する。
 - **[ubiquitous-language](./ubiquitous-language/SKILL.md)** — 現在の会話から DDD スタイルのユビキタス言語グロッサリーを抽出する。

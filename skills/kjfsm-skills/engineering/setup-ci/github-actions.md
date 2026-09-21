@@ -39,6 +39,7 @@ jobs:
 - **`push: branches: [main]` と `pull_request` の両方** — PR で緑だったものが、マージ後の main で赤くなることがある(別の PR と組み合わさって初めて壊れる)。main 側を見ていないと、次に PR を出した人が他人の赤を踏む
 - **`concurrency` + `cancel-in-progress`** — 同じブランチへ push を重ねたとき、古い実行を打ち切る。付けないとキューが詰まり、最新の結果が最後に届く。`github.ref` を含めるので、ブランチをまたいでは打ち切らない
 - **`permissions: contents: read`** — 既定のトークンは書き込み権限を持つ。CI から push しない以上、渡す理由が無い。事故ったワークフローやサードパーティ Action が押せる範囲を、読み取りに落としておく
+- ⚠️ **`git diff` の基点を使うゲートがあるなら `with: fetch-depth: 0` を足す。** 既定の 1 では merge-base が解決できず、その検査は**落ちずに飛ぶ** — CI は緑のまま、手元でだけ効いている状態になる。要らないなら足さない(clone が重くなる)
 
 ## 2. Node + pnpm
 

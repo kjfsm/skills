@@ -1,15 +1,8 @@
 # 公式が言っていること
 
-Anthropic の公式ドキュメントとブログから抽出した、**AI に読ませる文書**(スキル、`CLAUDE.md`、参照ファイル)を書くときの規約・技法・定数。
+Anthropic の公式ドキュメントとブログから抽出した、**AI に読ませる文書**(スキル、`CLAUDE.md`、参照ファイル、サブエージェントへの依頼文)を書くときの規約・技法・定数。
 
 [`SKILL.md`](SKILL.md) が扱うのは**設計論** — スキルを予測可能にするための語彙と判断基準であり、公式より一段抽象度が高い。この文書が扱うのは**プラットフォームの事実** — 数値上限、frontmatter の仕様、公式が名指しで挙げている技法とアンチパターンである。両者は競合しない: 迷ったら `SKILL.md`、確かめたければここ。
-
-この文書は2つの使われ方をする:
-
-1. **全体像の把握** — 公式が何をどこまで定めているかを1枚で見渡す
-2. **公式への索引** — 各項目に引用元がある。その項目に従って手を動かすときは、引用元を開く
-
-**一次情報源は公式である。** ここに書かれた数値は取得時点のもので、公式が動けば古くなる。仕様を確定させたい場面では必ずリンク先で裏を取ること。
 
 ## この文書を使うとき
 
@@ -19,22 +12,21 @@ Anthropic の公式ドキュメントとブログから抽出した、**AI に�
 
 - **数値を確かめるだけ**(`description` は何文字か、本文は何行までか)なら、この文書で足りる。それが定数を実体で持っている理由である
 - **設計や手順を決める**なら、引用元を開く。要約に無い前提と順序が必ずある
-- 1〜2行で足りるのは **思い出すため** であって、**決めるため** ではない
 
 実例: §8 の「eval を先に作る」「3シナリオで測る」だけを見て eval を設計したところ、[ev] にある「2〜3件から始めて後で広げる」「assertions は初回の出力を見てから足す」「両方の構成で常に通る assertion は外す」が丸ごと抜けた。要約は嘘をついていない。設計を決めるには足りなかった。
 
 ## この文書を編集するとき
 
-**記憶で書かない。** 追記・修正しようとしている項目の引用元を必ず開き、現在の記述と突き合わせてから書く。ここが扱うのは公式が動かしうる数値と仕様であり、モデルの事前学習に入っている値は既に古い可能性がある — 数値上限、frontmatter のフィールド名、ベータヘッダ、プラットフォームごとの実行環境は、いずれも黙って変わる類のものである。
+**記憶で書かない。** 追記・修正しようとしている項目の引用元を必ず開き、現在の記述と突き合わせてから書く。数値上限、frontmatter のフィールド名、プラットフォームごとの実行環境は、いずれも黙って変わる類のものである。
 
 - **隣接項目も一度見る。** 公式はページ単位で改訂される。1項目が変わっていたなら、同じ章の周囲も変わっている
-- **無くなった項目は消す。** 「昔はこうだった」を残さない — [時限情報を書かない](#時限情報を書かない)の規則は、この文書自身にも適用される
-- **新しいソースを探す。** 既知のソースを開き直すだけでは、その間に出た公式記事が入らない。前回の突き合わせ日以降で公式ドメイン(anthropic.com、claude.com、platform/code.claude.com、agentskills.io)を見直す
+- **無くなった項目は消す。** 「昔はこうだった」を残さない — [時限情報を書かない](#時限情報を書かない)の規則は、この文書自身にも適用される。数値が差し替わったら、古い数値ごと書き直す
+- **新しいソースを探す。** 前回の突き合わせ日以降で公式ドメイン(anthropic.com、claude.com、claude.dev、platform/code.claude.com、agentskills.io)と Claude Code の changelog を見直す
 - **ソースを足したら表にキーを追加する。** 既存項目の引用元と主張が衝突しないか確認する
-- **公式どうしが食い違っていたら両方を書く。** どちらかに丸めない。どのソースがどう言っているかを残した方が、後から裏を取れる
+- **公式どうしが食い違っていたら両方を書く。** どちらかに丸めない
 - **確認した日を下の行に書き直す。** 突き合わせずに項目だけ足すと、この文書は「確認済みに見えるが確認されていない」という最悪の状態になる
 
-ソースとの突き合わせを最後に行った日: **2026-09-12**(`cc` / `mm` / `pv` と、claude.com/blog の 2026-08-09 以降の記事。`bp` / `sp` / `ev` / `eq` / `ce` / `wt` / `lh` / `hc` / `se` / `cm` / `pe` は 2026-08-09 のまま)
+ソースとの突き合わせを最後に行った日: **2026-09-23**(表の全ソースと、Claude Code v2.1.280 までの changelog)
 
 ## 目次
 
@@ -42,65 +34,77 @@ Anthropic の公式ドキュメントとブログから抽出した、**AI に�
 2. [SKILL.md の仕様(確定値)](#2-skillmd-の仕様確定値) — 文字数・行数・frontmatter・実行モデル
 3. [description の書き方](#3-description-の書き方) — 発火を左右する唯一のフィールド
 4. [段階的開示](#4-段階的開示progressive-disclosure) — 何を本文に置き、何をファイルへ逃がすか
-5. [手順とフィードバックループ](#5-手順とフィードバックループ) — 複雑な作業を完走させる形
-6. [中身の指針](#6-中身の指針) — Gotchas、選択肢、時限情報、肯定形、例、テンプレート
+5. [手順・完了・フィードバックループ](#5-手順完了フィードバックループ) — 複雑な作業を完走させる形
+6. [中身の指針](#6-中身の指針) — Gotchas、選択肢、時限情報、強調、例、理由
 7. [スクリプトを同梱する](#7-スクリプトを同梱する) — 散文をコードに置き換える判定と作法
-8. [評価と反復](#8-評価と反復) — eval 駆動、assertion と採点、delta の読み方、`claude plugin eval`、Claude A / Claude B
-9. [どこに載せるか](#9-どこに載せるかskill--claudemd--mcp--サブエージェント) — Skill / CLAUDE.md / MCP / サブエージェント
-10. [CLAUDE.md 固有](#10-claudemd-固有) — 長さの目安、入れるもの/入れないもの、公式間の食い違い
+8. [評価と反復](#8-評価と反復) — eval 駆動、assertion と採点、delta の読み方、`claude plugin eval`
+9. [どこに載せるか](#9-どこに載せるかskill--claudemd--mcp--サブエージェント--フック) — Skill / CLAUDE.md / MCP / サブエージェント / フック
+10. [CLAUDE.md 固有](#10-claudemd-固有) — 長さ、入れるもの/入れないもの、rules、公式間の食い違い
 11. [出す前のチェックリスト](#11-出す前のチェックリスト)
 
 ## ソース
 
-| キー | ソース                                                                 | 何が書いてあるか                                                                             |
-| ---- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `ev` | [Evaluating skill output quality][ev]                                  | 出力の eval。evals.json の形式、assertion の書き方と採点、ベースライン比較の読み方           |
-| `sp` | [Agent Skills 仕様][sp]                                                | 標準そのもの。frontmatter の各フィールドの検証規則、ディレクトリ構成                         |
-| `bp` | [Skill authoring best practices][bp]                                   | 最も密度の高い正典。数値上限、良い例/悪い例、アンチパターン、チェックリスト                  |
-| `cc` | [Extend Claude with skills (Claude Code)][cc]                          | Claude Code 固有の frontmatter、置き場所、実行モデル、標準との差                             |
-| `eq` | [Equipping agents for the real world with Agent Skills][eq]            | 段階的開示の設計思想、スクリプト vs 指示、eval 駆動                                          |
-| `lc` | [Lessons from building Claude Code: How we use skills][lc]             | Gotchas、モデル向け description、最小から育てる、スキルの類型                                |
-| `ce` | [Effective context engineering for AI agents][ce]                      | 適切な高度、最小の高シグナルトークン、just-in-time 取得                                      |
-| `wt` | [Writing effective tools for AI agents][wt]                            | ツール定義・命名・レスポンス形式・エラーメッセージ                                           |
-| `lh` | [Effective harnesses for long-running agents][lh]                      | 長時間タスク、将来のコンテキストに何を残すか                                                 |
-| `hc` | [スキルの作成方法][hc]                                                 | 5ステップ、3シナリオのテスト、トリガーの限界                                                 |
-| `se` | [スキル解説: プロンプト/プロジェクト/MCP/サブエージェントとの比較][se] | どの手段に載せるかの使い分け                                                                 |
-| `cm` | [CLAUDE.md ファイルの使用][cm]                                         | `CLAUDE.md` に何を書き、何を書かないか(ブログ)                                               |
-| `mm` | [Claude はプロジェクトをどう記憶するか][mm]                            | `CLAUDE.md` の製品ドキュメント。200行の目安、`.claude/rules/` と `paths`、`/doctor` のトリム |
-| `pe` | [プロンプトエンジニアリングのベストプラクティス][pe]                   | 明示性、例示、肯定形、prefill、CoT                                                           |
-| `c5` | [Claude 5 世代のコンテキストエンジニアリング][c5]                      | 過剰な制約を外す、例より interface 設計、progressive disclosure、CLAUDE.md は gotcha に使う  |
-| `pv` | [Test plugins with evals][pv]                                          | `claude plugin eval` の仕様。ケースと grader の形式、3回ずつの実行、プラグイン無しとの `Δ`   |
-| `st` | [Steering Claude Code][st]                                             | CLAUDE.md / rules / スキル / フック / サブエージェントの使い分け(2026-06-18)                 |
-| `rc` | [Reducing cost and improving performance with Claude Platform][rc]     | フロンティアモデルで逆効果になる指示の5類型と、外したときの実測(2026-09-08)                  |
-| `ct` | [Claude on call: Claude Tag as first responder for CI/CD failures][ct] | 学びを `lessons.md` に書き溜め、繰り返したものをスキルへ昇格させる運用(2026-08-18)           |
-| `wp` | [How Warp builds self-improving agents on Claude][wp]                  | 規則より理由を渡す、スキルは手続きで安定・メモリは自動で変わり続ける(2026-08-26)             |
-| `mx` | [Maximizing the value of your Claude Code sessions][mx]                | CLAUDE.md に置く日常のコマンド、ワークフロー固有の指示はスキルへ(2026-08-14)                 |
-| `sd` | [The AI-Native SDLC playbook][sd]                                      | CLAUDE.md は1ページ未満、2度間違えたら書く、組織の知識はスキルに(2026-08-21)                 |
-| `o5` | [Getting the most out of Opus 5.5][o5]                                 | 思考の指示を外す、完了の定義を渡す、長時間ランの停止条件とタスク一覧のファイル化             |
+| キー  | ソース                                                                 | 何が書いてあるか                                                                                        |
+| ----- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `sp`  | [Agent Skills 仕様][sp]                                                | 標準そのもの。frontmatter の各フィールドの検証規則、ディレクトリ構成、本文のトークン目安                |
+| `ev`  | [Evaluating skill output quality][ev]                                  | 出力の eval。assertion の書き方と採点、ベースライン比較の読み方                                         |
+| `bp`  | [Skill authoring best practices][bp]                                   | 最も密度の高い正典。数値上限、良い例/悪い例、アンチパターン、チェックリスト                             |
+| `ov`  | [Agent Skills overview][ov]                                            | 3層のロード、プラットフォームごとの実行環境、セキュリティ                                               |
+| `cc`  | [Extend Claude with skills (Claude Code)][cc]                          | Claude Code 固有の frontmatter、置き場所、実行モデル、効き目の測り方                                    |
+| `cb`  | [Best practices for Claude Code][cb]                                   | CLAUDE.md の削り方と強調、検証の手段を渡す                                                              |
+| `mm`  | [Claude はプロジェクトをどう記憶するか][mm]                            | `CLAUDE.md` の製品ドキュメント。200行の目安、`.claude/rules/` と `paths`、`/doctor`、`AGENTS.md`        |
+| `sa`  | [Create custom subagents][sa]                                          | サブエージェントの frontmatter、起動時に何が載るか                                                      |
+| `fo`  | [Extend Claude Code][fo]                                               | CLAUDE.md / rules / スキル / サブエージェント / フック / MCP の使い分けと、載せ替える引き金             |
+| `pv`  | [Test plugins with evals][pv]                                          | `claude plugin eval` の仕様。ケースと grader の形式、3回ずつの実行、プラグイン無しとの `Δ`              |
+| `p55` | [Prompting Claude Opus 5.5][p55]                                       | Opus 5.5 向けのプロンプト。effort、早すぎる停止、推論の再現の拒否(2026-09-22)                           |
+| `o5`  | [Getting the most out of Opus 5.5][o5]                                 | 思考の指示を外す、完了の定義、停止と継続のルール、タスク一覧のファイル化(2026-09-22)                    |
+| `tc`  | [What a task costs on Opus 5.5][tc]                                    | effort の選び方、サブエージェントのモデル、prompt-audit の実測(2026-09-22)                              |
+| `rc`  | [Reducing cost and improving performance with Claude Platform][rc]     | フロンティアモデルで逆効果になる指示の6類型と、外したときの実測(2026-09-08、Opus 5.5 で再測定)          |
+| `c5`  | [Claude 5 世代のコンテキストエンジニアリング][c5]                      | 過剰な制約を外す、例より interface 設計、progressive disclosure、CLAUDE.md は gotcha に使う(2026-07-24) |
+| `st`  | [Steering Claude Code][st]                                             | CLAUDE.md / rules / スキル / フック / サブエージェントの使い分け(2026-06-18)                            |
+| `ct`  | [Claude on call: Claude Tag as first responder for CI/CD failures][ct] | 学びを `lessons.md` に書き溜め、繰り返したものをスキルへ昇格させる運用(2026-08-18)                      |
+| `wp`  | [How Warp builds self-improving agents on Claude][wp]                  | 規則より理由を渡す、スキルは手続きで安定・メモリは自動で変わり続ける(2026-08-26)                        |
+| `mx`  | [Maximizing the value of your Claude Code sessions][mx]                | CLAUDE.md に置く日常のコマンド、ワークフロー固有の指示はスキルへ(2026-08-14)                            |
+| `sd`  | [The AI-Native SDLC playbook][sd]                                      | CLAUDE.md は1ページ未満、2度間違えたら書く、組織の知識はスキルに(2026-08-21)                            |
+| `lc`  | [Lessons from building Claude Code: How we use skills][lc]             | Gotchas、トリガーとしての description、最小から育てる、スキルの類型                                     |
+| `eq`  | [Equipping agents for the real world with Agent Skills][eq]            | 段階的開示の設計思想、スクリプト vs 指示、eval 駆動                                                     |
+| `ce`  | [Effective context engineering for AI agents][ce]                      | 適切な高度、最小の高シグナルトークン、just-in-time 取得                                                 |
+| `wt`  | [Writing effective tools for AI agents][wt]                            | ツール定義・命名・レスポンス形式・エラーメッセージ                                                      |
+| `lh`  | [Effective harnesses for long-running agents][lh]                      | 長時間タスク、将来のコンテキストに何を残すか                                                            |
+| `hc`  | [スキルの作成方法][hc]                                                 | 5ステップ、3シナリオのテスト、トリガーの限界                                                            |
+| `se`  | [スキル解説: プロンプト/プロジェクト/MCP/サブエージェントとの比較][se] | どの手段に載せるかの使い分け                                                                            |
+| `cm`  | [CLAUDE.md ファイルの使用][cm]                                         | `CLAUDE.md` に何を書き、何を書かないか(ブログ)                                                          |
+| `pe`  | [プロンプトエンジニアリングのベストプラクティス][pe]                   | 明示性、例示、肯定形、理由を添える                                                                      |
 
-[ev]: https://agentskills.io/skill-creation/evaluating-skills
 [sp]: https://agentskills.io/specification
+[ev]: https://agentskills.io/skill-creation/evaluating-skills
 [bp]: https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
+[ov]: https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview
 [cc]: https://code.claude.com/docs/en/skills
+[cb]: https://code.claude.com/docs/en/best-practices
+[mm]: https://code.claude.com/docs/en/memory
+[sa]: https://code.claude.com/docs/en/sub-agents
+[fo]: https://code.claude.com/docs/en/features-overview
+[pv]: https://code.claude.com/docs/en/plugin-evals
+[p55]: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5
+[o5]: https://claude.dev/blog/getting-the-most-out-of-opus-5-5/
+[tc]: https://claude.com/blog/what-a-task-costs-on-opus-5-5
+[rc]: https://claude.com/blog/reducing-cost-and-improving-performance-with-claude-platform
+[c5]: https://claude.dev/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models/
+[st]: https://claude.com/blog/steering-claude-code-skills-hooks-rules-subagents-and-more
+[ct]: https://claude.com/blog/ai-ci-cd-on-call
+[wp]: https://claude.com/blog/how-warp-builds-self-improving-agents-on-claude
+[mx]: https://claude.com/blog/maximizing-the-value-of-your-claude-code-sessions
+[sd]: https://claude.com/blog/the-ai-native-sdlc-playbook
+[lc]: https://claude.dev/blog/lessons-from-building-claude-code-how-we-use-skills/
 [eq]: https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills
-[lc]: https://claude.com/blog/lessons-from-building-claude-code-how-we-use-skills
 [ce]: https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
 [wt]: https://www.anthropic.com/engineering/writing-tools-for-agents
 [lh]: https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents
 [hc]: https://claude.com/ja/blog/how-to-create-skills-key-steps-limitations-and-examples
 [se]: https://claude.com/ja/blog/skills-explained
 [cm]: https://claude.com/ja/blog/using-claude-md-files
-[mm]: https://code.claude.com/docs/en/memory
 [pe]: https://claude.com/ja/blog/best-practices-for-prompt-engineering
-[c5]: https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models
-[pv]: https://code.claude.com/docs/en/plugin-evals
-[st]: https://claude.com/blog/steering-claude-code-skills-hooks-rules-subagents-and-more
-[rc]: https://claude.com/blog/reducing-cost-and-improving-performance-with-claude-platform
-[ct]: https://claude.com/blog/ai-ci-cd-on-call
-[wp]: https://claude.com/blog/how-warp-builds-self-improving-agents-on-claude
-[mx]: https://claude.com/blog/maximizing-the-value-of-your-claude-code-sessions
-[sd]: https://claude.com/blog/the-ai-native-sdlc-playbook
-[o5]: https://claude.dev/blog/getting-the-most-out-of-opus-5-5/
 
 ---
 
@@ -128,21 +132,25 @@ Anthropic の公式ドキュメントとブログから抽出した、**AI に�
 
 ### 用語を1つに固定する
 
-「API endpoint」「URL」「API route」「path」を混ぜない。「field」「box」「element」を混ぜない。1つ選んで最後まで使う。 — [bp]
+「API endpoint」「URL」「API route」「path」を混ぜない。「field」「box」「element」「control」を混ぜない。「extract」「pull」「get」「retrieve」を混ぜない。1つ選んで最後まで使う。 — [bp]
 
 ### 過剰に制約しない — 衝突する指示は、判断させるより先に消す
 
-Claude Code のシステムプロンプトは Opus 5 / Fable 5 向けに **80%以上** 削られ、コーディング eval に測定可能な劣化は出なかった。削られたのは古いモデルの最悪ケースを避けるための強い断定である(例: 「コメントは既定で書くな。複数段落の docstring を絶対に書くな」→ 「周囲のコードと同じように書け — コメント密度・命名・イディオムを合わせろ」)。加えて、システムプロンプト・スキル・ユーザー依頼が1リクエスト内で衝突する(「適宜ドキュメントを残せ」と「コメントを追加するな」)と、Claude はどれに従うかを先に考えることになる。**制約を足す前に、いま持っている制約と衝突しないかを見る。** — [c5]
+Claude Code のシステムプロンプトは Opus 5 / Fable 5 向けに **80%以上** 削られ、コーディング eval に測定可能な劣化は出なかった。削られたのは古いモデルの最悪ケースを避けるための強い断定である(例: 「コメントは既定で書くな。複数段落の docstring を絶対に書くな」→ 「周囲のコードと同じように書け」)。システムプロンプト・スキル・ユーザー依頼が衝突する(「適宜ドキュメントを残せ」と「コメントを追加するな」)と、Claude はどれに従うかを先に考えることになる。スキルは「必要なときに情報を見つけさせる軽いガイド」として書き、**本当に重要な領域を除いて過剰に縛らない**。 — [c5]。情報は渡し、状況に合わせる柔軟さも渡す — [lc]。
 
 ### 古いモデル向けの「儀式」を外す
 
-フロンティアモデルで逆効果になる指示は5類型ある。(1) **検証の儀式** — 「作業を二重に確かめよ」は文字どおりに実行されてトークンを浪費する。(2) **強調の上乗せ** — 「最大限徹底的に」「CRITICAL: YOU MUST ALWAYS…」は冗長な出力と余計なツール呼び出しを招く。(3) **推論の足場** — 固定の手順や「スクラッチパッドで段階的に考えよ」は不要な儀式で、組み込みの推論に上乗せされる。(4) **古いモデル向けの例** — 旧モデルの失敗に合わせた few-shot は、要らない依頼にまで長い推論を真似させる。(5) **矛盾する規則** — 指示追従が上がった分、矛盾がより文字どおりに実行されて性能が落ちる。Opus 4.8 → Opus 5 の移行で、`/claude-api prompt-audit` でこれらを取り除いたところ、**コスト -14.6%、精度 +5.3%**(平均)だった。対象は API アプリのシステムプロンプトだが、[c5] がスキルと CLAUDE.md について言うことと同じ向きである。 — [rc]
+フロンティアモデルで逆効果になる指示は6類型ある。(1) **検証の儀式** — 「作業を二重に確かめよ」。(2) **強調の上乗せ** — 「最大限徹底的に」「CRITICAL: YOU MUST ALWAYS…」。(3) **必須の手順とスクラッチパッドの足場** — 組み込みの推論に上乗せされる。(4) **古いモデル向けの例**。(5) **矛盾する規則** — 指示追従が上がった分、矛盾がより文字どおりに実行される。(6) **古い世代向けの設定** — 手動の思考予算のように、新しいモデルでは Platform に拒否されうる。 — [rc]
 
-Opus 5.5 は毎回の返信の前に必ず考え、考える量を自分で決める。「think carefully」「think step by step」を外すと、品質を落とさずに返信の出だしが速くなった。 — [o5]
+実測: Opus 4.8 → Opus 5.5 の移行(サポート業務のベンチマーク)で、移行だけでコスト約 -18%、`/claude-api prompt-audit` で儀式を外してさらに約 -9%(合計約 -25%)、精度は約 +2 ポイント。スクラッチパッドの規則は Opus 5.5 の組み込みの思考とぶつかり、ツール呼び出しを推論の中に書いたまま実行しないチケットが出た。単一ベンチマークの結果であり、期待値ではなく例として扱う。**prompt-audit は API のシステムプロンプトだけでなく、作業ディレクトリのスキルと `CLAUDE.md` も見る。** — [rc] / [tc]
+
+### 思考を指示しない、推論を返信に書かせない
+
+Opus 5.5 は毎回の返信の前に必ず考え、考える量を自分で決める。「think carefully」「think step by step」はプロンプトからも保存した指示からも外す — チャット製品での試験で、外すと返信の出だしが速くなり、品質の明確な低下は無かった。考える量を変えたいなら文言ではなく **effort** を変える(文言より確実に効く)。**内部の推論を返信に再現させる依頼は、`reasoning_extraction` として拒否されうる。** 理由が欲しいなら「このやり方を選んだ理由を3文で」のように結論として求める。 — [o5] / [p55]
 
 ### 当たり前を書かず、モデルの通常の思考から押し出すものを書く
 
-Claude がコーディングについて既に知っていることを言い直さない。価値があるのは組織固有の知識・設計原則・ドメインの専門性である。 — [lc]
+Claude はコードの書き方を知っており、コードベースも読める。既定でやることを言い直すスキルは、価値を足さずにコンテキストだけ足す。書くのは Claude の通常の考え方から押し出す情報である。 — [lc]
 
 ---
 
@@ -150,59 +158,84 @@ Claude がコーディングについて既に知っていることを言い直�
 
 ### frontmatter は `name` と `description` の2つが核
 
-`name` は1〜64文字、小文字英数字(`a-z` `0-9`)とハイフンのみ、**先頭と末尾にハイフン不可**、**連続ハイフン(`--`)不可**、そして**親ディレクトリ名と一致**。`description` は1〜1,024文字。`compatibility` を書くなら最大500文字。 — [sp]
+`name` は1〜64文字、小文字英数字(`a-z` `0-9`)とハイフンのみ、**先頭と末尾にハイフン不可**、**連続ハイフン(`--`)不可**、そして**親ディレクトリ名と一致**。`description` は1〜1,024文字。`compatibility` を書くなら最大500文字。`metadata` は文字列キーから文字列値への map。 — [sp]
 
-### 予約語の禁止は標準ではなくプラットフォーム側の規則
+### 予約語と XML タグの禁止は標準ではなく Anthropic 側の規則
 
-`name` に `anthropic` / `claude` を含められない、`name` と `description` に XML タグを書けない — これらは [sp] の仕様には**無く**、Anthropic のプラットフォーム(claude.ai へのアップロード、Skills API、`package_skill.py`)の検証にだけ存在する。Claude Code プラグインや `npx skills` で配る限りは当たらないが、claude.ai へ直接上げる予定があるなら避ける。 — [bp]
+`name` に `anthropic` / `claude` を含められない、`name` と `description` に XML タグを書けない — これらは [sp] には**無く**、[bp] / [ov] が SKILL.md の要件として挙げ、claude.ai へのアップロード・Skills API・`package_skill.py` の検証で弾かれる。個人スキルを claude.ai のアカウントで有効にする経路もアップロードなので同じ規則がかかる。Claude Code が弾くかは [cc] に記述が無い。 — [bp] / [ov] / [cc]
 
 ### Claude Code では `name` は任意で、既定はディレクトリ名
 
-個人・プロジェクトのスキルでは `name` は一覧の表示名にしかならず、打ち込むコマンド名はディレクトリ名から来る。プラグインのスキルでは `name` がコマンドの最終セグメントを差し替える(`my-plugin/skills/review/` に `name: fancy` なら `/my-plugin:fancy`)。 — [cc]
+個人・プロジェクトのスキルでは打ち込むコマンド名はディレクトリ名から来る。プラグインのスキルでは `name` がコマンドの最終セグメントを差し替え(`my-plugin/skills/review/` に `name: fancy` なら `/my-plugin:fancy`)、他のコマンドと衝突しない限り素の `/fancy` でも呼べる。`description` を省くと本文の最初の空でない行が使われる。 — [cc]
 
 ### 本文は500行以内、かつ5,000トークン以内
 
-行数と別に、仕様は本文(第2層)を **5,000トークン未満** と推奨している。**行数だけを見ていると日本語で先にトークン側の上限を踏む** — 同じ500行でも、日本語の本文は英語より大きく重い。超えたら別ファイルへ分割する。起動時にプリロードされるのは全スキルの `name` と `description`(概ね100トークン)だけで、本文はスキルが関連したときに初めて読まれる。 — [bp] / [sp]
+本文(第2層)は500行以内 — [bp] / [cc]。トークンでは **5,000未満** が推奨 — [sp] / [ov]。**行数だけを見ていると日本語で先にトークン側の上限を踏む。** 超えたら別ファイルへ分割する。起動時にプリロードされるのは全スキルの `name` と `description` だけで、本文はスキルが関連したときに初めて読まれる。
 
 ### Agent Skills 標準の frontmatter は6フィールドだけ
 
-`name` / `description` / `license` / `compatibility` / `metadata` / `allowed-tools`。claude.ai へのアップロード、Skills API、`package_skill.py` はこの6つ以外を **unexpected key エラー**にする。 — [cc]
+`name` / `description` / `license` / `compatibility` / `metadata` / `allowed-tools`。claude.ai へのアップロード、Skills API、`package_skill.py` はこれ以外を **unexpected key のハードエラー**にする。 — [cc]
 
 ### Claude Code はそれを拡張している
 
-`disable-model-invocation` / `when_to_use` / `user-invocable` / `argument-hint` / `arguments` / `disallowed-tools` / `model` / `effort` / `context` / `agent` / `background` / `hooks` / `paths` / `shell`。**これらは Claude Code の外では読み飛ばされる。** — [cc]
+`when_to_use` / `argument-hint` / `arguments` / `disable-model-invocation` / `user-invocable` / `disallowed-tools` / `model` / `effort` / `context` / `agent` / `background` / `hooks` / `paths` / `shell`。**これらを含むスキルは、上のアップロード経路ではパッケージングやアップロードが失敗する**(読み飛ばされるのではない)。逆に Claude Code 自身は **知らないフィールドを黙って無視する** ので、フィールド名の綴り間違いはエラーにならずに効かない。`metadata` の中身は Claude Code は解釈せず、map でない値は捨てる。`paths` のようなフィールド名をキーに再利用しない。 — [cc]
+
+### frontmatter の解釈
+
+Claude Code は **開きの `---` がファイルの1行目にあるときだけ** frontmatter を読む。YAML が壊れていると、スキルはフィールドが1つも無い状態でロードされる(エラーは出ない)。壊れた frontmatter は `claude plugin validate .claude/skills` で見つかる(v2.1.233+)。 — [cc]
+
+### `paths` は自動発火をファイルで絞る
+
+glob を書くと、一致するファイルを扱っているときだけ Claude がスキルを自動でロードする。形式は path-scoped rules と同じ。 — [cc]
 
 ### `disable-model-invocation: true` はモデルの到達範囲から外す
 
-description がコンテキストに載らなくなり、人間が `/name` と打ったときだけ本文がロードされる。サブエージェントへのプリロードも、スケジュールタスクからの起動も止まる。 — [cc]
+description がコンテキストに載らなくなり、人間が `/name` と打ったときだけ本文がロードされる。サブエージェントへのプリロードも、スケジュールタスクからの起動も止まる。Claude が呼ぼうとしても Claude Code がブロックし、同じ手順を別の方法で再現しないよう指示する。副作用のあるワークフローを手動でだけ起動させたいときに使う。 — [cc] / [cb]
 
 ### `allowed-tools` / `disallowed-tools` はターン限りの効力
 
-`allowed-tools` は呼び出したターンのあいだ権限プロンプトを免除し、`disallowed-tools` はそのあいだツールを手札から外す。**どちらも次のユーザーメッセージで切れる。** — [cc]
+`allowed-tools` は呼び出したターンのあいだ権限プロンプトを免除するだけで、ツールを制限しない(全ツールが呼べるまま)。`disallowed-tools` はそのあいだツールを手札から外す。**どちらも次のユーザーメッセージで切れる。** `allowed-tools` はワークスペースの信頼に守られないので、リポジトリにコミットされたスキルの `allowed-tools` はレビューする。 — [cc]
 
-### `${CLAUDE_SKILL_DIR}` は本文と `allowed-tools` の両方で展開される
+### 置換される変数
 
-スキルフォルダの絶対パスに解決されるので、プラグインとして配られて実体が動いても同梱物を指せる。両方に同じ文字列を書けば、同梱スクリプトが権限プロンプトなしで走る。 — [cc]
+`${CLAUDE_SKILL_DIR}` はスキルフォルダの絶対パス(プラグインのスキルではプラグインルートではなくスキルのサブディレクトリ)で、本文と `allowed-tools` の **Bash ルール** の中で展開される。両方に同じ文字列を書けば同梱スクリプトが権限プロンプトなしで走る。同じく `${CLAUDE_PROJECT_DIR}`(v2.1.196+)、`${CLAUDE_EFFORT}`、プラグインでは `${CLAUDE_PLUGIN_ROOT}` / `${CLAUDE_PLUGIN_DATA}` も展開される。 — [cc]
+
+### `` !`command` `` による動的な差し込みは Claude Code 専用
+
+本文の `` !`cmd` `` とコードフェンス ` ```! ` は、呼び出し時に実行されて出力が差し込まれる。claude.ai のチャットと API では動かない。 — [cc]
 
 ### スキル本文はセッション中1度だけロードされ、再読込されない
 
-呼び出し時に1つのメッセージとして会話に入り、以降ずっと残る。Claude Code は後続ターンでファイルを読み直さない。**タスク全体に効かせたい指示は「一度きりの手順」ではなく「常時有効な指示」として書く。** — [cc]
-
-### `context: fork` はスキル本文まるごとを1つの委譲されたタスクにする
-
-`context: fork` を書くと、そのスキルは自前のコンテキストで走り、本文がサブエージェントへのプロンプトになる。`agent` で実行環境(モデル・ツール・権限)を選び、既定では背景で走って結果が後のターンに返る(`background: false` で待たせられる)。3つの制約がある。**会話履歴を継承しない** ので、問いは `$ARGUMENTS` で渡す。**背景で走るフォークはツールセットが狭まる** — `Read` / `Grep` / `Glob` / `Bash` / `Edit` / `Write` / `WebFetch` / `WebSearch` などは残るが、`AskUserQuestion` はどのサブエージェントからも外れるので、途中で人に訊く作業はこの形にできない。そして **同じフォークされたスキルの呼び出しが走っている間に再度呼ぶと、ハーネスは待つ** — N 回呼んでも並列にはならない。 — [cc]
+呼び出し時に1つのメッセージとして会話に入り、以降ずっと残る — **毎ターン払い続けるトークンである。** Claude Code は後続ターンでファイルを読み直さない。**タスク全体に効かせたい指示は「一度きりの手順」ではなく「常時有効な指示」として書く。** 同じ内容で再度呼ばれると、2部目ではなく「ロード済み」の短い注記が入る(引数や差し込み結果が違えば全文がもう一度入る)。 — [cc]
 
 ### 圧縮を挟むと、長いスキルは頭から5,000トークンだけが残る
 
-自動圧縮のあと、Claude Code は各スキルの最新の呼び出しを要約の後ろに繋ぎ直すが、残すのは **各スキルの先頭5,000トークン** で、繋ぎ直せる合計は **25,000トークン**。新しく呼んだスキルから順に埋めるので、多く呼んだセッションでは古いスキルが丸ごと落ちる。**効かせたい指示ほど本文の前方に置く。** 落ちたスキルは呼び直せば戻る。 — [cc]
+自動圧縮のあと、Claude Code は各スキルの最新の呼び出しを要約の後ろに繋ぎ直すが、残すのは **各スキルの先頭5,000トークン** で、繋ぎ直せる合計は **25,000トークン**。新しく呼んだスキルから順に埋めるので、多く呼んだセッションでは古いスキルが丸ごと落ちる。**効かせたい指示ほど本文の前方に置く。** — [cc]
+
+### `context: fork` はスキル本文まるごとを1つの委譲されたタスクにする
+
+本文がサブエージェントへのプロンプトになり、`agent`(既定 `general-purpose`)で実行環境を選ぶ。既定では背景で走り結果が後のターンに返る(`background: false` で待たせられる)。
+
+- **会話の fork ではない。** 会話履歴を継承しないので、問いは `$ARGUMENTS` で渡す
+- **タスクを持つスキルにだけ意味がある。** ガイドラインだけの本文を fork すると、意味のある出力無しで返る
+- **背景で走るとツールセットが狭まる** — `Read` / `Grep` / `Glob` / `Bash` / `Edit` / `Write` / `WebFetch` / `WebSearch` などは残るが、`AskUserQuestion` はどのサブエージェントからも外れる。手順が狭いセットの外のツールに依存するなら `background: false` にする
+- **背景の fork の編集はセッションのチェックポイントの外で起きる** ので `/rewind` で戻らない
+- **同じ fork スキルの呼び出しが走っている間に再度呼ぶと、ハーネスは待つ** — N 回呼んでも並列にはならない。`-p` / Agent SDK / スケジュールタスクからの起動でも待つ
+- `agent: Explore` / `Plan` は `CLAUDE.md` を読まず、SKILL.md と自身のシステムプロンプトだけを見る
+
+— [cc] / [sa]
 
 ### スキル一覧には、コンテキストウィンドウの 1% という予算がある
 
-一覧は全スキルの名前を必ず載せるが、予算を溢れると **呼ばれる頻度の低いスキルから** description を削る。削られた側は、マッチに要るキーワードごと落ちる。予算は `skillListingBudgetFraction`(`0.02` で 2%)で上げられ、優先度の低いスキルは `skillOverrides` の `"name-only"` で名前だけにして予算を空けられる(プラグインのスキルには `skillOverrides` が効かない)。一覧の文脈コストと大きい順は `/doctor` が見積もり、どのスキルがどれだけ食ってどれだけ呼ばれているかは `/skill-doctor`(v2.1.252+)が出す。 — [cc]
+一覧は全スキルの名前を必ず載せるが、文字数の予算(モデルのコンテキストウィンドウの 1%)を溢れると **呼ばれる頻度の低いスキルから** description を削る。予算は `skillListingBudgetFraction`(`0.02` で 2%)で上げられる。`skillOverrides` は `on` / `name-only` / `user-invocable-only` / `off` の4状態を持つが、プラグインのスキルには効かない。一覧の文脈コストは `/doctor` が見積もり、どのスキルがどれだけ食ってどれだけ呼ばれているかは `/skill-doctor`(v2.1.252+)が出す。 — [cc]
+
+### 見つかる場所
+
+起動ディレクトリより下の入れ子の `.claude/skills/` は、そのサブディレクトリのファイルを初めて読むか編集したときにロードされる。worktree の根に `.claude/skills` が無ければ、本体チェックアウトのプロジェクトスキルが使われる(v2.1.277+)。シンボリックリンクされたスキルフォルダは1度だけロードされる。変更の自動検出が見るのは SKILL.md の本文だけである。 — [cc]
 
 ### 実行環境はプラットフォームで異なる
 
-claude.ai は npm / PyPI / GitHub から取得できる。Claude API のコード実行にはネットワークアクセスがなく、実行時のパッケージインストールもできない。必要パッケージは SKILL.md に列挙し、利用可能か確認する。 — [bp]
+公式どうしが食い違っている。[bp] は「claude.ai は npm / PyPI からインストールでき GitHub から取得できる」、[ov] は「claude.ai のネットワークアクセスはユーザー/管理者の設定次第で、全面・一部・無しのいずれか」と書く。Claude API のコード実行にはネットワークアクセスが無く、実行時のインストールもできない。Claude Code はネットワークに全面アクセスできるが、グローバルなインストールは避けローカルに入れる。スキルはサーフェス間で同期されない。 — [bp] / [ov]
 
 ---
 
@@ -210,7 +243,7 @@ claude.ai は npm / PyPI / GitHub から取得できる。Claude API のコー�
 
 ### 「何をするか」と「いつ使うか」の両方を1フィールドに入れる
 
-description はスキル選択の唯一の材料であり、100個以上の候補から選ばせる。標準は分離フィールドを定めていないので、トリガー表現を別フィールドに出すと標準しか読まないハーネスで丸ごと落ちる。 — [bp] / [cc]
+description はスキル選択の唯一の材料であり、100個以上の候補から選ばせる。標準は分離フィールドを定めていないので、トリガー表現を別フィールドに出すと標準しか読まないハーネスで丸ごと落ちる。 — [bp] / [sp]
 
 ### 主要なユースケースを先頭に置く
 
@@ -220,13 +253,17 @@ Claude Code のスキル一覧では `description` と `when_to_use` を連結�
 
 システムプロンプトに注入されるため、視点が混ざると発見が壊れる。「Processes Excel files and generates reports」。「I can help you…」「You can use this to…」は避ける。 — [bp]
 
-### 人間向けではなくモデル向けに書く
+### 要約ではなく、いつ発火させるかを書く
 
-ユーザー向けドキュメントではない。Claude に認識させたいトリガー語やキーワード(PR 監視スキルにおける "babysit" のような口語も含む)を意図的に埋める。 — [lc]
+description は要約ではなく、このスキルをいつ発火させるかの記述である。Claude に認識させたいトリガー語(PR 監視スキルにおける "babysit" のような口語も含む)を意図的に埋める。 — [lc]
 
 ### 具体的な動詞・ファイル形式・トリガーを入れる
 
 良い: `Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.` 悪い: `Helps with documents` / `Processes data` / `Does stuff with files`。 — [bp]
+
+### 一般的すぎても狭すぎても外れる
+
+一般的すぎる記述は誤発火を招き、使用例が足りなければ発火の機会を逃す。複数のスキルが同時に発火することもある。 — [hc]
 
 ### 1スキル1カテゴリに収める
 
@@ -234,11 +271,11 @@ Claude Code のスキル一覧では `description` と `when_to_use` を連結�
 
 ### 名前は動名詞形を既定にする
 
-`processing-pdfs` / `analyzing-spreadsheets` / `writing-documentation`。名詞句(`pdf-processing`)や動詞形(`process-pdfs`)も可。`helper` / `utils` / `tools` / `documents` / `data` のような曖昧・汎用名は避ける。 — [bp]
+`processing-pdfs` / `analyzing-spreadsheets` / `writing-documentation`。名詞句(`pdf-processing`)や動詞形(`process-pdfs`)も可。`helper` / `utils` / `tools` / `documents` / `data` のような曖昧・汎用名と、コレクション内での不揃いは避ける。 — [bp]
 
-### 発火が外れているとき直すのは description であり、本文ではない
+### 発火が外れているときは description を直す
 
-トリガーが外れる問題を本文の推敲で直そうとしても動かない。逆に本文の質の問題を description で直すこともできない。 — [bp]
+Claude は `name` と `description` を見て発火を決める — [bp] / [eq]。発火しないなら、ユーザーが自然に言う語が description にあるかを確かめる。最初の応答のあとで効き目が消えるように見えるなら、description と本文の指示を強めるか、フックに移す。 — [cc]
 
 ---
 
@@ -246,11 +283,11 @@ Claude Code のスキル一覧では `description` と `when_to_use` を連結�
 
 ### ロードは3層になる
 
-(1) 起動時に全スキルの `name` / `description`、(2) 関連したときに `SKILL.md` 本文、(3) 必要になったときに追加ファイル。目次 → 章 → 付録の構造。 — [eq]
+(1) 起動時に全スキルの `name` / `description`、(2) 関連したときに `SKILL.md` 本文、(3) 必要になったときに追加ファイル。目次 → 章 → 付録の構造。 — [eq] / [ov]
 
 ### SKILL.md は目次として書く
 
-概要と行き先だけを持ち、詳細は `FORMS.md` / `reference.md` / `examples.md` へ逃がす。読まれないファイルはコンテキストを1トークンも消費しない。 — [bp]
+概要と行き先だけを持ち、詳細は `FORMS.md` / `reference.md` / `examples.md` へ逃がす。各ファイルに何が入っていて、いつ読むかを SKILL.md から示す。読まれないファイルはコンテキストを1トークンも消費しない。 — [bp] / [cc]
 
 ### 参照は SKILL.md から1階層までに保つ
 
@@ -266,7 +303,7 @@ Claude Code のスキル一覧では `description` と `when_to_use` を連結�
 
 ### 排他的な、あるいは同時に使わない文脈は分離する
 
-ある実行で通る経路(分岐)が異なるなら、全分岐が要るものだけをインラインにし、一部しか通らないものはポインタの裏に置く。 — [eq]
+ある文脈どうしが排他的か、めったに一緒に使われないなら、経路を分けておくとトークンが減る。 — [eq]
 
 ### ファイル名は中身を表すものにする
 
@@ -278,7 +315,7 @@ Claude Code のスキル一覧では `description` と `when_to_use` を連結�
 
 ### 「実行させる」のか「読ませる」のかを明示する
 
-「`analyze_form.py` を実行してフィールドを抽出する」(実行、中身はコンテキストに載らない)と「抽出アルゴリズムは `analyze_form.py` を参照」(読ませる)を書き分ける。既定は実行。 — [bp] / [eq]
+「`analyze_form.py` を実行してフィールドを抽出する」(実行、中身はコンテキストに載らない)と「抽出アルゴリズムは `analyze_form.py` を参照」(読ませる)を書き分ける。多くの場合は実行が既定。 — [bp] / [eq]
 
 ### 大きな資料は遠慮なく同梱する
 
@@ -286,11 +323,31 @@ Claude Code のスキル一覧では `description` と `when_to_use` を連結�
 
 ---
 
-## 5. 手順とフィードバックループ
+## 5. 手順・完了・フィードバックループ
 
 ### 複雑な作業は番号付きの手順に分解する
 
 特に複雑なものは、Claude が自分の応答にコピーして進捗を消し込めるチェックリストを与える。コードを伴わない分析作業にも同じ形が効く。 — [bp]
+
+### 完了の定義を渡す
+
+タスクは1つのメッセージで丸ごと渡し、終着点を名指しする。「完了とは: すべてのエンドポイントが新しいクライアントを使い、古いクライアントが削除され、テストスイートが通ること」。 — [o5]
+
+### 止まる地点と進み続ける地点を名指しする
+
+Opus 5.5 は、名指しされた停止に従う。避けたい早すぎる停止(次の手順を実行せず、それを告げる要約でターンを終える、など)と、望む停止の両方を名指しする。`CLAUDE.md` に置く例: 「入力が要らない手順は進み続ける。状況の報告は次の行動と同じメッセージに入れる。止まって訊くのは、自分なしでは進めないときと、破壊的な操作(データの削除、force push、このリポジトリの外の変更)の前だけ」。ペアプログラミングなら逆(着手前に1行の計画、最後に短い要約)を書く — どちらにも従う。危険な操作の権限プロンプトは残しておく。 — [o5] / [p55]
+
+### タスク一覧はファイルに置く
+
+「`TASKS.md` にチェックリストを置き、終えたら消し込み、見つけたものは足す」。古いターンは要約されるが、ファイルの一覧は残る。テキストだけでターンが終わったら、それは完了の証明ではなく報告として扱う。 — [o5] / [p55]
+
+### 確かめられなかったものを印させる
+
+「確かめられなかったものには印をつけ、どこを見たかを書く」。調査レポートでも Claude Code でも効く。 — [o5]
+
+### 検証の手段を渡す
+
+Claude は作業が終わったように見えたところで止まる。テスト・ビルド・lint・フィクスチャとの diff・スクリーンショットのように合否を返すチェックを渡せば、ループは自分で閉じる。止まる前の縛りの強さは段階がある: 1つのプロンプトで頼む / `/goal` の条件にする / Stop フックで決定的に止める(8回連続でブロックすると Claude Code が上書きして終える) / 検証用サブエージェントに反証させる。成功を主張させず、証拠(実行したコマンドと結果、テスト出力)を見せさせる。 — [cb]
 
 ### 検証ループを組み込む
 
@@ -302,7 +359,7 @@ plan-validate-execute。50個のフィールドを一括更新する前に `chan
 
 ### 検証エラーは具体的に書かせる
 
-「Field 'signature_date' not found. Available fields: customer_name, order_total, signature_date_signed」のように、直し方が読み取れる文面にする。 — [bp]
+「Field 'signature_date' not found. Available fields: customer_name, order_total, signature_date_signed」のように、直し方が読み取れる文面にする。 — [bp] / [wt]
 
 ### 手順が大きくなったら別ファイルへ落とす
 
@@ -310,11 +367,11 @@ plan-validate-execute。50個のフィールドを一括更新する前に `chan
 
 ### エージェントはテストせずに「完了」と宣言する
 
-明示的に促さない限り、機能を検証せずに完了扱いにする傾向がある。セッション冒頭に end-to-end の sanity check を置き、テストが通ったものだけをチェックリストで消す。 — [lh]
+明示的に促さない限り、end-to-end で動くことを確かめずに完了扱いにする傾向がある。セッション冒頭に開発サーバーでの基本テストを置き、確かめたものだけを通過にする。 — [lh]
 
 ### 将来のコンテキストのために状態を書き残す
 
-進捗ファイル、合否が二値になる機能リスト、意味のあるコミット履歴、`init.sh`。新しいコンテキストで立ち上がったエージェントが現在地を掴めるようにする。 — [lh]
+進捗ファイル、合否が二値になる機能リスト(Markdown より書き換えられにくい JSON で)、意味のあるコミット履歴、`init.sh`。新しいコンテキストで立ち上がったエージェントが現在地を掴めるようにする。 — [lh]
 
 ---
 
@@ -332,30 +389,35 @@ Claude が実際に踏んだ失敗点から作る。「`@request_id` は billing
 
 「2025年8月より前なら旧 API」は必ず腐る。「現行の方法」を本文に置き、旧仕様は `<details>` で畳んだ「旧パターン」節に落とす。 — [bp]
 
-### 否定形ではなく肯定形で促す
+### 強調は1行だけに付ける
 
-「〜するな」より「〜せよ」の方が確実に効く。禁止は肯定形で言い表せないガードレールに限り、その場合も「代わりに何をするか」と対にする。 — [pe]
+指示が無視され続けるなら、その1行だけに「IMPORTANT」のような強調を足す。**多くの行を強調すると、どれも目立たない。** — [cb]。フロンティアモデルでは強調の上乗せ自体が冗長な出力と余計なツール呼び出しを招く(§1) — [rc]。
+
+### 肯定形で促す — ただし避けたい具体的なパターンは列挙してよい
+
+「〜するな」より「〜せよ」の方が確実に効く — [pe]。一方で Opus 5.5 には、「ありがちな見た目を避けよ」のような一般的な禁止は既定を別の既定に置き換えるだけで、**避けたい具体的なパターンを並べる方がずっと効く** — [o5] / [p55]。両立させるなら、方向は肯定形で示し、禁止は名指しできる具体的なパターンに限る。
 
 ### 例は具体的に、正典的なものを少数
 
-入力と出力の対を見せる方が、形式を散文で説明するより伝わる。網羅ではなく、期待する振る舞いを代表する多様な例を選ぶ。 — [bp] / [ce]
+入力と出力の対を見せる方が、形式を散文で説明するより伝わる。網羅ではなく、期待する振る舞いを代表する多様な例を選ぶ。 — [bp] / [ce]。最新のモデルは例の細部まで写すので、例は奨励したい振る舞いと一致させる — [pe]。
 
 ### 公式どうしが食い違っている点: 例を出すか、形を設計するか
 
 - [bp] / [pe] は **例を出す** ことを勧める(具体的で正典的なものを少数)。
-- [c5] は、最新世代では **例がかえって探索空間を狭める** として、例の代わりに **インターフェースの設計** に紙面を使えとする — ツール・スクリプト・ファイルのパラメータをどれだけ表現力のある形にできるか。Todo ツールなら `pending` / `in_progress` / `completed` という列挙そのものが使い方を示し、「`in_progress` は常に1つ」という一文が振る舞いを定義する。
+- [c5] は、最新世代では **例がかえって探索空間を狭める** として、例の代わりに **インターフェースの設計** に紙面を使えとする — ツール・スクリプト・ファイルのパラメータをどれだけ表現力のある形にできるか。Todo ツールなら `pending` / `in_progress` / `completed` という列挙そのものが使い方を示し、「`in_progress` は常に1つ」という一文が振る舞いを定義する。引数名も曖昧にしない(`user` ではなく `user_id`) — [wt]。
 
-**書き手が選べる形があるなら [c5] に寄せる**(自分が定義するツール・スクリプト・frontmatter)。形を変えられない相手を説明するときは [bp] のまま、少数の正典的な例を出す。 — [bp] / [c5]
+**書き手が選べる形があるなら [c5] に寄せる**(自分が定義するツール・スクリプト・frontmatter)。形を変えられない相手を説明するときは [bp] のまま、少数の正典的な例を出す。
 
 ### テンプレートは厳密さのレベルを明示する
 
 「ALWAYS use this exact template structure」なのか「a sensible default, but use your best judgment」なのかを書く。書かないと Claude はどちらとも解釈できる。 — [bp]
 
-### 制約の理由を書く。硬直した命令より理由付きの指示の方が守られる
+### 公式どうしが食い違っている点: 理由を書くか、何をするかだけを書くか
 
-ルールだけでなく、なぜその制約があるか、出力が誰に何のために読まれるかを説明する — [pe]。[ev] はさらに踏み込み、**「X せよ、Y するな」より「Y は Z を招きがちなので X する」の方がモデルは確実に従う**、目的が分かるからだ、と言う。[wp] も同じ向きで、スキルは「コンピュータをプログラムするようにではなく、賢い人に指示するように」書き、規則の理由を渡せばエージェントは硬直した指示に従う代わりに問題そのものを推論できる、とする。 — [pe] / [ev] / [wp]
+- [pe] / [ev] / [wp] は **理由を書け** と言う。「X せよ、Y するな」より「Y は Z を招きがちなので X する」の方がモデルは確実に従う — [ev]。スキルは「コンピュータをプログラムするようにではなく、賢い人に指示するように」書き、規則の理由を渡せばエージェントは問題そのものを推論できる — [wp]。
+- [cc] は、スキル本文は毎ターン払い続けるトークンなので **「どうやって・なぜを語るのではなく、何をするかを書け」** と言い、`CLAUDE.md` と同じ簡潔さの基準を当てよとする。
 
-**公式どうしが食い違っている点。** [bp] は厳密なテンプレートの見本として `ALWAYS use this exact template structure` を挙げ、[ev] は `ALWAYS do X, NEVER do Y` 型の硬直した命令を反面教師に挙げる。両立させるなら、**厳密さのレベルは明示し(bp)、その厳密さの理由も添える(ev)** — 「この構造を厳密に守る。下流のパーサがこの見出しで切っているため」。理由を書けない厳密さは、たいてい厳密である必要がない。
+両立させるなら、**理由は自明でない規則にだけ、1節で添える。** 経緯・発見の物語・Claude が既に知っている説明は削る。理由を書けない厳密さは、たいてい厳密である必要がない — [bp] は厳密なテンプレートの見本に `ALWAYS use this exact template structure` を挙げるが、厳密さのレベルは明示し(bp)、その厳密さの理由も添える(ev):「この構造を厳密に守る。下流のパーサがこの見出しで切っているため」。
 
 ### 節は Markdown 見出しか XML タグで区切る
 
@@ -371,7 +433,7 @@ Claude が実際に踏んだ失敗点から作る。「`@request_id` は billing
 
 ### 生成させるより同梱した方が良い理由
 
-生成コードより信頼でき、トークンを節約し、生成時間を省き、実行ごとの一貫性を担保する。**Claude が毎回ほぼ同じコードを書いているなら同梱の合図。** — [bp]
+生成コードより信頼でき、トークンを節約し、生成時間を省き、実行ごとの一貫性を担保する — [bp]。**eval の各実行が似た補助スクリプトを毎回書いているなら同梱の合図** — [ev]。
 
 ### 解決する、投げ返さない
 
@@ -389,13 +451,17 @@ Claude が実際に踏んだ失敗点から作る。「`@request_id` は billing
 
 PDF を画像に変換してレイアウトを視覚的に解析させるなど、視覚能力を使える形に変換する。 — [bp]
 
-### 永続化はスキル内のログやファイルで行う
+### 永続化はスキル外の安定したディレクトリで行う
 
-追記専用ログや JSON をスキル内に置くと、前回の出力を踏まえた差分を出せる。Claude Code のプラグインでは `${CLAUDE_PLUGIN_DATA}` が永続領域になる。 — [lc]
+追記専用ログや JSON で前回の出力を踏まえた差分を出せる。Claude Code のプラグインでは `${CLAUDE_PLUGIN_DATA}` が安定した保存先になる。 — [lc]
 
 ### 設定は config.json に置き、欠けていたらユーザーに訊かせる
 
 任意パラメータをハードコードせず、未設定なら質問するよう促す。 — [lc]
+
+### 外部から取ってくるスキルは信頼できる出所に限る
+
+外部 URL からデータを取るスキルは特にリスクが高く、信頼できるスキルでも依存先が変われば侵害されうる。スキルは信頼できる出所からだけ入れ、使う前に監査する。 — [ov] / [eq]
 
 ---
 
@@ -403,7 +469,11 @@ PDF を画像に変換してレイアウトを視覚的に解析させるなど�
 
 ### eval を先に作る。ドキュメントを大量に書く前に
 
-(1) スキル無しで代表タスクを走らせて失敗を記録、(2) その穴を突く3シナリオを作る、(3) ベースラインを測る、(4) 穴を埋めるだけの最小の指示を書く、(5) 回して比べる。想像上の問題ではなく実在の問題を解くための順序である。 — [bp]
+(1) スキル無しで代表タスクを走らせて失敗を記録、(2) その穴を突く3シナリオを作る、(3) ベースラインを測る、(4) 穴を埋めるだけの最小の指示を書く、(5) 回して比べる。想像上の問題ではなく実在の問題を解くための順序である — [bp] / [eq]。[bp] の JSON 形式には組み込みの実行手段が無い。Claude Code では `claude plugin eval` と skill-creator が実行手段で、両者の形式は互換でない — [cc]。
+
+### 発火と出力を分けて測る。新しいセッションで
+
+スキルが発火したことは Claude が見つけたことを示すだけで、意図どおりに動いたことは示さない。現実的なプロンプトをいくつか集め、**新しいセッションで**スキル有りと無効の両方で走らせて比べる — 書いたときのコンテキストが残っていると、書かれた指示の穴が隠れる。 — [cc]
 
 ### 3種類のシナリオで測る
 
@@ -411,11 +481,11 @@ PDF を画像に変換してレイアウトを視覚的に解析させるなど�
 
 ### 2〜3件から始めて、結果を見てから広げる
 
-最初の1周を回す前に作り込まない。プロンプトは言い回し・詳しさ・丁寧さを散らし、少なくとも1件は境界条件を突く。「このデータを処理して」のような曖昧なプロンプトは何も検証しない。 — [ev]
+最初の1周を回す前に作り込まない。プロンプトは言い回し・詳しさ・丁寧さを散らし、少なくとも1件は境界条件を突く。「このデータを処理して」のような曖昧なプロンプトは何も検証しない。各実行はきれいなコンテキストから始める。 — [ev]
 
 ### assertions は初回の出力を見てから足す
 
-何が「良い」かは、走らせるまで分からない。最初はプロンプトと期待する結果の説明だけを書く。良い assertion は検証可能で観測可能(「軸にラベルがある」「推奨が3件以上ある」)、弱い assertion は曖昧か脆い(「出力が良い」「この文字列と完全一致」)。 — [ev]
+何が「良い」かは、走らせるまで分からない。良い assertion は検証可能で観測可能(「軸にラベルがある」「推奨が3件以上ある」)、弱い assertion は曖昧か脆い(「出力が良い」「この文字列と完全一致」)。機械的に確かめられるものはスクリプトで見る(LLM の判定より確実)。PASS には具体的な証拠を要求し、疑わしきは PASS にしない。assertion 自体も見直す(易しすぎ、難しすぎ、検証不能)。 — [ev]
 
 ### 両方の構成で常に通る assertion は外す
 
@@ -423,15 +493,21 @@ PDF を画像に変換してレイアウトを視覚的に解析させるなど�
 
 ### 合否ではなく delta で判断する
 
-with-skill と without-skill の差を、合格率・時間・トークンの3つで見る。「13秒増で合格率+50ポイント」なら見合う。「トークン倍増で+2ポイント」なら見合わない。 — [ev]
+with-skill と without-skill の差を、合格率・時間・トークンの3つで見る。「13秒増で合格率+50ポイント」なら見合う。「トークン倍増で+2ポイント」なら見合わない。既存スキルを改善するときは、**前の版をベースライン**にする。時間とトークンはタスク通知からすぐ保存する(他には残らない)。 — [ev]
 
 ### Claude Code では `claude plugin eval` が上の測り方を実装している
 
-v2.1.269+。プラグインのスキルを、ケース(`evals/<case>/prompt.md` + `graders/*.md`)に対して走らせて採点する。`prompt.md` は **ユーザーが打つ言い回しで書き、スキル名を出さない**。各ケースは既定で **3回** 走り(非決定的なエージェントの1回は何も語らない)、既定では **プラグイン無しでも同じ回数** 走らせて `WITH` / `W/OUT` / `Δ` を出す。両方で 1.0 のケースは、プラグインが通したのではない。`--threshold` の既定は 1.0 で、下回ると exit 1 になるので CI のゲートにそのまま使える。実行も judge も実際のモデル呼び出しで、プランの使用量か API 課金に計上される。ケースと grader は `claude plugin eval init` に提案させるのが推奨の経路で、形式は skill-creator の `evals/evals.json` とは別物である。 — [pv]
+v2.1.269+。プラグインのスキルを、ケース(`evals/<case>/prompt.md` + `graders/*.md`、または `case.yaml`)に対して走らせて採点する。`prompt.md` は **ユーザーが打つ言い回しで書き、スキル名を出さない**。各ケースは既定で **3回** 走り、既定では **プラグイン無しでも同じ回数** 走らせて `WITH` / `W/OUT` / `Δ` を出す。両方で 1.0 のケースは、プラグインが通したのではない。`--threshold` の既定は 1.0 で、下回ると exit 1 になるので CI のゲートにそのまま使える(CI では `--trust-plugin` も渡す)。ケースと grader は `claude plugin eval init` に提案させるのが推奨の経路。 — [pv]
+
+- **実行は隔離される。** ユーザー設定・フック・`CLAUDE.md`・MCP サーバー・他のプラグイン・メモリ・スキルは載らない。`CLAUDE.md` の文脈に頼るスキルは、それ無しで採点される
+- **費用。** おおむね「ケース数 × 実行回数」のエージェント実行と、ベースラインで同数、加えて `llm` / `baseline` grader ごと・実行ごとに短い judge 呼び出しが3回。プランの使用量か API 課金に計上される
+- **安く回す。** `claude plugin eval . --case <name> --runs 1 --ablation none` で回し、信じる前に既定の3回で確かめる
+
+— [pv]
 
 ### grader は「結果」と「経路」を1つずつ置く
 
-grader は6種類(`regex` / `tool_used` / `tool_order` / `file_exists` は無料、`llm` / `baseline` は judge を呼ぶ)で、カスタムコードの grader は無い。各ケースに、最終メッセージや生成物を見る grader を1つ、`tool_used` / `tool_order` で **どう到達したか** を見る grader を1つ置く — 答えが正しいかと、それをプラグインが生んだかを分けて測れる。長い出力は `llm` ではなく `regex` で見る(`llm` の判定は読む文が長いほど揺れる)。`llm` の rubric は具体的な PASS / FAIL 条件で書く。 — [pv]
+grader は6種類(`regex` / `tool_used` / `tool_order` / `file_exists` は無料、`llm` / `baseline` は judge を呼ぶ)で、カスタムコードの grader は無い。各ケースに、最終メッセージや生成物を見る grader を1つ、`tool_used` / `tool_order` で **どう到達したか** を見る grader を1つ置く。長い出力は `llm` ではなく `regex` で見る(`llm` の判定は読む文が長いほど揺れる)。`llm` の rubric は具体的な PASS / FAIL 条件で書く。2腕の実行では `tool` が `Skill` の `tool_used` grader は `scored: false` になり `Δ` に数えない。スコープ外(スキルを呼んではいけない)のケースは `arm: both` と `min: 0` / `max: 0` で書く。 — [pv]
 
 ### `Δ` がほぼ 0 で `tool_used: Skill` が落ちているなら、直すのは description
 
@@ -439,15 +515,15 @@ grader は6種類(`regex` / `tool_used` / `tool_order` / `file_exists` は無料
 
 ### 版を比べるときはブラインドで
 
-2版の出力を、どちらがどちらか伏せて判定させる。assertion では拾えない全体の質(構成、体裁、使いやすさ)を、どちらが新しいかの先入観なしに測れる。 — [ev]
+2版の出力を、どちらがどちらか伏せて判定させる。assertion では拾えない全体の質を、どちらが新しいかの先入観なしに測れる。 — [ev]
 
-### ばらつきと頭打ちは、それぞれ別の指示の問題を指す
+### ばらつきと頭打ちは、それぞれ別の問題を指す
 
-同じ eval が通ったり落ちたりするなら、指示が複数の解釈を許している — 例を足すか具体化する。ルールを足しても合格率が頭打ちなら、**過剰に縛りすぎている** — 指示を減らして結果が保たれるか見る。 — [ev]
+同じ eval が通ったり落ちたりするなら、eval 自体がモデルの揺らぎに敏感か、指示が複数の解釈を許している — 後者なら例を足すか具体化する。ルールを足しても合格率が頭打ちなら、**過剰に縛りすぎている** — 指示を減らして結果が保たれるか見る。 — [ev]
 
 ### Claude A / Claude B で回す
 
-Claude A(スキルを設計・推敲する側)と Claude B(そのスキルを実際のタスクで使う側)を分ける。B の挙動を観測し、具体的な失敗を A に持ち帰る。「B が Q4 の日付フィルタを忘れた。日付フィルタの節を足すべきか?」 — [bp]
+Claude A(スキルを設計・推敲する側)と Claude B(そのスキルを実際のタスクで使う側)を分ける。B の挙動を観測し、具体的な失敗を A に持ち帰る。「B が Q4 の日付フィルタを忘れた。日付フィルタの節を足すべきか?」 — [bp]。うまくいったやり方とよくある間違いを、Claude 自身にスキルへ書き取らせる — [eq]。
 
 ### Claude はスキル形式を native に理解している
 
@@ -455,7 +531,7 @@ Claude A(スキルを設計・推敲する側)と Claude B(そのスキルを実
 
 ### Claude がスキルをどう歩いたかを観測する
 
-想定外の順序でファイルを読む(構造が直感的でない)、参照を辿らない(リンクが目立たない)、同じファイルばかり読む(その内容は SKILL.md 本体にあるべき)、一度も読まれないファイル(不要か、signal が足りない)。 — [bp]
+想定外の順序でファイルを読む(構造が直感的でない)、参照を辿らない(リンクが目立たない)、同じファイルばかり読む(その内容は SKILL.md 本体にあるべき)、一度も読まれないファイル(不要か、signal が足りない) — [bp]。組織内では PreToolUse フックでスキルの使用を記録し、発火が足りないスキルを見つける — [lc]。
 
 ### 使うつもりの全モデルでテストする
 
@@ -465,41 +541,46 @@ Claude A(スキルを設計・推敲する側)と Claude B(そのスキルを実
 
 有効なスキルの多くは数行と gotcha 1つから始まった。エッジケースに遭遇するたびに改善する。最初から網羅しようとしない。 — [lc]
 
-育て方の実例: Anthropic の CI チームは、Claude Tag が解決した障害ごとに「何が起きたか・根本原因・直し方・覚えておくべき gotcha」を `lessons.md` に自動で追記させ、新しい調査はまずそこを読ませる。**同じパターンが十分な回数出たら、ログから調査スキル本体へ昇格させる。** 常設の指示はスキルとして GitHub にコミットし、コードと同じように変更を管理する。 — [ct]
+育て方の実例: Anthropic の CI チームは、解決した障害ごとに「何が起きたか・根本原因・直し方・覚えておくべき gotcha」を `lessons.md` に自動で追記させ、新しい調査はまずそこを読ませる。**同じパターンが十分な回数出たら、ログから調査スキル本体へ昇格させる。** 常設の指示はスキルとして GitHub にコミットし、コードと同じように変更を管理する。 — [ct]
 
-### 実際に5回以上やった作業だけをスキルにする
+### 5回以上やった作業、10回以上繰り返す予定の作業をスキルにする
 
-これから10回以上繰り返すと分かっている作業。想像で作らない。 — [hc]
+「このタスクを少なくとも5回は実行したか? 今後少なくとも10回以上繰り返す予定はあるか?」を自問する。想像で作らない。 — [hc]
 
 ### description の小さな修正が大きく効く
 
-ツール記述のわずかな精緻化が SOTA 級の性能差を生んだ例がある。記述の推敲は最も費用対効果の高い改善手段のひとつ。 — [wt]
+ツールの記述をわずかに精緻化するだけで劇的な改善が出うる — [wt]。対象はツールの記述だが、選択の材料を記述だけに頼る点はスキルの description と同じである。
 
 ---
 
-## 9. どこに載せるか(Skill / CLAUDE.md / MCP / サブエージェント)
+## 9. どこに載せるか(Skill / CLAUDE.md / MCP / サブエージェント / フック)
+
+### 載せ替える引き金
+
+Claude が規約やコマンドを2度間違えた → `CLAUDE.md`。同じ手順書を3度チャットに貼った → スキル。同じ依頼文で作業を始め続けている → ユーザー呼び出し型のスキル。脇道の作業が会話を埋める → サブエージェント。訊かずに毎回起きてほしい → フック。繰り返した間違いやレビュー指摘は、チャットでの一度きりの訂正ではなく `CLAUDE.md` の編集で直す。 — [fo]
 
 ### Skill — 再利用可能な**手続き的知識**
 
-「どう実行するか」を教える。会話をまたいで効き、関連したときだけ動的にロードされる。同じ指示を何度も貼っているなら、それはスキルの候補である。 — [se] / [cc]。デプロイ手順・リリースのチェックリスト・レビュー手順のような手続きは、CLAUDE.md ではなくスキルに置く — [st]。
-
-スキルとメモリは別物である: スキルは手続きで安定しており(「X のやり方」、実行に依らず、意図して変える)、メモリは推論時にエージェントが自動で書き、変わり続ける。 — [wp]
+同じ指示を何度も貼っているとき、`CLAUDE.md` の節が事実ではなく手順に育ったときにスキルにする — [cc]。複数の会話で同じプロンプトを繰り返しているならスキルの候補 — [se]。デプロイ手順・リリースのチェックリスト・レビュー手順のような手続きは、`CLAUDE.md` ではなくスキルに置く — [st]。スキルは手続きで安定しており(「X のやり方」、実行に依らず、意図して変える)、メモリは推論時にエージェントが自動で書き、変わり続ける — [wp]。
 
 ### CLAUDE.md — 毎回要る**事実**
 
-常時ロードされるので signal 対 noise 比が支配的。手順に育った節はスキルへ移す。スキルの本文は使われたときだけロードされるので、長い参照資料をほぼ無料で持てる。 — [cc] / [cm]
+常時ロードされるので signal 対 noise 比が支配的。スキルの本文は使われたときだけロードされるので、長い参照資料をほぼ無料で持てる — [cc]。Claude Code は `CLAUDE.md` を最初からそのまま載せ、残りは glob や grep で just-in-time に取りにいく混成型である — [ce]。
 
 ### MCP — 外部データ・ツールへの**接続**
 
-手続き的知識ではなく接続性を提供する。MCP がデータに繋ぎ、Skill がその使い方を教える。両者は補完関係にある。 — [se]
+MCP がデータに繋ぎ、Skill がその使い方を教える。両者は補完関係にある — [se] / [fo]。MCP のツール定義は遅延ロードされ、起動時に載るのはツール名とサーバーの指示だけである — [tc]。
 
 ### サブエージェント — 独立したコンテキストでの**委譲**
 
-クリーンなコンテキストで専門タスクを処理し、凝縮した要約だけを返す。関心の分離が目的 — [se]。子は数万トークン以上を使って探索しうるが、親に返るのは **概ね1,000〜2,000トークン** の要約である — [ce]。
+個別のタスクを独立したコンテキストで処理し、結果をメインに返す — [se]。子は数万トークン以上を使って探索しうるが、親に返るのは概ね1,000〜2,000トークンの要約である — [ce]。
+
+- **起動時に何が載るか。** fork でないサブエージェントには `CLAUDE.md` の階層が全部載る(`Explore` / `Plan` と `omitClaudeMd: true` は除く)。出力スタイル(fork を除く)と自動メモリは載らない。**サブエージェントに届かせたい規則は、委譲するときのプロンプトに書き直す** — [sa]
+- **モデル。** 定義の `model` は `CLAUDE_CODE_SUBAGENT_MODEL` より優先され、`model` の無いサブエージェントはメインのモデルで走る。小さいモデルは間違いが見つけやすい調べ物に回し、判断はメインのモデルに残す — [tc]
 
 ### フック — 決定的に**起きなければならない**こと
 
-編集後の linter、完了時の通知、特定コマンドの遮断のように、毎回決定的に起きるべきものはフックに置く — [st]。CLAUDE.md は強制された設定ではなく文脈であり、どう判断されても止めたいなら PreToolUse フックを使う。 — [mm]
+編集後の linter、完了時の通知、特定コマンドの遮断のように、毎回決定的に起きるべきものはフックに置く — [st]。`CLAUDE.md` やスキルに書いた「`.env` を編集するな」は依頼であって保証ではない。どう判断されても止めたいなら PreToolUse フックを使う — [mm] / [fo]。フックは出力を返さない限りコンテキストを食わない — [fo]。
 
 ### スキル内の MCP ツール名は完全修飾で書く
 
@@ -511,15 +592,23 @@ Claude A(スキルを設計・推敲する側)と Claude B(そのスキルを実
 
 ### 1ファイル200行未満を目標にする
 
-`CLAUDE.md` は毎セッション **全文** がコンテキストに入る(`MEMORY.md` と違って行数で切られない。ただし **4 MiB を超えるファイルは丸ごとスキップ** される)。長いほどトークンを食い、**指示への従いやすさが落ちる**。溢れたら `paths` 付きの path-scoped rule へ逃がす。`@path` の import は整理にはなるが起動時に一緒に読まれるので、コンテキストは減らない。[st] は運用を足す: 200行未満に保ち、**オーナーを決め、変更をコードと同じようにレビューする**。[sd] は「1ページ未満」と言う(Claude は全文を読むので、古くなった行は何の得もなく文脈を食う)。 — [mm] / [st] / [sd]
+`CLAUDE.md` は毎セッション **全文** がコンテキストに入り、各行が毎ターン再送される(`MEMORY.md` と違って行数で切られない。ただし **4 MiB を超えるファイルは丸ごとスキップ** される)。長いほどトークンを食い、**指示への従いやすさが落ちる**。溢れたら `paths` 付きの path-scoped rule へ逃がす。`@path` の import は整理にはなるが起動時に一緒に読まれるので、コンテキストは減らない。 — [mm] / [tc]。200行未満に保ち、オーナーを決め、変更をコードと同じようにレビューする — [st]。1ページ未満 — [sd]。
+
+### 1行ずつ「消したら Claude は間違えるか」を問う
+
+間違えないなら消す。肥大した `CLAUDE.md` は本当の指示を無視させる。指示が無くても Claude が正しくやっていることは、消すかフックにする。規則があるのに守られないなら、ファイルが長すぎて規則が埋もれている。書いてあることを訊かれるなら、言い回しが曖昧である。変更したら、Claude の振る舞いが実際に変わるかを観測する。 — [cb]
+
+### 入れるもの・入れないもの
+
+入れる: Claude が推測できない Bash コマンド、既定と違うコードスタイル、テストの指示と好みのランナー、リポジトリの作法(ブランチ名、PR の慣習)、プロジェクト固有の設計判断、開発環境の癖(必須の環境変数)、よくある落とし穴と自明でない挙動。入れない: コードを読めば分かること、Claude が知っている標準の慣習、詳細な API ドキュメント(リンクを置く)、頻繁に変わる情報、長い説明やチュートリアル、ファイルごとの説明、「きれいなコードを書く」のような自明な心得 — [cb]。機密情報・API キー・認証情報・データベース接続文字列・脆弱性の詳細も入れない — [cm]。
 
 ### 人間向けのメモはブロックレベルの HTML コメントに書く
 
-`<!-- … -->` はコンテキストへ注入される前に取り除かれるので、保守する人へのメモをトークンを払わずに残せる。コードブロック内のコメントは残る。 — [mm]
+`<!-- … -->` はコンテキストへ注入される前に取り除かれるので、保守する人へのメモをトークンを払わずに残せる。コードブロック内のコメントは残る。Read ツールで直接開いたときはコメントも見える。 — [mm]
 
 ### CLAUDE.md はシステムプロンプトではない
 
-中身はシステムプロンプトの後に **user メッセージとして** 渡され、厳密な遵守の保証は無い。システムプロンプトの層に置きたい指示は `--append-system-prompt` で起動時に渡す(スクリプト・自動化向け)。 — [mm]
+中身はシステムプロンプトの後に **user メッセージとして** 渡され、厳密な遵守の保証は無い(曖昧な指示や矛盾する指示では特に)。システムプロンプトの層に置きたい指示は `--append-system-prompt` で起動時に渡す(スクリプト・自動化向け)。 — [mm]
 
 ### 毎日打つコマンドは、打つとおりに書く
 
@@ -531,69 +620,85 @@ Claude A(スキルを設計・推敲する側)と Claude B(そのスキルを実
 
 ### 書き足す引き金は4つ
 
-Claude が同じ間違いを2度した / コードレビューが Claude の知っておくべきことを捕まえた / 前のセッションと同じ訂正を打ち込んだ / 新しいチームメイトが同じ文脈を必要とする。理論上の懸念ではなく、実際に繰り返し説明する羽目になったことを書く。小さく始めて育てる。 — [mm] / [cm] / [sd]
+Claude が同じ間違いを2度した / コードレビューが Claude の知っておくべきことを捕まえた / 前のセッションと同じ訂正を打ち込んだ / 新しいチームメイトが同じ文脈を必要とする — [mm] / [sd]。理論上の懸念ではなく、実際に遭遇した問題を書く。小さく始めて育てる — [cm]。
+
+### 停止と報告の形は CLAUDE.md に書く
+
+いつ止まって訊き、いつ進み続けるか(§5)と、実行の最後の報告の形(「毎回、Blocked on me / Changed / Found の3見出しで終える」)は `CLAUDE.md` に置く。 — [o5]
 
 ### 手続きはスキルへ、一部にしか効かないルールは `.claude/rules/` へ
 
-多段の手続きになった節はスキルへ移す。コードベースの一部にしか効かないルールは `.claude/rules/` に置き、`paths` frontmatter(glob)で対象を絞る — こうすると該当ファイルを読んだときだけロードされる。 — [mm]
+多段の手続きはスキルへ、コードベースの一部にしか効かないルールは `.claude/rules/` に置き、`paths` frontmatter(glob)で対象を絞る — [mm]。
+
+- path-scoped rule は `paths` に一致するファイルを Claude が読んだときにロードされる(ツールを使うたびではない)。`paths` の無い rule は起動時に `.claude/CLAUDE.md` と同じ優先度でロードされる
+- rule の frontmatter で Claude Code が読むのは `paths` だけで、他のフィールドはエラー無しに無視される。YAML が壊れていると `paths` の無い rule としてロードされる
+- 圧縮後も、プロジェクトルートの `CLAUDE.md` は残る。入れ子の `CLAUDE.md` と `paths` 付きの rule は、該当ファイルを読んだときに読み込み直される
+
+— [mm]
 
 ### 具体的に、矛盾なく書く
 
-「コードを整形する」ではなく「インデントはスペース2つ」。真偽を確認できる粒度まで落とす。加えて、ルートと入れ子の `CLAUDE.md`、`.claude/rules/` を横断して **矛盾を消す** — 食い違う指示があると Claude はその場でどちらかを勝手に選ぶ。 — [mm]
+「コードを整形する」ではなく「インデントはスペース2つ」。真偽を確認できる粒度まで落とし、見出しと箇条書きで整理する。ルートと入れ子の `CLAUDE.md`、`.claude/rules/`、ユーザーの `~/.claude/rules/` を横断して **矛盾を消す** — 食い違う指示があると Claude はその場でどちらかを勝手に選ぶ。 — [mm]
 
-### 入れないもの
+### `AGENTS.md` は `CLAUDE.md` が無いときだけ読まれる
 
-API キー・認証情報・トークン、脆弱性の詳細、機密のビジネスロジック。Claude が繰り返し必要としないものも入れない(過剰文書化)。 — [cm]
-
-### 生きた文書として保守する
-
-プロジェクトと一緒に変わる。放置された `CLAUDE.md` は嘘をつく。 — [cm]
+v2.1.277+。作業ディレクトリとその上に `CLAUDE.md` が無いときだけ、Claude Code は `AGENTS.md` を読む。`~/.claude/CLAUDE.md`・管理された `CLAUDE.md`・`.claude/rules/` は数に入らず、`AGENTS.md` と並んでロードされ続ける。挙動は `/config` の Project instructions(`claude-md-or-agents-md` が既定 / `claude-md-and-agents-md` / `managed-only`)で変えられる。 — [mm]
 
 ### `/doctor` は削り方を実装として持っている
 
-ここに並ぶ判断は `claude doctor` に組み込まれている — Claude Code で `/doctor` を実行すると、スキルと `CLAUDE.md` を rightsize する。手で削る前に一度かける — [c5]。コミットされた `CLAUDE.md` に対しては、コードベースから導けるもの(ディレクトリ構成・依存関係一覧・アーキテクチャ概観)を削る案を出し、落とし穴・理由・ツール既定と異なる規約を残す。このトリムは v2.1.206+。 — [mm]
+Claude Code で `/doctor` を実行すると、スキルと `CLAUDE.md` を rightsize する。手で削る前に一度かける — [c5]。コミットされた `CLAUDE.md` に対しては、コードベースから導けるもの(ディレクトリ構成・依存関係一覧・アーキテクチャ概観)を削る案を出し、落とし穴・理由・ツール既定と異なる規約を残す(v2.1.206+) — [mm]。
 
-### 公式どうしが食い違っている点: アーキテクチャ概要とディレクトリ構成
+### 公式どうしが食い違っている点: アーキテクチャとディレクトリ構成
 
-- [cm] (ブログ)は **入れるもの** として「プロジェクト概要とディレクトリ構成」「アーキテクチャパターン」を挙げる。
-- [mm] (製品ドキュメント)の `/doctor` によるトリムは、**ディレクトリ構成・依存関係一覧・アーキテクチャ概観を「コードベースから導出できる」として削り**、落とし穴・理由・ツール既定と異なる規約を残す。
+- **入れる側**: [cm] は「主要なディレクトリを示すシンプルなツリー」と「アーキテクチャパターン」を挙げる。[mm] 自身も毎セッション持つべき事実に「project layout」を、[fo] は「project architecture」を、[cb] は入れるものに「プロジェクト固有の設計判断」を挙げる。
+- **削る側**: [mm] の `/doctor` はディレクトリ構成・依存関係一覧・アーキテクチャ概観を「コードベースから導出できる」として削り、[cb] は入れないものに「コードを読めば分かること」「ファイルごとの説明」を挙げる。
 
-同じ対象について正反対を言っている。**新しく書き足すときは [mm] に寄せる** — こちらが製品の実装(`/doctor` が実際にそう削る)であり、[cm] のリストは `/init` が出す下書きの説明に近い。[cm] 側を採る余地があるのは、その構成が **コードを読んでも分からないとき** — モノレポでどのパッケージが何を担うか、生成物と手書きの境界など、ディレクトリを眺めただけでは出てこない情報に限る。
+食い違いはブログと製品ドキュメントの間ではなく、製品ドキュメントの中にもある。裁く基準は **コードから導けるか** である。導けないもの — 設計判断とその理由、モノレポでどのパッケージが何を担うか、生成物と手書きの境界 — は入れ、ディレクトリを眺めれば分かる構成は入れない。
 
 ---
 
 ## 11. 出す前のチェックリスト
 
-**核** — [bp]
+**核**
 
-- [ ] description が具体的で、キーとなる語を含む
-- [ ] description に「何をするか」と「いつ使うか」の両方がある
-- [ ] description が三人称
-- [ ] `name` が1〜64文字、小文字英数字とハイフンのみ、先頭末尾と連続のハイフン無し、親ディレクトリ名と一致
-- [ ] `description` が1〜1,024文字
-- [ ] claude.ai へ上げるなら `name` に `anthropic` / `claude` を含まない
-- [ ] SKILL.md 本文が500行以内、かつ5,000トークン以内
-- [ ] 詳細は別ファイルに出してある(段階的開示が使われている)
-- [ ] 時限情報が無い(あるなら「旧パターン」節に畳んである)
-- [ ] 用語が一貫している
-- [ ] 例が抽象でなく具体
-- [ ] ファイル参照が SKILL.md から1階層
-- [ ] 100行超の参照ファイルに目次がある
-- [ ] 手順の各ステップが明確
+- [ ] description が具体的で、キーとなる語を含む — [bp]
+- [ ] description に「何をするか」と「いつ使うか」の両方があり、主要なユースケースが先頭にある — [bp] / [cc]
+- [ ] description が三人称 — [bp]
+- [ ] `name` が1〜64文字、小文字英数字とハイフンのみ、先頭末尾と連続のハイフン無し、親ディレクトリ名と一致 — [sp]
+- [ ] `description` が1〜1,024文字 — [sp]
+- [ ] claude.ai へ上げるなら `name` に `anthropic` / `claude` を含まず、Claude Code 拡張の frontmatter も無い — [bp] / [cc]
+- [ ] SKILL.md 本文が500行以内(bp)、かつ5,000トークン以内(sp)
+- [ ] 詳細は別ファイルに出してある(段階的開示が使われている) — [bp]
+- [ ] 時限情報が無い(あるなら「旧パターン」節に畳んである) — [bp]
+- [ ] 用語が一貫している — [bp]
+- [ ] 例が抽象でなく具体 — [bp]
+- [ ] ファイル参照が SKILL.md から1階層 — [bp]
+- [ ] 100行超の参照ファイルに目次がある — [bp]
+- [ ] 手順の各ステップが明確で、作業を伴うなら完了の定義がある — [bp] / [o5]
+
+**Opus 5.5 向け** — [rc] / [o5] / [cb]
+
+- [ ] 「think carefully」「step by step」のような思考の指示が無い
+- [ ] 推論を返信に再現させる依頼が無い
+- [ ] 強調は無視され続けた行だけに付いている
+- [ ] 具体的な検証の手段が無い「二重に確かめよ」が無い
+- [ ] 規則どうし、また CLAUDE.md や出力スタイルと矛盾していない
 
 **コードを含む場合** — [bp]
 
 - [ ] スクリプトが自分で解決し、Claude に投げ返していない
 - [ ] エラー処理が明示的で、直し方が読み取れる
 - [ ] 根拠のない定数が無い
-- [ ] スクリプトに何をするものかの説明がある
 - [ ] 必要パッケージが列挙され、環境で利用可能と確認済み
+- [ ] スクリプトに何をするものかの説明がある
 - [ ] Windows 形式のパスが無い
 - [ ] 重要な操作に検証ステップがある
 - [ ] 品質が critical な作業にフィードバックループがある
 
-**テスト** — [bp]
+**テスト**
 
-- [ ] eval が3つ以上ある(正常系 / エッジケース / スコープ外)
-- [ ] 使うつもりのモデル全部で試した
-- [ ] 実際のタスクで使った(作った状況の再現ではなく)
+- [ ] eval が3つ以上ある(正常系 / エッジケース / スコープ外) — [bp] / [hc]
+- [ ] 使うつもりのモデル全部で試した — [bp]
+- [ ] 新しいセッションで、スキル有りと無効を比べた — [cc]
+- [ ] 実際のタスクで使った(作った状況の再現ではなく) — [bp]
+- [ ] チームのフィードバックを取り込んだ(該当するなら) — [bp]

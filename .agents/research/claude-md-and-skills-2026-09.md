@@ -162,7 +162,7 @@ Anthropic の CI チームは Claude Tag を on-call の一次対応に置き、
 
 ## 5. OFFICIAL.md に未反映のもの
 
-`OFFICIAL.md` の最終突き合わせ(2026-08-09)以降に出た、あるいはそこに載っていない公式の事実。取り込むなら `OFFICIAL.md` の「この文書を編集するとき」の手順に従う。
+`OFFICIAL.md` の最終突き合わせ(2026-08-09)以降に出た、あるいはそこに載っていない公式の事実。2026-09-23 の突き合わせで、この節の項目はすべて `OFFICIAL.md` に取り込んだ。`rc` の類型と実測値はその後 Opus 5.5 で測り直されているので、数値は `OFFICIAL.md` の側を正とする。
 
 - **`claude plugin eval`**(v2.1.269+、[pe][x]): §8 の「eval を先に作る」「delta で判断する」を実装した公式ツール。3回ずつの実行、プラグイン無しのベースライン、`Δ`、grader の6種類、CI での閾値ゲート
 - **スキル一覧の予算はコンテキストの 1%**。溢れたら使用頻度の低いスキルから description が削られる。`skillListingBudgetFraction` / `skillListingMaxDescChars` / `skillOverrides: "name-only"` で調整する [cc]

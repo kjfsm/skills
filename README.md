@@ -65,7 +65,7 @@ Fetch https://raw.githubusercontent.com/kjfsm/skills/main/setup.md
 
 **`deprecated/` と `in-progress/` を配らないのは B だけである。** C は `--skill` で名前を挙げれば絞れるが、既定は全部入りで、上流で削除したスキルもコピー先には残り続ける。
 
-**サブエージェントと出力スタイルを運べるのも B だけである。** A と C でコメントの判定基準を効かせるには `/kjfsm-skills:setup-repo` を実行して `CLAUDE.md` 側に書かせる。
+**サブエージェントと出力スタイルを運べるのも B だけである。** A と C でコメントの判定基準を効かせるには `/kjfsm-skills:setup-repo` を実行して `AGENTS.md` 側に書かせる。
 
 ### 選択肢 A: ローカルのハーネススキルディレクトリへシンボリックリンクする
 
@@ -127,7 +127,7 @@ npx -y skills add kjfsm/skills
 | 層                     | 効くとき                 | 工程                                                                                                                                       |
 | ---------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | 規約・ドキュメント配置 | 毎セッション             | `/kjfsm-skills:setup-skills` — イシュートラッカー、トリアージラベル、ドメインドキュメントの配置、検証ゲート、応答と記述の規約              |
-| パス別ルール           | その glob を編集するとき | `/kjfsm-skills:setup-rules` — `paths:` を持つ rule を `.claude/rules/` へ、絶対ルールを `CLAUDE.md` へ                                     |
+| パス別ルール           | その glob を編集するとき | `/kjfsm-skills:setup-rules` — `paths:` を持つ rule を `.claude/rules/` へ、絶対ルールを `AGENTS.md` へ                                     |
 | CI                     | push / PR のとき         | `/kjfsm-skills:setup-ci` — 記録された検証ゲートを GitHub Actions で回す                                                                    |
 | 弾く機構               | 該当する操作のたび       | `/kjfsm-skills:setup-hooks` — 散文では守られないものを、効く範囲の広い層から順に(`permissions.deny` / 検査スクリプト / フック)決定的に弾く |
 
@@ -189,7 +189,7 @@ npx -y skills add kjfsm/skills
 
 - **[ask-kjfsm](./skills/kjfsm-skills/engineering/ask-kjfsm/SKILL.md)** — どのスキルやフローが自分の状況に合うかを尋ねる。このリポジトリのスキルを案内するルーター。
 - **[setup-repo](./skills/kjfsm-skills/engineering/setup-repo/SKILL.md)** — setup 系4工程(規約とドキュメント配置・パス別ルール・CI・フック)の入口。順序と依存はこのスキルが持つ。再実行すると現況を読み、足りない工程と**ずれた箇所だけ**を当てる。
-- **[tend-memory-files](./skills/kjfsm-skills/engineering/tend-memory-files/SKILL.md)** — セッション開始時にロードされる指示ファイル(`CLAUDE.md`、`.claude/rules/`)を新規に書く、または監査してトリムする。行数の目安に収め、具体的で矛盾のない指示だけを残す。
+- **[tend-memory-files](./skills/kjfsm-skills/engineering/tend-memory-files/SKILL.md)** — セッション開始時にロードされる指示ファイル(`AGENTS.md` とそれを取り込む `CLAUDE.md`、`.claude/rules/`)を新規に書く、または監査してトリムする。行数の目安に収め、具体的で矛盾のない指示だけを残す。
 - **[implement-and-review](./skills/kjfsm-skills/engineering/implement-and-review/SKILL.md)** — スペックやチケットの集合が記述する作業を、本家の `/mattpocock-skills:implement` でビルドしてもらってから締める。着手前に既定ブランチへ追いつき、打つ行(`/mattpocock-skills:code-review` とコミットを止める一文付き)を示して止まり、ビルドが済んだら `/kjfsm-skills:verification-loop` でクリーンランを取り、`/kjfsm-skills:prune-comments` と `/kjfsm-skills:two-axis-review` を通してから PR を出す。
 - **[squash-d1-migrations](./skills/kjfsm-skills/engineering/squash-d1-migrations/SKILL.md)** — 積み上がった D1 のマイグレーションを1本に畳む。合格条件はファイルが減ったことではなく、空の DB に適用した結果が旧チェーンと一致すること。`d1_migrations` は名前を記録しているので、各環境と突き合わせるまでが作業である。
 

@@ -94,7 +94,7 @@ scripts/check-invariants.sh
 
 `plugin.json` の `skills` 配列は、既定の `skills/` スキャンに **追加** されるのが原則で、`marketplace.json` の `source` がマーケットプレイスのルート(`"./"`)に解決される場合に限り **置き換え** になる。昇格していないバケットがプラグインに載らないのはこの例外に乗っているからなので、`source` を変えるときは `deprecated/` や `in-progress/` が出荷対象に混ざらないか確認する。
 
-`version` を両方のマニフェストから省く理由は `CLAUDE.md` が持つ。片方にでも書くと、その文字列が固定のキャッシュキーになって更新が止まる。
+`version` を両方のマニフェストから省く理由は `AGENTS.md` が持つ。片方にでも書くと、その文字列が固定のキャッシュキーになって更新が止まる。
 
 昇格していないバケットのスキルは、プラグインではなく利用側リポジトリでの `npx skills` による実体配置で配る(`skills-lock.json` に載り、`npx skills update` で追随できる)。`kjfsm-emdash/` がこの経路の主な利用者である。
 

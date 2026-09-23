@@ -39,7 +39,7 @@ disable-model-invocation: true
 ## コードベースの健全性
 
 - **`/mattpocock-skills:improve-codebase-architecture`** — 手が空いたらいつでも実行し、エージェントが操作しやすいコードベースを保つ。**深化の機会** を洗い出し、1つ選ぶと _アイデアが生まれる_ ので、`/mattpocock-skills:grill-with-docs` でメインフローに持ち込む。これは候補を見つける調査であり、選んだものを設計する作業台が **`/mattpocock-skills:codebase-design`** である。
-- **`/kjfsm-skills:tend-memory-files`** — セッション開始時にロードされる指示ファイル(`CLAUDE.md`、`CLAUDE.local.md`、`.claude/rules/`)を新規に書く、あるいは肥大化・陳腐化・矛盾を疑うたびに監査してトリムする。
+- **`/kjfsm-skills:tend-memory-files`** — セッション開始時にロードされる指示ファイル(`AGENTS.md`、`CLAUDE.md`、`CLAUDE.local.md`、`.claude/rules/`)を新規に書く、あるいは肥大化・陳腐化・矛盾を疑うたびに監査してトリムする。
 
 ## スタンドアロン
 
@@ -63,4 +63,4 @@ disable-model-invocation: true
 - **`/kjfsm-skills:setup-ci`**(push / PR)— そのゲートを CI で回す。手元で通しても記録は残らない
 - **`/kjfsm-skills:setup-hooks`**(該当する操作のたび)— 散文では守られないものを、効く範囲の広い層から順に決定的に弾く。**先回りしない**
 
-この4層が敷く規約は `CLAUDE.md` / `AGENTS.md` にも載るが、重複ではない。**出力スタイルはサブエージェントに届かない** — `/kjfsm-skills:two-axis-review` や `/mattpocock-skills:improve-codebase-architecture` が投げる子コンテキストに規約を効かせるのは、こちら側だからである。
+この4層が敷く規約は本体の `AGENTS.md` にも載るが、重複ではない。**出力スタイルは(fork を除く)サブエージェントに届かない** — `/kjfsm-skills:two-axis-review` や `/mattpocock-skills:improve-codebase-architecture` が投げる子コンテキストに規約を効かせるのは、こちら側だからである。

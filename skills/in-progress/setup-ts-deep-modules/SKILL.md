@@ -92,9 +92,9 @@ pnpm なら、入れる前に `pnpm up --latest` で既存の依存を最新に�
 
 **パッケージフォルダ内**(`<packages-root>/README.md`)に、それが統括するパッケージの隣に `README.md` を書く。内容は: `src/packages/<name>/` のレイアウト(ルートにエントリーポイント、実装は `lib/`、テストは `tests/`)、「パッケージのエントリーポイント(ルートファイル)を通じてのみインポートする」こと、そして `lint:boundaries` の実行方法。**バレルファイルは明示的に非推奨とする** — サブツリー全体を1つの index で再エクスポートする代わりに、複数の小さなエントリーポイントを公開する。コピー用スニペットと、4つのルールをそれぞれ1段落にまとめた内容に留める。
 
-その後、リポジトリのエージェント向け指示ファイル — 存在すれば `CLAUDE.md`、なければ `AGENTS.md`(どちらも存在しなければ `AGENTS.md` を作成)— から、そこへの**コンテキストポインタ**を追加する。1行で十分である。例: `Packages are deep modules — see [src/packages/README.md](./src/packages/README.md) before adding or importing one.` これによって、エージェントが境界ルールにつまずくのではなく、それを発見できるようになる。
+その後、リポジトリのエージェント向け指示ファイルの本体 — `AGENTS.md`(`CLAUDE.md` しか無ければそちら。どちらも無ければ `AGENTS.md` を作り、`CLAUDE.md` を `@AGENTS.md` の1行で作る)— から、そこへの**コンテキストポインタ**を追加する。1行で十分である。例: `Packages are deep modules — see [src/packages/README.md](./src/packages/README.md) before adding or importing one.` これによって、エージェントが境界ルールにつまずくのではなく、それを発見できるようになる。
 
-**完了の条件:** `<packages-root>/README.md` が存在し、バレルを非推奨としており、リポジトリの `CLAUDE.md`/`AGENTS.md` からそこへリンクされていること。
+**完了の条件:** `<packages-root>/README.md` が存在し、バレルを非推奨としており、リポジトリの本体(`AGENTS.md`)からそこへリンクされていること。
 
 ## 補足
 

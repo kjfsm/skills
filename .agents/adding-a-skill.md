@@ -1,6 +1,6 @@
 # このリポジトリにスキルを足す
 
-配線 — マニフェストへの登録、README への掲載、`agents/openai.yaml` の有無、2つのハーネスの呼び出し方式の一致、frontmatter の上限、参照ファイルの実在と階層 — は `scripts/check-invariants.sh` が機械的に検査する。**走らせて落ちた項目が、まだ済んでいない配線である。** 覚えておく必要はない。
+一覧 — トップと各バケットの README、`plugin.json` の `skills` 配列 — は `scripts/render-catalog.py` が frontmatter から書き出す。項目の文面は `description` そのもので、別に要約を書く場所は無い。残りの配線 — `agents/openai.yaml` の有無、2つのハーネスの呼び出し方式の一致、frontmatter の上限、参照ファイルの実在と階層 — は `scripts/check-invariants.sh` が機械的に検査する。**走らせて落ちた項目が、まだ済んでいない配線である。** 覚えておく必要はない。
 
 この文書が扱うのは、検査が見られない2つ: 走らせる前に下す **判断** と、検査に出ない **後始末** である。
 
@@ -58,10 +58,11 @@ policy:
 ## 4. 検査を走らせる
 
 ```
+scripts/render-catalog.py
 scripts/check-invariants.sh
 ```
 
-落ちた項目を潰す。README への追加も `plugin.json` への登録も、ここに出てくる。**クリーンになるまで、配線は済んでいない。**
+落ちた項目を潰す。**クリーンになるまで、配線は済んでいない。**
 
 `claude plugin validate .` も走らせてよいが、2点で当てにならない。リポジトリルートを渡すと `marketplace.json` しか検証せず、`plugin.json` の壊れたパスを見逃す。そして `--strict` は `version` 不在を error に格上げする — このリポジトリではそれが意図した状態である(→ `CLAUDE.md`)。
 
@@ -102,7 +103,7 @@ scripts/check-invariants.sh
 
 ディレクトリ名と frontmatter の `name` は一致していなければならない(仕様の要求であり、検査もする)。両方を同時に変える。
 
-そのうえで、名前を書いている場所すべてを追う: バケットの `README.md`、トップレベルの `README.md`、`plugin.json`、`ask-kjfsm`、そして**他のスキルの本文にある `/旧名` の文中呼び出し**。最後の1つは検査に出ない — `grep -rn '/旧名' skills/` で拾う。
+一覧は `scripts/render-catalog.py` を走らせ直せば追随する。残りは手で追う: `ask-kjfsm` と、**他のスキルの本文にある `/旧名` の文中呼び出し**。どちらも検査に出ない — `grep -rn '旧名' skills/ agents/` で拾う。
 
 改名後は `link-skills.sh` を走らせ、古い名前のシンボリックリンクを手で消す(スクリプトは張り直すだけで、消えた名前の後始末はしない)。リポジトリ側の `.claude/skills/` は `scripts/sync-project-skills.sh` が古い名前ごと張り直すので手当ては要らず、忘れれば検査 14. が落ちる。
 
@@ -110,7 +111,7 @@ scripts/check-invariants.sh
 
 `in-progress/` から `engineering/` か `productivity/` へ移す。
 
-ディレクトリを移動したら、あとは検査が要求してくる — トップレベル `README.md` への追加と `plugin.json` の `skills` 配列への登録。バケットの `README.md` は移動元から消し、移動先へ足す。昇格済みバケットとトップレベルの README は **ユーザー呼び出し型 / モデル呼び出し型** でグループ分けするので、正しい側へ入れる(昇格していないバケットの README はフラットなリストを使う)。掲載されているかは検査 4./5. が弾くが、**どちらのグループに入っているかは弾かない。**
+ディレクトリを移動したら `scripts/render-catalog.py` を走らせる — 両方のバケットの README、トップレベルの README、`plugin.json` が書き換わる。ユーザー呼び出し型 / モデル呼び出し型のグループ分けも frontmatter から決まる。
 
 `scripts/sync-project-skills.sh` を走らせ直す — 昇格したスキルはプラグインが配るようになるので、`.claude/skills/` のリンクは外れる(忘れれば検査 14. が落とす)。
 
@@ -120,4 +121,4 @@ scripts/check-invariants.sh
 
 ディレクトリごと削除し、[`retired-skills.md`](./retired-skills.md) に **なぜ退役したかと、代わりに使うもの** を1行で書く — 書かないと、同じものをもう一度作る。本文は git 履歴が持つ。`scripts/sync-project-skills.sh` を走らせ直せば `.claude/skills/` からも消える。`scripts/link-skills.sh` は消えた名前の後始末をしないので、ローカルのリンクは手で消す。
 
-`plugin.json` とトップレベル `README.md` からは消える必要がある(検査が要求する)。`ask-kjfsm` からも消す。他のスキルがその名前を文中呼び出ししていないか `grep` で確かめる — 呼ばれたまま退役したスキルは、実行時に静かに何も起きない。
+一覧は `scripts/render-catalog.py` で追随させる。`ask-kjfsm` からは手で消す。他のスキルがその名前を文中呼び出ししていないか `grep` で確かめる — 呼ばれたまま退役したスキルは、実行時に静かに何も起きない。

@@ -32,14 +32,6 @@ field() {
   frontmatter "$1" | sed -n "s/^$2:[[:space:]]*//p" | head -1 | sed 's/^"\(.*\)"$/\1/'
 }
 
-listed_in_plugin() {
-  grep -q "\"\./$1\"" "$PLUGIN"
-}
-
-listed_in_plugin_anywhere() {
-  grep -q "\"\./skills/[a-z/-]*/$1\"" "$PLUGIN"
-}
-
 charlen() {
   # charlen <文字列> — UTF-8 の文字数。継続バイトを落とすと1文字1バイトになるので、
   # シェルのロケールが何であれ数が合う。このリポジトリの description は日本語なので、
@@ -136,20 +128,6 @@ while IFS= read -r skill_md; do
       err "$name: disable-model-invocation=$claude_user_invoked but openai.yaml allow_implicit_invocation:false=$codex_user_invoked"
   fi
 
-  # 4. promoted skills ship; unpromoted skills do not
-  case " $PROMOTED_BUCKETS " in
-    *" $bucket "*)
-      listed_in_plugin "$dir" || err "$name is in $bucket/ but missing from $PLUGIN"
-      grep -q "](\./$bucket_dir/$name/SKILL\.md)" README.md ||
-        err "$name is in $bucket/ but missing from README.md"
-      ;;
-    *)
-      ! listed_in_plugin_anywhere "$name" || err "$name is in $bucket/ (not promoted) but listed in $PLUGIN"
-      ! grep -q "](\./$bucket_dir/$name/SKILL\.md)" README.md ||
-        err "$name is in $bucket/ (not promoted) but listed in README.md"
-      ;;
-  esac
-
   # 4b. バケット単位のプラグインは、そのバケットのスキルを1本ずつシンボリックリンクで
   #     持つ。リンク先がマーケットプレイスの中なら、インストール時に実体がコピーされる。
   case " $PLUGIN_BUCKETS " in
@@ -159,10 +137,6 @@ while IFS= read -r skill_md; do
         err "$name is in $bucket/ but $side_link is not a symlink to ../../../skills/$bucket/$name"
       ;;
   esac
-
-  # 5. every bucket README lists every skill in its bucket
-  grep -q "](\./$name/SKILL\.md)" "$bucket_dir/README.md" ||
-    err "$name is missing from $bucket_dir/README.md"
 
   # 6. skill names are unique across buckets — link-skills.sh flattens them
   case " $seen_names " in
@@ -258,9 +232,11 @@ while IFS= read -r skill_md; do
   done
 done < <(find skills -name SKILL.md -not -path '*/node_modules/*' | sort)
 
-while IFS= read -r path; do
-  [ -f "$path/SKILL.md" ] || err "$PLUGIN lists $path, which has no SKILL.md"
-done < <(sed -n 's|^[[:space:]]*"\(\./skills/[^"]*\)",\{0,1\}$|\1|p' "$PLUGIN")
+# 4. 一覧(トップと各バケットの README、plugin.json の skills 配列)が frontmatter から
+#    生成したものと一致する。昇格済みだけが出荷され、昇格していないものが載らないのも
+#    これで決まる。
+scripts/render-catalog.py --check ||
+  err "the skill catalog is out of date; run scripts/render-catalog.py"
 
 for bucket in $PLUGIN_BUCKETS; do
   side="plugins/$bucket"

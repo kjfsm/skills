@@ -185,48 +185,56 @@ npx -y skills add kjfsm/skills
 
 日々のコード作業のためのスキル。
 
+<!-- catalog:begin kjfsm-skills/engineering -->
+
 **ユーザー呼び出し型**
 
 - **[ask-kjfsm](./skills/kjfsm-skills/engineering/ask-kjfsm/SKILL.md)** — どのスキルやフローが自分の状況に合うかを尋ねる。このリポジトリのスキルを案内するルーター。
-- **[setup-repo](./skills/kjfsm-skills/engineering/setup-repo/SKILL.md)** — setup 系4工程(規約とドキュメント配置・パス別ルール・CI・フック)の入口。順序と依存はこのスキルが持つ。再実行すると現況を読み、足りない工程と**ずれた箇所だけ**を当てる。
-- **[tend-memory-files](./skills/kjfsm-skills/engineering/tend-memory-files/SKILL.md)** — セッション開始時にロードされる指示ファイル(`AGENTS.md` とそれを取り込む `CLAUDE.md`、`.claude/rules/`)を新規に書く、または監査してトリムする。行数の目安に収め、具体的で矛盾のない指示だけを残す。
-- **[implement-and-review](./skills/kjfsm-skills/engineering/implement-and-review/SKILL.md)** — スペックやチケットの集合が記述する作業を、本家の `/mattpocock-skills:implement` でビルドしてもらってから締める。着手前に既定ブランチへ追いつき、打つ行(`/mattpocock-skills:code-review` とコミットを止める一文付き)を示して止まり、ビルドが済んだら `/kjfsm-skills:verification-loop` でクリーンランを取り、`/kjfsm-skills:prune-comments` と `/kjfsm-skills:two-axis-review` を通してから PR を出す。
-- **[squash-d1-migrations](./skills/kjfsm-skills/engineering/squash-d1-migrations/SKILL.md)** — 積み上がった D1 のマイグレーションを1本に畳む。合格条件はファイルが減ったことではなく、空の DB に適用した結果が旧チェーンと一致すること。`d1_migrations` は名前を記録しているので、各環境と突き合わせるまでが作業である。
+- **[implement-and-review](./skills/kjfsm-skills/engineering/implement-and-review/SKILL.md)** — 本家の /mattpocock-skills:implement でのビルドをユーザーに打ってもらい、そのあとの検証・レビュー・PR までを進める。
+- **[setup-repo](./skills/kjfsm-skills/engineering/setup-repo/SKILL.md)** — このリポジトリのエージェント向け設定を一括で敷く — 規約とドキュメント配置、パス別ルール、CI、弾く機構。再実行すると現況を読み、足りない工程とずれた箇所だけを当てる。
+- **[squash-d1-migrations](./skills/kjfsm-skills/engineering/squash-d1-migrations/SKILL.md)** — 積み上がった D1 のマイグレーションを1本に畳み、適用済みの各環境と突き合わせる。
+- **[tend-memory-files](./skills/kjfsm-skills/engineering/tend-memory-files/SKILL.md)** — AGENTS.md・CLAUDE.md と .claude/rules/ を新規に書く、または既存のものを監査してトリムする — 行数の目安に収め、具体的で矛盾のない指示だけを残す。
 
 **モデル呼び出し型**
 
-- **[create-tests](./skills/kjfsm-skills/engineering/create-tests/SKILL.md)** — Cloudflare Workers のプロジェクトで、テストが1本も無いところから作り始める。何が壊れると困るかから始め、node と workerd の2プロジェクトに分けて、依存の内側から積む。
-- **[rebuild-tests](./skills/kjfsm-skills/engineering/rebuild-tests/SKILL.md)** — Cloudflare Workers のテストスイートを立て直す。vitest.config の複雑さを `vi.mock` の本数の問題として読み替え、消す前に棚卸しし、履歴から復元し、書いたテストは壊して実効性を確かめる。
-- **[prune-tests](./skills/kjfsm-skills/engineering/prune-tests/SKILL.md)** — 既存のテストから削除・統合できるものを洗い出す。「消すと、どんな現実的な不具合を見逃すか」をコストと比べ、件数とカバレッジは目的にしない。判定はサブエージェントがスライスごとに下し、迷ったものはコードを壊して決める。
-- **[migrate-d1](./skills/kjfsm-skills/engineering/migrate-d1/SKILL.md)** — Cloudflare D1 のスキーマを移行する。生成されたテーブル再構築の SQL は D1 では子テーブルを空にするので、消える側を退避して戻す形に書き直し、当てる前に復元点を控える。
-- **[d1-bound-parameters](./skills/kjfsm-skills/engineering/d1-bound-parameters/SKILL.md)** — D1 の bound parameter は1文100個まで。元データが DB にあるならサブクエリや `INSERT ... SELECT` で SQL の中に閉じ、JS にしか無い値だけをテーブルの列数から分割して1つの `db.batch()` に入れる。
-- **[delegation](./skills/kjfsm-skills/engineering/delegation/SKILL.md)** — 作業をどこで走らせるかの共有された語彙: 出力が大量で後から読み返さない作業をサブエージェントの子コンテキストへ押し出し、探索や事実確認は下位モデルに、設計判断は上位モデルに回す。
-- **[verification-loop](./skills/kjfsm-skills/engineering/verification-loop/SKILL.md)** — 変更が本当に動くことを **クリーンラン** で確かめる: 記録された検証ゲートを中断なく1回で通し、そのうえで変更した経路を実際に駆動して観測の証拠を残す。
-- **[two-axis-review](./skills/kjfsm-skills/engineering/two-axis-review/SKILL.md)** — 固定した基点からの差分に対する二軸レビュー: **Standards**(リポジトリのコーディング標準に従っているか、加えて Fowler のコードスメルの基準を満たしているか)と **Spec**(元になったイシュー/PRD を忠実に実装しているか)。互いを汚染しないよう並列のサブエージェントとして実行する。
-- **[prune-comments](./skills/kjfsm-skills/engineering/prune-comments/SKILL.md)** — 書かれてしまったコメントを1パスで削る。順序の決まった6段(言い直し・経緯・動く的への参照・膨らんだ理由づけ・陳腐化・本物の制約)を汚れていないコンテキストで当て、迷ったら Why を残し How を消す非対称の基準で倒す。
-- **[ai-efficiency](./skills/kjfsm-skills/engineering/ai-efficiency/SKILL.md)** — 大量のファイル移動・リネーム・import 付け替えを、1ファイルずつ読み書きせずシェルで機械的に処理する: `git mv` で履歴を保ち、相対 import を絶対へ正規化してから一括置換し、抜けの検出は typecheck に委ねる。
-- **[react-router-route-module](./skills/kjfsm-skills/engineering/react-router-route-module/SKILL.md)** — React Router（framework mode）の route module に何をどの export へ置くかの規律: 認可の強制点は `middleware`（loader と action の両方の手前を通る）、レイアウトが持つ値は `<Outlet context>` で配る。
-- **[react-router-worker-tests](./skills/kjfsm-skills/engineering/react-router-worker-tests/SKILL.md)** — SSR フレームワークを `main` に載せた Cloudflare Worker のテストを組む。`applyD1Migrations` が `main` を立ち上げる事実から層を3つに割り、Worker を HTTP で叩く側は `createTestHarness` に渡す。
-- **[drizzle-generate-non-interactive](./skills/kjfsm-skills/engineering/drizzle-generate-non-interactive/SKILL.md)** — TTY の無いところで `drizzle-kit generate` を完走させる。止まるのは rename の判定だけなので、その1問だけ pty 越しに答えを渡す。既定でハイライトされているのはデータが消える側である。
-- **[partyserver-on-durable-objects](./skills/kjfsm-skills/engineering/partyserver-on-durable-objects/SKILL.md)** — partyserver を Durable Object に載せるときの、公式に載らない4点。stub の取り方でリクエスト数が2倍になること、`onStart` が失敗しても DO はリセットされないこと、ハイバネーションで消えるもの、上限。
-- **[dev-bypass-sign-in](./skills/kjfsm-skills/engineering/dev-bypass-sign-in/SKILL.md)** — 叩くだけでサインイン済みになる開発・E2E 用の入口を作る。better-auth なら `testUtils` の `test.login({ userId })` で座り、サインイン方式ごとの書き分けを消す。戸はビルド時に畳んで成果物を grep で検査する。
-- **[where-to-write-what](./skills/kjfsm-skills/engineering/where-to-write-what/SKILL.md)** — コード・テスト・コメント・JSDoc・コミットメッセージ・PR 本文・ADR・docs のどこに何を書くかのルーティング規律: コードには How、テストには What、コミットログには Why、コメントには Why not。
-- **[setup-rules](./skills/kjfsm-skills/engineering/setup-rules/SKILL.md)** — このリポジトリのルールを2層に敷く: `paths:` を持つ rule はその glob を編集するときだけ注入され、スタックに依存しない絶対ルールと追記先の優先順位は毎セッション読まれる側に置く。`/kjfsm-skills:setup-skills` から引き継がれる。
-- **[setup-skills](./skills/kjfsm-skills/engineering/setup-skills/SKILL.md)** — このリポジトリをエンジニアリング系スキル向けに設定する(イシュートラッカー、トリアージラベル、ドメインドキュメントの配置、検証ゲート、応答と記述の規約)。`/kjfsm-skills:setup-repo` の工程 A。
-- **[setup-ci](./skills/kjfsm-skills/engineering/setup-ci/SKILL.md)** — 記録された検証ゲートを CI に敷き、ローカルの規律を機構に変える。CI に載らない行(観測・シークレットを要る経路)を分け、必須チェックは使えるリポジトリでだけ選択肢として伝える。
-- **[setup-hooks](./skills/kjfsm-skills/engineering/setup-hooks/SKILL.md)** — 散文では守られないルールを Claude Code のフックへ落として決定的に弾く。落とすのは3条件(すでに破られた・破られても気づけない・入力だけで機械的に判定できる)を満たすものだけ。
-- **[setup-cf-app](./skills/kjfsm-skills/engineering/setup-cf-app/SKILL.md)** — 新規の Cloudflare Workers フルスタックアプリを、いつも使う標準ライブラリ構成で立ち上げる。バージョンやフラグは固定せず、各ツールの公式手順で都度組む。
-- **[setup-cf-access](./skills/kjfsm-skills/engineering/setup-cf-access/SKILL.md)** — Cloudflare Access を Worker・ホスト名・パスに3層ルール(人間 / 機械 / 自前認証パス)で掛ける。書き込み権限を先に確かめ、不足していれば具体名で指示して止まる。
-- **[setup-playwright](./skills/kjfsm-skills/engineering/setup-playwright/SKILL.md)** — Playwright の E2E を入れ、ブラウザを3つの層(VM のプロビジョニング・プロジェクトの用意・CI)のどこで用意するか決める。版の正は lockfile 側に置き、`executablePath` で実体を名指しする逃げ道を作らない。
+- **[ai-efficiency](./skills/kjfsm-skills/engineering/ai-efficiency/SKILL.md)** — 大量のファイル移動・リネーム・import 付け替えを、1ファイルずつ読み書きせずシェルで機械的に処理する戦略。「大量リネーム」「一括置換」「ディレクトリ再編」「import パスの一括付け替え」などで参照する。
+- **[create-tests](./skills/kjfsm-skills/engineering/create-tests/SKILL.md)** — Cloudflare Workers のプロジェクトで、テストが1本も無いところからテストを作り始めるときの規律。Workers / D1 / Durable Objects / Queues にテストを入れたいとき、@cloudflare/vitest-plugin をどう設定するか決めたいとき、何からテストすればいいか分からないときに使う。
+- **[d1-bound-parameters](./skills/kjfsm-skills/engineering/d1-bound-parameters/SKILL.md)** — Cloudflare D1 へ多数の値を渡すクエリの規律 — bound parameter は1文あたり100個まで。`D1_ERROR: too many SQL variables` が出たとき、D1 へ大量の行を INSERT するとき、`inArray` / `IN (...)` に長い ID の列を渡すとき、`db.batch()` で分割するときに使う。
+- **[delegation](./skills/kjfsm-skills/engineering/delegation/SKILL.md)** — 作業をサブエージェントの子コンテキストへ押し出し、タスクに見合ったモデル階層に回す判断。サブエージェントを起動するとき、大量の出力を伴う作業を始めるとき、他のスキルが委譲の語彙を必要とするときに使う。
+- **[dev-bypass-sign-in](./skills/kjfsm-skills/engineering/dev-bypass-sign-in/SKILL.md)** — 叩くだけでサインイン済みになる開発・E2E 用の入口(dev bypass)を作る。ログインの要る画面を E2E やエージェントから駆動したいとき、dev サーバーでソーシャルログインやパスワード登録を踏まずに座りたいとき、better-auth の `testUtils` の使いどころを決めるとき、既存の bypass の戸が本番の成果物に残っていないか確かめたいとき、他のスキルが認証済みのセッションを必要とするときに使う。
+- **[drizzle-generate-non-interactive](./skills/kjfsm-skills/engineering/drizzle-generate-non-interactive/SKILL.md)** — TTY の無いところで `drizzle-kit generate` を完走させる。エージェント・フック・CI から generate を回すとき、`Interactive prompts require a TTY terminal` で落ちたとき、`missing_hints` で exit 2 したとき、rename を含むスキーマ変更のマイグレーションを生成するときに使う。
+- **[migrate-d1](./skills/kjfsm-skills/engineering/migrate-d1/SKILL.md)** — Cloudflare D1 のスキーマを変えるときの規律。drizzle-kit などが `PRAGMA foreign_keys=OFF` と `DROP TABLE` を含むマイグレーションを生成したとき、列を NOT NULL にしたいとき、CHECK 制約や複合ユニークを足したいとき、本番に `--remote` でマイグレーションを当てる前に使う。**D1 では `PRAGMA foreign_keys=OFF` が効かないので、生成物をそのまま流すと参照している側のテーブルが空になる。**
+- **[partyserver-on-durable-objects](./skills/kjfsm-skills/engineering/partyserver-on-durable-objects/SKILL.md)** — partyserver(`Server`)を Durable Object の上に載せるときの、公式ドキュメントに載っていない挙動。stub の取り方でリクエスト数が2倍になるとき、`onStart` に初期化や移行を置くとき、WebSocket のハイバネーションと keepalive を組むとき、RPC メソッドを足すか `onRequest` のままにするか決めるときに使う。素の Durable Objects の API は公式の `durable-objects` スキルが持つ。
+- **[prune-comments](./skills/kjfsm-skills/engineering/prune-comments/SKILL.md)** — 書かれてしまったコメントを1パスで削る。コミットや PR を出す直前、コメントが冗長・AI が書いたように見える・整理したいとき、他のスキルがコメントの掃除を必要とするときに使う。順序の決まった6段のルールと非対称の残す基準を当て、実行ごとのばらつきを潰す。
+- **[prune-tests](./skills/kjfsm-skills/engineering/prune-tests/SKILL.md)** — 既存のテストを全部読み、削除・統合できるものを「消すと、どんな現実的な不具合を見逃すか」で洗い出す。テストが多すぎる・遅い・振る舞いを変えない変更のたびに大量に落ちるとき、テストを整理したい・減らしたいとき、他のスキルが削れるテストの判定を必要とするときに使う。
+- **[react-router-route-module](./skills/kjfsm-skills/engineering/react-router-route-module/SKILL.md)** — React Router（framework mode）の route module に何をどの export へ置くかの規律。認可ガードを足すとき、loader と action に同じチェックを書いているとき、レイアウトが持つ値を配下のコンポーネントへ渡したいとき、`useRouteLoaderData` と `<Outlet context>` のどちらを使うか迷ったとき、Cloudflare Workers の `env` を loader / action へ渡すときに使う。
+- **[react-router-worker-tests](./skills/kjfsm-skills/engineering/react-router-worker-tests/SKILL.md)** — SSR フレームワーク(React Router など)を `main` に載せた Cloudflare Worker のテストを組む規律。テストが1ファイルあたり十数秒かかるとき、`applyD1Migrations` が遅いとき、Worker を HTTP から叩く層を `createTestHarness` で作るとき、`main` に何を指すか決めるとき、SSR を載せた構成でテスト層を分け直すときに使う。
+- **[rebuild-tests](./skills/kjfsm-skills/engineering/rebuild-tests/SKILL.md)** — Cloudflare Workers のプロジェクトで、既存のテストスイートを立て直すときの規律。vitest.config が複雑すぎる、テストが遅い・OOM する、vi.mock だらけで信用できない、@cloudflare/vitest-plugin（旧 @cloudflare/vitest-pool-workers）を上げたら壊れた、テストを消して作り直したい、というときに使う。
+- **[setup-cf-access](./skills/kjfsm-skills/engineering/setup-cf-access/SKILL.md)** — Cloudflare Access を Worker・ホスト名・パスに、いつもの3層ルール(人間=指定メール / 機械=サービストークン / アプリ側に認証があるパス=bypass)で掛ける。「Access を掛ける」「認証を必要にする」「workers.dev が素通り」「Zero Trust のアプリを作る」で参照する。
+- **[setup-cf-app](./skills/kjfsm-skills/engineering/setup-cf-app/SKILL.md)** — 新規の Cloudflare Workers フルスタックアプリを、いつも使う標準ライブラリ構成で立ち上げる。「環境構築」「新規プロジェクト」「新しいアプリを作る」「セットアップ」「スキャフォールド」などで参照する。
+- **[setup-ci](./skills/kjfsm-skills/engineering/setup-ci/SKILL.md)** — 記録された検証ゲートを CI に敷き、ローカルの規律を機構に変える。ゲートを強制する仕組みがまだ無いとき（CI が無い、あるいは誰も走らせていない）、CI が `docs/agents/verification.md` とずれてきたとき、`/kjfsm-skills:setup-repo` の工程 C として使う。
+- **[setup-hooks](./skills/kjfsm-skills/engineering/setup-hooks/SKILL.md)** — 散文のルールでは守られないものを機構へ落とし、決定的に弾く — `permissions.deny`、git hook と CI が同じ述語を呼ぶ検査スクリプト、Claude Code のフックの3層。書いてある規約が実際には破られ続けているとき（生成物の手編集、シークレットのコミット）、フックにだけ存在する検査が CI やクローンをすり抜けているとき、セッション開始時に環境を用意させたいとき、`/kjfsm-skills:setup-repo` の工程 D として使う。
+- **[setup-playwright](./skills/kjfsm-skills/engineering/setup-playwright/SKILL.md)** — Playwright の E2E を入れ、ブラウザをどの層で用意するか決める。E2E をこれから入れるとき、`Executable doesn't exist` や `Missing system dependencies` が出たとき、コンテナやクラウドのサンドボックスに置いてあるブラウザと Playwright が要求するビルド番号がずれたとき、CI でだけブラウザの取得に失敗するとき、`playwright install` をセットアップスクリプト・SessionStart フック・CI のどこに置くか決めるときに使う。
+- **[setup-rules](./skills/kjfsm-skills/engineering/setup-rules/SKILL.md)** — このリポジトリのルールを `.claude/rules/` と `AGENTS.md` の2層に敷く — パスに応じて自動注入されるパス別ルールと、全セッションに効く絶対ルール。Claude Code を使うリポジトリを初めて設定するとき、`.claude/rules/` がまだ無いとき、同じ指摘を2回以上受けてルールに落としたいとき、`/kjfsm-skills:setup-repo` の工程 B として使う。
+- **[setup-skills](./skills/kjfsm-skills/engineering/setup-skills/SKILL.md)** — このリポジトリをエンジニアリング系スキル向けに設定する — イシュートラッカー、トリアージラベルの語彙、ドメインドキュメントの配置、検証ゲート、応答と記述の規約。`docs/agents/` がまだ無いとき、他のエンジニアリング系スキルを初めて使う前、`/kjfsm-skills:setup-repo` の工程 A として使う。
+- **[two-axis-review](./skills/kjfsm-skills/engineering/two-axis-review/SKILL.md)** — 固定した基点(コミット、ブランチ、タグ、マージベース)からの変更を二軸でレビューする — Standards(このリポジトリの明文化されたコーディング標準)と Spec(元のイシュー/PRD)。両方を並列サブエージェントで実行し、結果を並べて報告する。ユーザーがブランチ・PR・進行中の変更をレビューしたいとき、「X 以降をレビューして」と求めたとき、他のスキルが差分のレビューを必要とするときに使う。
+- **[verification-loop](./skills/kjfsm-skills/engineering/verification-loop/SKILL.md)** — 変更が本当に動くことを、記録された検証ゲートのクリーンラン — 型チェック、lint、テスト、ビルド、そして実際に動かしての観測 — で確かめる。ユーザーが動作確認や検証を求めたとき、変更を完了と宣言する前(コミットや PR を出す直前)、他のスキルが作業の検証を必要とするときに使う。
+- **[where-to-write-what](./skills/kjfsm-skills/engineering/where-to-write-what/SKILL.md)** — コード・テスト・コメント・JSDoc・コミットメッセージ・PR 本文・ADR・docs のどこに何を書くかを決めるルーティング規律 — コードには How、テストには What、コミットログには Why、コメントには Why not。コメントを書くか消すか判断するとき、JSDoc に何を載せるか決めるとき、コミットメッセージや PR 本文を書くとき、README を足すか迷ったとき、実装の背景や設計判断をどこに残すか迷ったときに使う。
+
+<!-- catalog:end -->
 
 ### Productivity
 
 コードに限らない、一般的なワークフローツール。
 
+<!-- catalog:begin kjfsm-skills/productivity -->
+
 **モデル呼び出し型**
 
-- **[writing-great-skills](./skills/kjfsm-skills/productivity/writing-great-skills/SKILL.md)** — スキルを書く・直すための判断基準と、公式が定める仕様: 予測可能性・情報階層・段階的開示・先導語・失敗モードの語彙に、公式の数値上限と frontmatter の規則をまとめた `OFFICIAL.md` が付く。
-- **[sharpen-request](./skills/kjfsm-skills/productivity/sharpen-request/SKILL.md)** — 「〜を整理したい」「〜を改善したい」のような曖昧な依頼を、範囲・止まる地点・方向と強さ・対象の名指し・1項目ずつ判定できる問い・比べるコスト・目的にしないものを持った指示に研ぐ。指示を出して止まり、作業は合意してから始める。モデルが自分から呼んだときは、研ぐ前に使うかをユーザーに聞く。
+- **[sharpen-request](./skills/kjfsm-skills/productivity/sharpen-request/SKILL.md)** — 曖昧な改善・整理の依頼を、1項目ずつ判定できる問いと止まる地点を持った指示に研ぐ。「〜を整理したい」「〜を改善したい」のように、既にあるものを良くしたい依頼が何をもって良いかを言わずに来たとき、同じ指示を複数のリポジトリやセッションに配りたいときに使う。
+- **[writing-great-skills](./skills/kjfsm-skills/productivity/writing-great-skills/SKILL.md)** — スキルを書く・直すための判断基準と、公式が定める仕様。SKILL.md を新規に書くとき、既存のスキルを編集・分割・刈り込むとき、description のトリガーを調整するとき、name や description の文字数上限・frontmatter の書き方を確かめるとき、スキルが発火しない・実行ごとに動きがばらつく原因を診断するときに使う。
+
+<!-- catalog:end -->
 
 本家由来のスキル(`/mattpocock-skills:grill-me`、`/mattpocock-skills:grill-with-docs`、`/mattpocock-skills:tdd`、`/mattpocock-skills:diagnosing-bugs`、`/mattpocock-skills:to-spec`、`/mattpocock-skills:to-tickets`、`/mattpocock-skills:triage`、`/mattpocock-skills:wayfinder` ほか)は依存先の本家が配るので、ここには載らない。一覧は[本家の README](https://github.com/mattpocock/skills#readme) にある。
 

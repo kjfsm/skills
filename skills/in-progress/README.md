@@ -4,4 +4,8 @@
 
 本家に同名のスキルがあるものはここに置かない — 本家から入れる(→ [`.agents/retired-skills.md`](../../.agents/retired-skills.md))。
 
-いまは下書きが無い。
+<!-- catalog:begin -->
+
+(いまは無い)
+
+<!-- catalog:end -->

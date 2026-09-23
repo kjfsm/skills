@@ -63,7 +63,7 @@ gh release view @emdash-cms/cloudflare@<版> -R emdash-cms/emdash --json body -q
 
 - 項目は判定・対応・本番の3つで書く。**判定** は、作った直後のサイトで機械的に流せる grep かコマンドにする。
 - 足した項目が `blog-cloudflare` にも当たるかを判定し、冒頭の表を更新する(`git clone --depth 1 https://github.com/emdash-cms/templates` をスクラッチに置いて流す)。表の版と日付も、そのとき同期されている版に書き換える。
-- CHECKLIST.md は kjfsm/skills にあるので、サイトとは別の PR になる。
+- CHECKLIST.md の正本は kjfsm/skills にある。インストール済みのプラグインの中の写しを直しても次の更新で消えるので、kjfsm/skills のチェックアウトで直し、サイトとは別の PR にする。チェックアウトも書き込み権も無ければ、足す項目をユーザーに渡して止まる。
 
 ### 5. 検証する
 
@@ -78,4 +78,4 @@ gh release view @emdash-cms/cloudflare@<版> -R emdash-cms/emdash --json body -q
 - 対応した項目の一覧(版つき)と、未確認のもの
 - **最初のデプロイのあとにやること:** 手順 3 で控えた「本番」の作業
 
-**完了基準:** 上の2つが示されていて、CHECKLIST.md に足した項目があればその PR も出ている。
+**完了基準:** 上の2つが示されていて、CHECKLIST.md に足した項目があればその PR が出ている(または項目をユーザーに渡した)。

@@ -8,6 +8,14 @@
 # ここで異常終了し、フックが黙って壊れる。
 set -uo pipefail
 
+# このリポジトリではプラグインと .claude/settings.json の両方から配線されており、
+# 別の設定元どうしのフックは重複排除されないので2度鳴る。作業ツリーの版を試せる
+# 自家用の側を残し、プラグインの側が降りる。
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -n "${CLAUDE_PROJECT_DIR:-}" ] &&
+  grep -qs 'nudge-comment-check.sh' "$CLAUDE_PROJECT_DIR/.claude/settings.json"; then
+  exit 0
+fi
+
 # jq が無い環境で拒否側に倒れないよう、判定できなければ黙って通す。
 command -v jq >/dev/null 2>&1 || exit 0
 

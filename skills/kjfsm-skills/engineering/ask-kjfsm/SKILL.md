@@ -10,7 +10,7 @@ disable-model-invocation: true
 
 **フロー** はスキルを通り抜ける一本の道筋である。ほとんどは1つの **メインフロー** に沿い、そこへ3つの **オンランプ** が合流する。残りはスタンドアロンである。
 
-ここにあるのは **起点** — どのフローへ入るか。フローを走っている最中に、状況が満たされたときだけ入るものは [`SITUATIONS.md`](SITUATIONS.md) にある。開くのは次のとき: テストの土台が無い・信用できない、テストが多すぎる・振る舞いを変えないのに大量に落ちる、スタック固有の規律(React Router / Drizzle / D1)が要る、サインインの要る画面を人間なしで駆動したい、ロジックを変えない機械的な変更を大量にかける、Worker の経路が素通りで守られていない、マージがコンフリクトで止まった、スレッドが埋まった、プロセスではなく言葉が問題になった。
+ここにあるのは **起点** — どのフローへ入るか。フローを走っている最中に、状況が満たされたときだけ入るものは [`SITUATIONS.md`](SITUATIONS.md) にある。開くのは次のとき: テストの土台が無い・信用できない、テストが多すぎる・振る舞いを変えないのに大量に落ちる、スタック固有の規律(React Router / Drizzle / D1)が要る、サインインの要る画面を人間なしで駆動したい、E2E のブラウザが用意できない、ロジックを変えない機械的な変更を大量にかける、Worker の経路が素通りで守られていない、マージがコンフリクトで止まった、スレッドが埋まった、プロセスではなく言葉が問題になった。
 
 ## メインフロー: アイデア → 出荷
 
@@ -39,7 +39,7 @@ disable-model-invocation: true
 ## コードベースの健全性
 
 - **`/mattpocock-skills:improve-codebase-architecture`** — 手が空いたらいつでも実行し、エージェントが操作しやすいコードベースを保つ。**深化の機会** を洗い出し、1つ選ぶと _アイデアが生まれる_ ので、`/mattpocock-skills:grill-with-docs` でメインフローに持ち込む。これは候補を見つける調査であり、選んだものを設計する作業台が **`/mattpocock-skills:codebase-design`** である。
-- **`/kjfsm-skills:tend-memory-files`** — セッション開始時にロードされる指示ファイル(`CLAUDE.md`、`CLAUDE.local.md`、`.claude/rules/`)を新規に書く、あるいは肥大化・陳腐化・矛盾を疑うたびに監査してトリムする。
+- **`/kjfsm-skills:tend-memory-files`** — セッション開始時にロードされる指示ファイル(`AGENTS.md`、`CLAUDE.md`、`CLAUDE.local.md`、`.claude/rules/`)を新規に書く、あるいは肥大化・陳腐化・矛盾を疑うたびに監査してトリムする。
 
 ## スタンドアロン
 
@@ -63,4 +63,4 @@ disable-model-invocation: true
 - **`/kjfsm-skills:setup-ci`**(push / PR)— そのゲートを CI で回す。手元で通しても記録は残らない
 - **`/kjfsm-skills:setup-hooks`**(該当する操作のたび)— 散文では守られないものを、効く範囲の広い層から順に決定的に弾く。**先回りしない**
 
-この4層が敷く規約は `CLAUDE.md` / `AGENTS.md` にも載るが、重複ではない。**出力スタイルはサブエージェントに届かない** — `/kjfsm-skills:two-axis-review` や `/mattpocock-skills:improve-codebase-architecture` が投げる子コンテキストに規約を効かせるのは、こちら側だからである。
+この4層が敷く規約は本体の `AGENTS.md` にも載るが、重複ではない。**出力スタイルは(fork を除く)サブエージェントに届かない** — `/kjfsm-skills:two-axis-review` や `/mattpocock-skills:improve-codebase-architecture` が投げる子コンテキストに規約を効かせるのは、こちら側だからである。

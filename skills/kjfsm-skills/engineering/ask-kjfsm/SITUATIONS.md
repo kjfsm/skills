@@ -22,8 +22,13 @@
 - **`/kjfsm-skills:drizzle-generate-non-interactive`** — TTY を求めるのは rename の判定だけ
 - **`/kjfsm-skills:migrate-d1`** — 再構築の生成物は D1 で子表を空にする
 - **`/kjfsm-skills:d1-bound-parameters`** — D1 の bound parameter は1文100個まで。SQL の中に閉じてから分割する
-- **`/kjfsm-skills:squash-d1-migrations`** — マイグレーションを1本に畳む
 - **`/kjfsm-skills:partyserver-on-durable-objects`** — stub の取り方がそのままリクエスト数になる。素の DO の API は Cloudflare 公式のスキルが持つ
+
+マイグレーションを1本に畳むのは **`/kjfsm-skills:squash-d1-migrations`** で、こちらはユーザーが打つ — 適用済みの履歴を書き換えるので、モデルからは呼ばれない。
+
+## E2E のブラウザが用意できない
+
+**`/kjfsm-skills:setup-playwright`**。E2E をこれから入れるとき、`Executable doesn't exist` / `Missing system dependencies` が出たとき、サンドボックスや CI でだけブラウザの取得に失敗するとき。ブラウザをセットアップスクリプト・SessionStart フック・CI のどの層で用意するかを決める。
 
 ## サインインの要る画面を、人間なしで駆動したい
 

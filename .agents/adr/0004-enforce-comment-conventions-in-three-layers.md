@@ -1,6 +1,6 @@
 # コメント規約は常駐テキストを増やさず、発火するフックと削るパスで効かせる
 
-4本の柱(How=コード、What=テスト、Why=コミットログ、Why not=コメント)は `output-styles/kjfsm.md`・`CLAUDE.md`・`setup-skills` の3か所に本文として常駐し、検査 16. が同期を見ている。それでも守られない。
+4本の柱(How=コード、What=テスト、Why=コミットログ、Why not=コメント)は `output-styles/kjfsm.md`・`AGENTS.md`・`setup-skills` の3か所に本文として常駐し、検査 16. が同期を見ている。それでも守られない。
 
 このとき素直に出てくる手は「**常に読まれる場所をもう1つ増やす**」である — `SessionStart` フックの標準出力、`UserPromptSubmit` の注入、`.claude/rules/` の追加。この手を捨てる。
 

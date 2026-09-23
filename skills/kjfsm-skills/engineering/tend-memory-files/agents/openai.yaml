@@ -1,5 +1,5 @@
 interface:
-  display_name: "メモリファイルの手入れ(CLAUDE.md)"
-  short_description: "CLAUDE.md と .claude/rules/ を書く、またはトリムする"
+  display_name: "メモリファイルの手入れ(AGENTS.md / CLAUDE.md)"
+  short_description: "AGENTS.md・CLAUDE.md と .claude/rules/ を書く、またはトリムする"
 policy:
   allow_implicit_invocation: false

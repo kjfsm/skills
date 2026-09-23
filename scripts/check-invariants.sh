@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-# Checks the repository invariants that CLAUDE.md and .agents/invocation.md
+# Checks the repository invariants that AGENTS.md and .agents/invocation.md
 # state in prose.
 #
 # `claude plugin validate . --strict` only reaches marketplace.json when handed
@@ -276,7 +276,7 @@ done
 
 # 11. `version` はどこにも無い — plugin.json と marketplace.json の両方。
 #     コミット SHA をバージョンとして扱わせる条件が「両方から省く」ことで、片方だけ
-#     書いても更新は止まる。see CLAUDE.md
+#     書いても更新は止まる。see AGENTS.md
 for manifest in "$PLUGIN" plugins/*/.claude-plugin/plugin.json; do
   ! grep -q '^[[:space:]]*"version"' "$manifest" ||
     err "$manifest has a \"version\" field; it pins the cache key and stops updates from reaching installed users"
@@ -323,7 +323,7 @@ while IFS= read -r style; do
   want="../../output-styles/$name.md"
 
   # 出力スタイルは既定でハーネス組み込みのエンジニアリング指示を **外す**。付け忘れ
-  # ると、コメントの規律を足すつもりで既存の規律を消すことになる。see CLAUDE.md
+  # ると、コメントの規律を足すつもりで既存の規律を消すことになる。see AGENTS.md
   [ "$(field "$style" "keep-coding-instructions")" = "true" ] ||
     err "$style does not set keep-coding-instructions: true; it would drop the harness's built-in engineering instructions"
 
@@ -356,8 +356,8 @@ fi
 #     瞬間に規律は効かなくなり、しかも症状が出ない。4本の柱を別に見るのはテストの宛先を
 #     その1行だけが運んでいるため、優先順位の句を別に見るのはハーネス側の「周囲のコードに
 #     合わせろ」と正面からぶつかる唯一の行だからである。
-#     see CLAUDE.md, .agents/adr/0003-never-start-from-init-output.md
-for resident in output-styles/kjfsm.md CLAUDE.md skills/kjfsm-skills/engineering/setup-skills/SKILL.md; do
+#     see AGENTS.md, .agents/adr/0003-never-start-from-init-output.md
+for resident in output-styles/kjfsm.md AGENTS.md skills/kjfsm-skills/engineering/setup-skills/SKILL.md; do
   grep -q 'コミットログには Why、コードコメントには Why not' "$resident" ||
     err "$resident lost the four pillars; without them tests have no destination and the routing lives only in a skill nobody calls"
   grep -q 'コードを読めば分かることは書かない' "$resident" ||
@@ -368,10 +368,20 @@ for resident in output-styles/kjfsm.md CLAUDE.md skills/kjfsm-skills/engineering
     err "$resident lost the precedence clause; without it the harness's match-the-surrounding-code line and this rule point opposite ways and the model picks silently"
 done
 
+# 16b. 3か所の段落が一字一句そろっている。目印の語句だけを見ていると、段落の残りが
+#      片方だけ書き換わってもすり抜ける。
+for opening in 'コードを読めば分かることは書かない' 'コメントが運ぶのは' 'JSDoc・コミットメッセージ'; do
+  variants="$(for resident in output-styles/kjfsm.md AGENTS.md skills/kjfsm-skills/engineering/setup-skills/SKILL.md; do
+    grep -m1 "^$opening" "$resident"
+  done | sort -u | wc -l)"
+  [ "$variants" -eq 1 ] ||
+    err "the paragraph starting '$opening' differs across the three resident copies; make them identical"
+done
+
 # 17. コメントのフックが、出荷側(プラグイン)と自家用(このリポジトリ)の両方から
 #     実在する実行可能スクリプトを指している。そして 4本の柱を復唱していない —
 #     復唱した瞬間にこれは常駐 3か所(検査 16.)の同期先 4つ目になり、フックが
-#     黙って壊れた日に、揃っていない本文だけが残る。see CLAUDE.md
+#     黙って壊れた日に、揃っていない本文だけが残る。see AGENTS.md
 hook_script="hooks/nudge-comment-check.sh"
 if [ ! -x "$hook_script" ]; then
   err "$hook_script is missing or not executable; a hook that cannot run fails silently"
@@ -386,10 +396,10 @@ for manifest in hooks/hooks.json .claude/settings.json; do
 done
 
 # 18. `agents/` のサブエージェントが健全で、呼ぶ側と食い違っていない。プラグインは
-#     このディレクトリを自動で拾う(`plugin.json` に列挙しない — 列挙と走査の両方に
-#     載ると同じエージェントが2度並ぶ)。壊れたときの症状は「そんな subagent_type は
+#     このディレクトリを自動で拾う(`plugin.json` に列挙しない — 列挙すると既定の走査が
+#     止まり、列挙し忘れたものが黙って消える)。壊れたときの症状は「そんな subagent_type は
 #     無い」で静かに汎用エージェントへ落ちるか、そもそも起動しないかであり、どちらも
-#     レビューや検証が**通ったように見える**。see CLAUDE.md
+#     レビューや検証が**通ったように見える**。see AGENTS.md
 while IFS= read -r agent; do
   base="$(basename "$agent" .md)"
   [ "$(field "$agent" "name")" = "$base" ] ||
@@ -432,6 +442,13 @@ grep -q 'モックの自己検証' agents/test-auditor.md ||
   err "agents/test-auditor.md lost the six categories; the audit would prune by taste"
 grep -q 'モックの自己検証' skills/kjfsm-skills/engineering/prune-tests/SKILL.md &&
   err "skills/kjfsm-skills/engineering/prune-tests/SKILL.md copies the categories that agents/test-auditor.md owns"
+
+# 19. 本文は AGENTS.md にあり、CLAUDE.md はそれを取り込む1行だけである。CLAUDE.md に
+#     書き足した行は Claude Code でだけ効き Codex には届かないので、食い違っても気づけない。
+#     see AGENTS.md
+[ -f AGENTS.md ] && [ ! -L AGENTS.md ] || err "AGENTS.md must be a regular file holding the instructions"
+[ "$(cat CLAUDE.md 2>/dev/null)" = "@AGENTS.md" ] ||
+  err "CLAUDE.md must contain only '@AGENTS.md'; put instructions in AGENTS.md"
 
 if [ "$fail" -eq 0 ]; then
   echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills, $(find agents -name '*.md' | wc -l | tr -d ' ') agents)"

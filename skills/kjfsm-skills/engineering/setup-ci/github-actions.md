@@ -31,12 +31,16 @@ permissions:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 ```
 
 - **`push: branches: [main]` と `pull_request` の両方** — PR で緑だったものが、マージ後の main で赤くなることがある(別の PR と組み合わさって初めて壊れる)。main 側を見ていないと、次に PR を出した人が他人の赤を踏む
+- **private リポジトリでは `pull_request` を外し、`workflow_dispatch` を足す**(`SKILL.md` の手順3)。ドキュメントだけの変更で枠を使わないよう `paths-ignore` に `**/*.md`・`docs/**`・`.claude/**` を並べ(CI から呼ぶ検査スクリプトを `.claude/` に置いているなら、そこは外さない)、`cancel-in-progress: false` にする
+- **`runs-on` はバージョンを固定し、`timeout-minutes` を付ける** — `latest` は予告付きで足元が動く。ハングした1本は既定で6時間ぶん枠を食う
+- **Action の版は、書く日に最新のメジャーを確かめる**(`gh api repos/<owner>/<action>/releases/latest -q .tag_name`)。ここに書いた版もいずれ古くなる
 - **`concurrency` + `cancel-in-progress`** — 同じブランチへ push を重ねたとき、古い実行を打ち切る。付けないとキューが詰まり、最新の結果が最後に届く。`github.ref` を含めるので、ブランチをまたいでは打ち切らない
 - **`permissions: contents: read`** — 既定のトークンは書き込み権限を持つ。CI から push しない以上、渡す理由が無い。事故ったワークフローやサードパーティ Action が押せる範囲を、読み取りに落としておく
 - ⚠️ **`git diff` の基点を使うゲートがあるなら `with: fetch-depth: 0` を足す。** 既定の 1 では merge-base が解決できず、その検査は**落ちずに飛ぶ** — CI は緑のまま、手元でだけ効いている状態になる。要らないなら足さない(clone が重くなる)
@@ -44,9 +48,9 @@ jobs:
 ## 2. Node + pnpm
 
 ```yaml
-- uses: pnpm/action-setup@v4
+- uses: pnpm/action-setup@v6
 
-- uses: actions/setup-node@v4
+- uses: actions/setup-node@v7
   with:
     node-version-file: .node-version
     cache: pnpm
@@ -57,7 +61,7 @@ jobs:
 - **順序が効く。** `setup-node` の `cache: pnpm` は pnpm が既に居ることを前提にするので、`pnpm/action-setup` が先に来る。逆にすると「pnpm が見つからない」で落ちる
 - **`node-version-file`** — バージョンを YAML に直接書かない。書くと手元(`.node-version` / `.nvmrc`)とずれ、ずれた事実が誰にも見えない。ファイルが無いならこの機会に作る
 - **`--frozen-lockfile`** — ロックファイルと `package.json` が食い違っていたら落とす。付けないと CI が黙って解決し直し、手元と別のバージョンで緑になる。npm なら `npm ci`、yarn なら `--immutable`
-- **`postinstall` で生成物を作るリポジトリでは、これだけで型チェックが通る。** 無いなら生成コマンドを明示的に足す。どちらなのかは手順1で確かめる
+- **`postinstall` で生成物を作るリポジトリでは、これだけで型チェックが通る。** 無いなら生成コマンドを明示的に足す。生成物をコミットしているなら、生成ではなく鮮度の検査をゲートの先頭に置く。どれなのかは手順1で確かめる
 
 ## 3. 検証ゲートのステップ
 
@@ -83,7 +87,7 @@ jobs:
 
 - run: pnpm test:e2e
 
-- uses: actions/upload-artifact@v4
+- uses: actions/upload-artifact@v7
   if: failure()
   with:
     name: playwright-report

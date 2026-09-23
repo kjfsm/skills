@@ -39,10 +39,12 @@ Chrome for Testing 151.0.7922.34 (playwright chromium v1234)
 | 層                                                                                                   | いつ走るか                                                  | 置くもの                                 |
 | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ---------------------------------------- |
 | **VM のプロビジョニング** — クラウドのセットアップスクリプト、Dockerfile、devcontainer の postCreate | 環境を作るときに1度。結果はイメージやスナップショットに残る | `install --with-deps <ブラウザ>`         |
-| **プロジェクトの用意** — SessionStart フック、`postinstall`                                          | どこでも、毎回                                              | `install <ブラウザ>`(`--with-deps` 無し) |
+| **プロジェクトの用意** — E2E を走らせる script、SessionStart フック                                  | どこでも、毎回                                              | `install <ブラウザ>`(`--with-deps` 無し) |
 | **CI**                                                                                               | ジョブごとに、まっさらな状態から                            | `install --with-deps <ブラウザ>`         |
 
 **正は真ん中の層に置く。** 版を知っているのは lockfile なので、そこから引く `pnpm exec playwright install` が唯一の権威になる。上下の層は前倒しのキャッシュであり、版がずれても遅くなるだけで、間違ったブラウザで緑にはならない。逆向き(プロビジョニング側だけが用意する)にすると、ずれた日に静かに壊れる。
+
+真ん中の層の既定は **E2E の script そのもの**である — `"test:e2e": "playwright install <ブラウザ> && playwright test"`。E2E を走らせる経路が必ずここを通るので、取り忘れが起きない。**`postinstall` には置かない。** Workers Builds のようにデプロイのたびに `pnpm install` を走らせる環境では、本番のビルドにブラウザの取得が混ざる。
 
 **「入っているか」を調べる分岐を自分で書かない。** `playwright install` はすでに冪等で、揃っていれば数秒で戻る。
 
@@ -72,6 +74,8 @@ Chrome for Testing 151.0.7922.34 (playwright chromium v1234)
 E2E は `docs/agents/verification.md` の1行になり、そこから CI に写る(→ `/kjfsm-skills:setup-ci`)。**向きは常に verification.md → CI。**
 
 `webServer` にビルドとマイグレーションまで持たせると、手元と CI で E2E の入口が1つになる。CI では `reuseExistingServer: false` にして、前のジョブの残骸を掴ませない。E2E が内部でビルドするなら、CI にビルドの行を重ねて置かない。
+
+手元の `reuseExistingServer: true` は、**そのポートに居る別のプロセスも受け入れる** — 別のプロジェクトの dev サーバーを相手にテストが走る。ポートは環境変数(`E2E_PORT` など)で変えられるようにし、`webServer.command` にも同じ値を渡す。手元の `workers` は上限を置く — WSL では既定の「コア数の半分」だと、Worker とブラウザがメモリを使い切って VM ごと落ちる。
 
 ### 6. 完了
 

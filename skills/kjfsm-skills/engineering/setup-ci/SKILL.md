@@ -22,7 +22,7 @@ description: 記録された検証ゲートを CI に敷き、ローカルの規
 - `.github/workflows/` — すでに何かあるか。あるなら追加であって新規作成ではない
 - `package.json` の scripts / `Makefile` / `Taskfile` — verification.md の各行が実際に何を呼ぶか
 - パッケージマネージャとロックファイル、`.node-version` / `.nvmrc` / `engines`
-- `postinstall` — 生成物を作るならインストールだけで型チェックが通る。無いなら CI で明示的に生成コマンドを呼ぶ
+- `postinstall` — 生成物を作るならインストールだけで型チェックが通る。無いなら CI で明示的に生成コマンドを呼ぶ。生成物をコミットしているなら、生成ではなく鮮度の検査(`wrangler types --check` など)をゲートに置く
 - E2E のランナーとブラウザ。`playwright.config.ts` の `webServer`
 - シークレットを要求する経路(デプロイ、リモート DB、外部 API)
 - ホスティング先。GitHub 以外(GitLab CI、CircleCI)ならテンプレートは移し替える
@@ -51,7 +51,11 @@ verification.md の各行を1つずつ見て、**CI で走るか**を決める�
 
 分けるのは、E2E が分単位で伸びてからでよい。分けると赤の原因が1画面で読めなくなり、ジョブ間でインストールとキャッシュをやり直すぶん総時間はむしろ増える。**先に分けない。**
 
-`concurrency` で同じブランチの古い実行を打ち切る。付けないと、push を重ねたぶんだけ実行が並び、キューが詰まる。
+`concurrency` で同じブランチの実行を1本にまとめる。public では古い実行を打ち切る — 付けないと、push を重ねたぶんだけ実行が並び、キューが詰まる。
+
+**トリガーは Actions の枠で決める。** public リポジトリは無料なので、PR と main への push の両方で回す。**GitHub Free の private は無料枠(執筆時点で月 2,000 分)**を持ち、PR と main の両方で回すと同じ木を2回検証して枠を使い切る。private では **main への push 後と `workflow_dispatch` だけ**にし、マージ前に止める役は同じ列を回す pre-push へ渡す(`/kjfsm-skills:setup-hooks`)。この形では、打ち切るとキャッシュが書かれず次がコールドになるので、`cancel-in-progress` は付けない。⚠️ **origin/main との merge-base を基点にする検査は、この CI では空振りする** — push された時点で HEAD が origin/main そのものなので、差分が常に空になる。止めるのは pre-push だけで、verification.md にもそう書く。
+
+**枠や支払いで止まった実行も「失敗」として出る。** ステップが1つも走らず数秒で終わり、`recent account payments have failed or your spending limit needs to be increased` の注記が付いていたら、コードの赤ではない。直すのは Settings → Billing & plans で、エージェントからは触れない。
 
 ### 4. 書く
 

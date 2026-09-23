@@ -213,7 +213,7 @@ npx -y skills add kjfsm/skills
 - **[where-to-write-what](./skills/kjfsm-skills/engineering/where-to-write-what/SKILL.md)** — コード・テスト・コメント・JSDoc・コミットメッセージ・PR 本文・ADR・docs のどこに何を書くかのルーティング規律: コードには How、テストには What、コミットログには Why、コメントには Why not。
 - **[setup-rules](./skills/kjfsm-skills/engineering/setup-rules/SKILL.md)** — このリポジトリのルールを2層に敷く: `paths:` を持つ rule はその glob を編集するときだけ注入され、スタックに依存しない絶対ルールと追記先の優先順位は毎セッション読まれる側に置く。`/kjfsm-skills:setup-skills` から引き継がれる。
 - **[setup-skills](./skills/kjfsm-skills/engineering/setup-skills/SKILL.md)** — このリポジトリをエンジニアリング系スキル向けに設定する(イシュートラッカー、トリアージラベル、ドメインドキュメントの配置、検証ゲート、応答と記述の規約)。`/kjfsm-skills:setup-repo` の工程 A。
-- **[setup-ci](./skills/kjfsm-skills/engineering/setup-ci/SKILL.md)** — 記録された検証ゲートを CI に敷き、ローカルの規律を機構に変える。CI に載らない行(観測・シークレットを要る経路)を分け、必須チェックの設定はユーザーの手に残す。
+- **[setup-ci](./skills/kjfsm-skills/engineering/setup-ci/SKILL.md)** — 記録された検証ゲートを CI に敷き、ローカルの規律を機構に変える。CI に載らない行(観測・シークレットを要る経路)を分け、必須チェックは使えるリポジトリでだけ選択肢として伝える。
 - **[setup-hooks](./skills/kjfsm-skills/engineering/setup-hooks/SKILL.md)** — 散文では守られないルールを Claude Code のフックへ落として決定的に弾く。落とすのは3条件(すでに破られた・破られても気づけない・入力だけで機械的に判定できる)を満たすものだけ。
 - **[setup-cf-app](./skills/kjfsm-skills/engineering/setup-cf-app/SKILL.md)** — 新規の Cloudflare Workers フルスタックアプリを、いつも使う標準ライブラリ構成で立ち上げる。バージョンやフラグは固定せず、各ツールの公式手順で都度組む。
 - **[setup-cf-access](./skills/kjfsm-skills/engineering/setup-cf-access/SKILL.md)** — Cloudflare Access を Worker・ホスト名・パスに3層ルール(人間 / 機械 / 自前認証パス)で掛ける。書き込み権限を先に確かめ、不足していれば具体名で指示して止まる。

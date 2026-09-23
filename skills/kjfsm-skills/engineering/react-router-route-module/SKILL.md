@@ -62,9 +62,7 @@ middleware に寄せない — ルートごと止めると、読む手段まで�
 Worker の `env` も、middleware が配る値と同じ経路で渡す。`createContext` でキー
 （`cloudflareContext` など）を作り、`workers/app.ts` の `fetch` で `RouterContextProvider` に
 `{ env, ctx }` を `set` して `requestHandler` へ渡す。loader / action / middleware は
-`context.get(cloudflareContext)` で受ける。C3 テンプレートの `AppLoadContext` に素のオブジェクトを
-渡す形は、ルートが `middleware` を持った時点で「`RouterContextProvider` でなければならない」という
-invariant で落ちる。
+`context.get(cloudflareContext)` で受ける。
 
 モジュールの先頭で `cloudflare:workers` の `env` から組まない — 組んだものがリクエストの外で
 固定され、オリジンのようにリクエストから取るべき値を env に固定値で持つことになる。

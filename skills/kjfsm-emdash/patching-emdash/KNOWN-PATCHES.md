@@ -97,8 +97,7 @@ Workers の無料プランの KV の書き込みは、**アカウント全体で
 
 ```js
 /** [patched: …] Astro persists the session on every set(), even with an unchanged value — skip it so each authenticated request does not cost a KV write. */
-if ((await resolveSessionUser(session))?.id !== user.id)
-  session?.set("user", { id: user.id });
+if ((await resolveSessionUser(session))?.id !== user.id) session?.set("user", { id: user.id });
 ```
 
 - **`resolveSessionUser` を使う理由:** 同じファイルがすでに import している関数で、セッションの読み取りが止まってもリクエストを巻き込まない(#1274 の対策)。新しい import を足すと、`dist` のチャンク名が版ごとに変わるので上げたときに壊れる。

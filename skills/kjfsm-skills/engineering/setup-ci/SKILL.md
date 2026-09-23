@@ -53,6 +53,8 @@ verification.md の各行を1つずつ見て、**CI で走るか**を決める�
 
 `concurrency` で同じブランチの古い実行を打ち切る。付けないと、push を重ねたぶんだけ実行が並び、キューが詰まる。
 
+**トリガーは Actions の枠で決める。** public リポジトリは無料なので、PR と main への push の両方で回す。**GitHub Free の private は月 2,000 分**で、PR と main の両方で回すと同じ木を2回検証して枠を使い切る(実際に月の半ばで尽きた)。private では **main への push 後と `workflow_dispatch` だけ**にし、マージ前に止める役は同じ列を回す pre-push へ渡す(`/kjfsm-skills:setup-hooks`)。この形では、打ち切るとキャッシュが書かれず次がコールドになるので、`cancel-in-progress` は付けない。
+
 ### 4. 書く
 
 テンプレートと各行の理由は [github-actions.md](./github-actions.md) にある。

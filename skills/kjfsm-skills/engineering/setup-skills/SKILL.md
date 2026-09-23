@@ -26,7 +26,7 @@ description: このリポジトリをエンジニアリング系スキル向け�
 - `docs/agents/` — このスキルの過去の出力がすでに存在するか?
 - `.scratch/` — ローカル markdown のイシュートラッカー規約がすでに使われている印
 - `package.json` の scripts、`Makefile`、`Taskfile`、`turbo.json`、`.github/workflows/*.yml` などの CI 設定 — このリポジトリが実際に使っている検証コマンド。加えて、アプリを起動する手段(開発サーバー、CLI のエントリ、E2E のランナー)
-- `triage` スキルはインストールされているか?(このスキルの隣にある `triage` スキルのフォルダ、または利用可能なスキルの中に `triage` があるか)これによって Section B をそもそも実行するかどうかが決まる。同じ見方で `where-to-write-what` も探す — Section E がそれを指すかどうかが決まる。
+- `triage` スキルはインストールされているか? ユーザー呼び出し型なので、利用可能なスキルの一覧には出ない。`claude plugin list` に `mattpocock-skills` があれば在る。決められなければユーザーに訊く。これで Section B を実行するかが決まる。`where-to-write-what` はモデル呼び出し型なので一覧で探す — Section E がそれを指すかが決まる。
 - モノレポの兆候 — `pnpm-workspace.yaml`、`package.json` の `workspaces` フィールド、または独自の `src/` を持つ中身のある `packages/*`。本当に大きな複数パッケージのリポジトリにのみ存在する。これらがなければ単一コンテキストであり、それがほぼすべてのリポジトリに当てはまる。
 
 ### 2. 発見を提示し、尋ねる
@@ -138,7 +138,7 @@ description: このリポジトリをエンジニアリング系スキル向け�
 
 コメントが運ぶのはコードから読めない情報に限る: 採らなかった素直な書き方とそれがだめな理由、外部の制約(API 仕様・RFC・プラットフォームの上限)、不変条件と順序依存、issue や ADR への参照 1 行。それ以外は宛先が違う — 逐語的な説明(「〜を取得」「〜を更新」)はコード自体へ、変更の経緯はコミットメッセージへ、使わなくなったコードは削除して git 履歴へ。
 
-JSDoc・コミットメッセージ・PR 本文・ADR・docs の宛先は `where-to-write-what` スキルが決める。
+JSDoc・コミットメッセージ・PR 本文・ADR・docs の宛先は `where-to-write-what` スキルが決める。書く前にそれを読む。
 ```
 
 `### Triage labels` サブブロックの記載と `docs/agents/triage-labels.md` の作成は、`triage` がインストールされていて Section B が実行された場合にのみ行う。そうでない場合は、両方とも省略する。

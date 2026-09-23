@@ -15,8 +15,8 @@ set -uo pipefail
 # 張るのは **どのプラグインも配らない** バケットだけである。昇格済みは
 # `kjfsm-skills` が、`kjfsm-emdash/`・`kjfsm-personal/` はそれぞれ専用のプラグインが配るので、
 # ここにも張ると入れた人のセッションで同じスキルが2度並ぶ — 実体は1つでも、名前と
-# description のぶんだけコンテキストを二重に払う。`deprecated/` は link-skills.sh と同じ規則で除く。`in-progress/` を
-# 張るのは意図的で、下書きはここで呼んでみて初めて直せる。
+# description のぶんだけコンテキストを二重に払う。`in-progress/` を張るのは意図的で、
+# 下書きはここで呼んでみて初めて直せる。下書きが1本も無い時期は `.claude/skills/` ごと無くてよい。
 #
 # 使い方:
 #   scripts/sync-project-skills.sh           リンクを張り直す(不要なものは消す)
@@ -65,19 +65,21 @@ while IFS= read -r skill_md; do
   # `.claude/skills/` は2階層下なので、`../..` がリポジトリルートに解決される。
   # 相対にしておくとクローン先のパスに依存しない。
   targets+=("../../$src")
-done < <(find skills -name SKILL.md -not -path '*/node_modules/*' -not -path '*/deprecated/*' | sort)
+done < <(find skills -name SKILL.md -not -path '*/node_modules/*' | sort)
 
-if [ "${#names[@]}" -eq 0 ]; then
+if [ -z "$(find skills -name SKILL.md -print -quit 2>/dev/null)" ]; then
   echo "error: no skills found under skills/; run this from a full checkout" >&2
   exit 1
 fi
 
-if [ "$check" -eq 0 ]; then
-  mkdir -p "$DEST"
-elif [ ! -d "$DEST" ]; then
-  note "$DEST is missing"
-  echo "run scripts/sync-project-skills.sh to fix" >&2
-  exit 1
+if [ "${#names[@]}" -gt 0 ]; then
+  if [ "$check" -eq 0 ]; then
+    mkdir -p "$DEST"
+  elif [ ! -d "$DEST" ]; then
+    note "$DEST is missing"
+    echo "run scripts/sync-project-skills.sh to fix" >&2
+    exit 1
+  fi
 fi
 
 for i in "${!names[@]}"; do
@@ -106,14 +108,15 @@ if [ -d "$DEST" ]; then
     [ -n "$stale" ] || continue
     name="$(basename "$stale")"
     known=0
-    for n in "${names[@]}"; do
+    # 素の "${names[@]}" は、下書きが無く配列が空のとき bash 3.2 の set -u で落ちる。
+    for n in ${names[@]+"${names[@]}"}; do
       if [ "$n" = "$name" ]; then
         known=1
         break
       fi
     done
     [ "$known" -eq 1 ] && continue
-    note "$stale is stale (shipped by a plugin, deprecated, or gone)"
+    note "$stale is stale (shipped by a plugin, or gone)"
     [ "$check" -eq 1 ] || rm -rf "$stale"
   done < <(find "$DEST" -mindepth 1 -maxdepth 1 | sort)
 fi

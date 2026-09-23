@@ -39,7 +39,6 @@ scripts/upstream-diff.py <本家のクローン先> <base> <head>
 - **`writing-great-skills` → `writing-for-agents` の改名と再構成** — こちらは `OFFICIAL.md`(公式仕様の突き合わせ)を足す方向へ独自に伸ばしてある
 - **`ask-matt` / `setup-matt-pocock-skills` の変更** — `ask-kjfsm` / `setup-skills` は別物になった。後者は `setup-repo` を入口とする4工程に分解済み
 - **`code-review`** — `two-axis-review` に置き換えてある
-- **`deprecated/` バケットの廃止** — 本家は退役スキルを削除する方針に変えたが、こちらは残す
 - **「Skill ツールを "x" で呼ぶ」という言い回し** — 呼び出しであることを明示する意図は取り込んだが、道具名は出さず `` `x` スキルを呼ぶ `` にしてある。書き分けの規則は `.agents/invocation.md` にある
 - **新スキル `wait-what`** — 中身は「ASD-STE100(航空宇宙の簡易英語規格)で言い直せ」の1文。日本語運用のこのフォークでは規格の裏付けが消えて、中身が残らない
 - **新スキル `implement-spec`**(本家も in-progress)**の並列実行** — worktree ごとの実装サブエージェントとマージャで最大限に並列化する形は、各チケットのゲートを末尾の `code-review` 1回に薄めており、`implement-and-review` + `verification-loop` + `two-axis-review` の直列チェーンと正面衝突する。ゲートを薄めてまで欲しくなったときに別途決める。(「チケットは手順のリストではなくタスクグラフである」という捉え方だけは `implement-and-review` に1文で取り込んだ。)

@@ -15,7 +15,7 @@
 |                | A: Claude Code プラグイン                                                                                                                                  | B: `npx skills` でコピー                                                                           |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | 実体の置き場所 | `~/.claude/plugins/` 配下のみ。作業中のリポジトリは汚れない                                                                                                | 実行した場所の `.claude/skills/`(`--global` なら `~/.claude/skills`)に実ファイルとしてコピーされる |
-| 入るスキル     | 昇格済みの集合(`engineering/` + `productivity/`)だけ                                                                                                       | リポジトリ内の**全スキル**。`deprecated/` や未完成の下書きも含む(`--skill` で個別指定は可能)       |
+| 入るスキル     | 昇格済みの集合(`engineering/` + `productivity/`)だけ                                                                                                       | リポジトリ内の**全スキル**。未完成の下書きや EmDash 専用も含む(`--skill` で個別指定は可能)         |
 | 更新           | `/plugin marketplace update kjfsm` で追随する。このプラグインは `version` を持たずコミット SHA をバージョンにしているので、**push されるたびに更新が届く** | コピーなので自動では追随しない。`npx skills update` を自分で叩く                                   |
 | 出力スタイル   | `kjfsm` が同梱される(有効化するかはユーザーが選ぶ)                                                                                                         | **入らない**(プラグイン専用)。応答と記述の規約は `/setup-skills` が `CLAUDE.md` 側に書く           |
 | 取り消し       | `claude plugin uninstall`                                                                                                                                  | コピーされたディレクトリを消す                                                                     |
@@ -52,7 +52,7 @@ claude plugin list
 npx -y skills add kjfsm/skills --agent claude-code
 ```
 
-- **`--skill` を付けないと、`deprecated/` や下書きまで含めてリポジトリ内の全スキルが入る。** 先に `npx -y skills add kjfsm/skills --list` で一覧を見せ、絞り込むかどうかユーザーに確認すること。絞る場合は `--skill tdd,two-axis-review` のようにカンマ区切りで渡す。**絞るときも `setup-skills` は必ず含める** — 方式 B では、これが応答と記述の規約を `CLAUDE.md` に届ける唯一の経路である。
+- **`--skill` を付けないと、下書きや EmDash 専用まで含めてリポジトリ内の全スキルが入る。** 先に `npx -y skills add kjfsm/skills --list` で一覧を見せ、絞り込むかどうかユーザーに確認すること。絞る場合は `--skill tdd,two-axis-review` のようにカンマ区切りで渡す。**絞るときも `setup-skills` は必ず含める** — 方式 B では、これが応答と記述の規約を `CLAUDE.md` に届ける唯一の経路である。
 - コピー元の情報は `skills-lock.json` に記録される。更新は `npx skills update`、lock からの復元は `npx skills experimental_install`。
 - プロジェクトスコープで入れた場合、`.claude/skills/` と `skills-lock.json` をコミットするかどうかはユーザーの判断である。勝手にコミットしないこと。
 

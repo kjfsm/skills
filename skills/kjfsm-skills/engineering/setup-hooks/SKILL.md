@@ -56,7 +56,7 @@ description: 散文のルールでは守られないものを機構へ落とし�
 - `lefthook.yml` / `.husky/` / `package.json` の `simple-git-hooks` — git hook の層がすでにあるか
 - `.claude/settings.json` — 既存の `permissions` と `hooks`。あるならマージであって新規作成ではない
 - `.github/workflows/` と `docs/agents/verification.md` — 同じ述語がすでに CI 側にあるか
-- インストール済みのスキル — git の破壊的コマンドだけが目的なら `/git-guardrails-claude-code` が完成品を持っている
+- インストール済みのスキル — git の破壊的コマンドだけが目的なら 本家の `git-guardrails-claude-code`(`npx skills add mattpocock/skills --skill git-guardrails-claude-code`)が完成品を持っている
 
 **既存のフックを1本ずつ、何が見えているかで数え直す。** CI にも検証ゲートにも同じ述語が無いフックは、**手元の Claude セッションの中でしか効いていない**。それが意図どおりかを、移す前に確かめる。
 

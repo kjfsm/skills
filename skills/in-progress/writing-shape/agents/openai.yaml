@@ -1,5 +1,0 @@
-interface:
-  display_name: "記事に形作る"
-  short_description: "素材を記事へと形作る"
-policy:
-  allow_implicit_invocation: false

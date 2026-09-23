@@ -23,12 +23,8 @@ manifest.pop("dependencies", None)
 json.dump(manifest, open(sys.argv[2], "w", encoding="utf-8"), ensure_ascii=False, indent=2)
 EOF
 
-status=0
-claude plugin eval "$BUILD" --trust-plugin "$@" || status=$?
-
-if [ -d "$BUILD/evals/results" ]; then
-  mkdir -p "$REPO/evals/results"
-  cp -r "$BUILD/evals/results/." "$REPO/evals/results/"
-  echo "results copied to evals/results/"
-fi
-exit "$status"
+# 結果は写しではなくリポジトリ側へ直に書かせる。写しは終了時に消えるので、既定の
+# 置き場のままだと eval が最後に表示するレポートのパスが開けなくなる。
+out="$REPO/evals/results/$(date -u +%Y-%m-%dT%H-%M-%SZ)"
+mkdir -p "$out"
+claude plugin eval "$BUILD" --trust-plugin --output-dir "$out" --report "$out/report.html" "$@"

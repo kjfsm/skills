@@ -21,7 +21,7 @@ err() {
 PROMOTED_BUCKETS="kjfsm-skills/engineering kjfsm-skills/productivity"
 # バケットごとに専用のプラグイン(plugins/<バケット>/)で配るもの。全員には入れず、
 # 必要なリポジトリや端末で個別に有効にする。see .agents/adr/0005-ship-buckets-as-side-plugins.md
-PLUGIN_BUCKETS="kjfsm-emdash kjfsm-personal matt-skills-jp"
+PLUGIN_BUCKETS="kjfsm-emdash kjfsm-personal"
 PLUGIN=".claude-plugin/plugin.json"
 
 frontmatter() {
@@ -428,17 +428,12 @@ grep -q '本物の制約' agents/comment-pruner.md ||
 grep -q 'コードの言い直し' skills/kjfsm-skills/engineering/prune-comments/SKILL.md &&
   err "skills/kjfsm-skills/engineering/prune-comments/SKILL.md copies the graded rules that agents/comment-pruner.md owns"
 
-grep -q 'シームの裏に何を隠すか' plugins/matt-skills-jp/agents/interface-designer.md ||
-  err "plugins/matt-skills-jp/agents/interface-designer.md lost the five-item output contract; the designs would not be comparable"
-grep -q 'シームの裏に何を隠すか' skills/matt-skills-jp/codebase-design/DESIGN-IT-TWICE.md &&
-  err "skills/matt-skills-jp/codebase-design/DESIGN-IT-TWICE.md copies the output contract that plugins/matt-skills-jp/agents/interface-designer.md owns"
-
 grep -q 'モックの自己検証' agents/test-auditor.md ||
   err "agents/test-auditor.md lost the six categories; the audit would prune by taste"
 grep -q 'モックの自己検証' skills/kjfsm-skills/engineering/prune-tests/SKILL.md &&
   err "skills/kjfsm-skills/engineering/prune-tests/SKILL.md copies the categories that agents/test-auditor.md owns"
 
 if [ "$fail" -eq 0 ]; then
-  echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills, $(find agents plugins/*/agents -name '*.md' | wc -l | tr -d ' ') agents)"
+  echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills, $(find agents plugins/*/agents -name '*.md' 2>/dev/null | wc -l | tr -d ' ') agents)"
 fi
 exit "$fail"

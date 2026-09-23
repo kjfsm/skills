@@ -27,13 +27,6 @@
       "description": "kjfsm 個人の作業環境に紐づいたスキル集。",
       "category": "productivity",
       "keywords": ["personal"]
-    },
-    {
-      "name": "matt-skills-jp",
-      "source": "./plugins/matt-skills-jp",
-      "description": "mattpocock/skills のうち、ほぼ訳のままのスキルの日本語訳。kjfsm-skills はこれではなく本家 mattpocock-skills に依存する。",
-      "category": "engineering",
-      "keywords": ["engineering", "skills", "tdd", "grilling", "japanese"]
     }
   ]
 }

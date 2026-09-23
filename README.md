@@ -2,7 +2,7 @@
 
 Claude Code、Codex、その他 Agent-Skills 標準に準拠したハーネス向けのエージェントスキル(スラッシュコマンドと振る舞い) — 雰囲気で書くコーディングではなく、実務のエンジニアリングのために使う。
 
-[mattpocock/skills](https://github.com/mattpocock/skills) を日本語訳し、kjfsm 向けに調整した独立フォークから出発した。**本家由来のスキル(`/mattpocock-skills:tdd`、`/mattpocock-skills:grill-with-docs`、`/mattpocock-skills:to-spec` など)は、依存先の本家 `mattpocock-skills` がそのまま配る。** このリポジトリの `kjfsm-skills` が持つのは自作のスキルと、本家から離れて自作の流れの中心になったもの(`/kjfsm-skills:implement-and-review`、`/kjfsm-skills:ask-kjfsm`、`/kjfsm-skills:setup-skills`、`/kjfsm-skills:writing-great-skills`)である。本家のほぼ訳のままの日本語訳は、別プラグイン [`matt-skills-jp`](./skills/matt-skills-jp/README.md) に分けてある。
+[mattpocock/skills](https://github.com/mattpocock/skills) を日本語訳し、kjfsm 向けに調整した独立フォークから出発した。**本家由来のスキル(`/mattpocock-skills:tdd`、`/mattpocock-skills:grill-with-docs`、`/mattpocock-skills:to-spec` など)は、依存先の本家 `mattpocock-skills` がそのまま配る。** このリポジトリの `kjfsm-skills` が持つのは自作のスキルと、本家から離れて自作の流れの中心になったもの(`/kjfsm-skills:implement-and-review`、`/kjfsm-skills:ask-kjfsm`、`/kjfsm-skills:setup-skills`、`/kjfsm-skills:writing-great-skills`)である。
 
 これらのスキルは小さく、手を加えやすく、組み合わせやすいように設計されている。どのモデルでも動作する。
 
@@ -100,7 +100,7 @@ claude plugin marketplace add kjfsm/skills --scope project
 claude plugin install kjfsm-skills@kjfsm --scope project
 ```
 
-`kjfsm-skills` は本家の `mattpocock-skills@mattpocock` に依存しており、インストール時に本家も自動で入る(このマーケットプレイスは `allowCrossMarketplaceDependenciesOn` で `mattpocock` を許可している)。本家の日本語訳 `matt-skills-jp` は同じ名前のスキルを持つので、一緒には入れない。本家の `/mattpocock-skills:implement` はビルドまでで、検証とレビューの流れを締めまで持つのは kjfsm の `/kjfsm-skills:implement-and-review` である。
+`kjfsm-skills` は本家の `mattpocock-skills@mattpocock` に依存しており、インストール時に本家も自動で入る(このマーケットプレイスは `allowCrossMarketplaceDependenciesOn` で `mattpocock` を許可している)。本家の `/mattpocock-skills:implement` はビルドまでで、検証とレビューの流れを締めまで持つのは kjfsm の `/kjfsm-skills:implement-and-review` である。
 
 これは `.claude/settings.json` に `extraKnownMarketplaces` と `enabledPlugins` を書き込む。コミットすれば、そのリポジトリで作業する人は何も入れなくてもスキルが有効になる — `npx skills` のようにスキルの実体をリポジトリへコミットせずに済む。
 
@@ -238,7 +238,6 @@ npx -y skills add kjfsm/skills
 
 昇格していない(`kjfsm-skills` へのエントリなし、上記の README への掲載もなし) — 中身については各バケット自身の `README.md` を参照:
 
-- [`skills/matt-skills-jp/`](./skills/matt-skills-jp/README.md) — 本家のうち、ほぼ訳のままのスキルの日本語訳。別プラグイン `matt-skills-jp` で、本家の代わりに入れる
 - [`skills/misc/`](./skills/misc/README.md) — 残してあるがほとんど使われない
 - [`skills/kjfsm-emdash/`](./skills/kjfsm-emdash/README.md) — [EmDash](https://docs.emdashcms.com) CMS のサイト専用。EmDash を使わないプロジェクトでは無価値なので、別プラグイン `kjfsm-emdash` でサイトのリポジトリにだけ入れる
 - [`skills/kjfsm-personal/`](./skills/kjfsm-personal/README.md) — この端末固有のセットアップに紐づく。別プラグイン `kjfsm-personal` で自分の端末にだけ入れる

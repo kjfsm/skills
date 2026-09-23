@@ -1,3 +1,0 @@
-interface:
-  display_name: "バグの診断"
-  short_description: "手強いバグとリグレッションを診断する"

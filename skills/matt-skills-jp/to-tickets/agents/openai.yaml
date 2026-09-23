@@ -1,5 +1,0 @@
-interface:
-  display_name: "チケットにする"
-  short_description: "計画をトレーサーバレット方式のチケットに割る"
-policy:
-  allow_implicit_invocation: false

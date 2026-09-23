@@ -9,11 +9,9 @@
 
 次に同期するときは `git clone https://github.com/mattpocock/skills` して、最後に突き合わせた地点を base に下の測り方を回す。この表を更新するのは、実際に突き合わせて取捨を決めたときだけである。
 
-## 同期の対象は訳だけになった
+## 同期の対象は本家から離れた4本だけになった
 
-2026-09-18 から、`kjfsm-skills` は本家のプラグイン `mattpocock-skills` に依存している(→ [ADR 0006](./adr/0006-depend-on-upstream-ship-translation-separately.md))。本家の更新は、`kjfsm-skills` を使う人へは本家から直接届く。この文書の手順で手を入れるのは、`skills/matt-skills-jp/` の訳と、本家から離れて `kjfsm-skills` に残した `implement-and-review`・`ask-kjfsm`・`setup-skills`・`writing-great-skills` だけである。
-
-訳へ取り込むときは、`kjfsm-skills` のスキルを名指ししない。
+2026-09-18 から、`kjfsm-skills` は本家のプラグイン `mattpocock-skills` に依存している(→ [ADR 0006](./adr/0006-depend-on-upstream-ship-translation-separately.md))。本家の更新は、`kjfsm-skills` を使う人へは本家から直接届く。この文書の手順で手を入れるのは、本家から離れて `kjfsm-skills` に残した `implement-and-review`・`ask-kjfsm`・`setup-skills`・`writing-great-skills` だけである。本家の日本語訳を別プラグインで配るのは 2026-09-23 にやめた(→ ADR 0006 の追記)。
 
 ## 起点の確認方法
 

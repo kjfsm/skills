@@ -1,6 +1,6 @@
 # このリポジトリにスキルを足す
 
-一覧 — トップと各バケットの README、`plugin.json` の `skills` 配列 — は `scripts/render-catalog.py` が frontmatter から書き出す。項目の文面は `description` そのもので、別に要約を書く場所は無い。残りの配線 — `agents/openai.yaml` の有無、2つのハーネスの呼び出し方式の一致、frontmatter の上限、参照ファイルの実在と階層 — は `scripts/check-invariants.sh` が機械的に検査する。**走らせて落ちた項目が、まだ済んでいない配線である。** 覚えておく必要はない。
+一覧 — トップと各バケットの README、`plugin.json` の `skills` 配列 — は `scripts/render.py` が frontmatter から書き出す。項目の文面は `description` そのもので、別に要約を書く場所は無い。残りの配線 — `agents/openai.yaml` の有無、2つのハーネスの呼び出し方式の一致、frontmatter の上限、参照ファイルの実在と階層 — は `scripts/check-invariants.sh` が機械的に検査する。**走らせて落ちた項目が、まだ済んでいない配線である。** 覚えておく必要はない。
 
 この文書が扱うのは、検査が見られない2つ: 走らせる前に下す **判断** と、検査に出ない **後始末** である。
 
@@ -58,7 +58,7 @@ policy:
 ## 4. 検査を走らせる
 
 ```
-scripts/render-catalog.py
+scripts/render.py
 scripts/check-invariants.sh
 ```
 
@@ -103,7 +103,7 @@ scripts/check-invariants.sh
 
 ディレクトリ名と frontmatter の `name` は一致していなければならない(仕様の要求であり、検査もする)。両方を同時に変える。
 
-一覧は `scripts/render-catalog.py` を走らせ直せば追随する。残りは手で追う: `ask-kjfsm` と、**他のスキルの本文にある `/旧名` の文中呼び出し**。どちらも検査に出ない — `grep -rn '旧名' skills/ agents/` で拾う。
+一覧は `scripts/render.py` を走らせ直せば追随する。残りは手で追う: `ask-kjfsm` と、**他のスキルの本文にある `/旧名` の文中呼び出し**。どちらも検査に出ない — `grep -rn '旧名' skills/ agents/` で拾う。
 
 改名後は `link-skills.sh` を走らせ、古い名前のシンボリックリンクを手で消す(スクリプトは張り直すだけで、消えた名前の後始末はしない)。リポジトリ側の `.claude/skills/` は `scripts/sync-project-skills.sh` が古い名前ごと張り直すので手当ては要らず、忘れれば検査 14. が落ちる。
 
@@ -111,7 +111,7 @@ scripts/check-invariants.sh
 
 `in-progress/` から `engineering/` か `productivity/` へ移す。
 
-ディレクトリを移動したら `scripts/render-catalog.py` を走らせる — 両方のバケットの README、トップレベルの README、`plugin.json` が書き換わる。ユーザー呼び出し型 / モデル呼び出し型のグループ分けも frontmatter から決まる。
+ディレクトリを移動したら `scripts/render.py` を走らせる — 両方のバケットの README、トップレベルの README、`plugin.json` が書き換わる。ユーザー呼び出し型 / モデル呼び出し型のグループ分けも frontmatter から決まる。
 
 `scripts/sync-project-skills.sh` を走らせ直す — 昇格したスキルはプラグインが配るようになるので、`.claude/skills/` のリンクは外れる(忘れれば検査 14. が落とす)。
 
@@ -121,4 +121,4 @@ scripts/check-invariants.sh
 
 ディレクトリごと削除し、[`retired-skills.md`](./retired-skills.md) に **なぜ退役したかと、代わりに使うもの** を1行で書く — 書かないと、同じものをもう一度作る。本文は git 履歴が持つ。`scripts/sync-project-skills.sh` を走らせ直せば `.claude/skills/` からも消える。`scripts/link-skills.sh` は消えた名前の後始末をしないので、ローカルのリンクは手で消す。
 
-一覧は `scripts/render-catalog.py` で追随させる。`ask-kjfsm` からは手で消す。他のスキルがその名前を文中呼び出ししていないか `grep` で確かめる — 呼ばれたまま退役したスキルは、実行時に静かに何も起きない。
+一覧は `scripts/render.py` で追随させる。`ask-kjfsm` からは手で消す。他のスキルがその名前を文中呼び出ししていないか `grep` で確かめる — 呼ばれたまま退役したスキルは、実行時に静かに何も起きない。

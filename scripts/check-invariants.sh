@@ -222,7 +222,7 @@ while IFS= read -r skill_md; do
       err "$name: $rel links to $deep, which SKILL.md does not link; keep references one level deep from SKILL.md"
     done < <(md_links "$dir" "$dir/$rel")
 
-    # 14. 100行を超える参照ファイルは目次を持つ。エージェントは長い参照を頭から
+    # 10c. 100行を超える参照ファイルは目次を持つ。エージェントは長い参照を頭から
     #     100行だけ読んで済ませることがあり、目次があれば、本文を読まなくても
     #     そのファイルに何がどこまで載っているかは見える。
     [ "$(wc -l <"$dir/$rel")" -gt 100 ] || continue
@@ -232,11 +232,11 @@ while IFS= read -r skill_md; do
   done
 done < <(find skills -name SKILL.md -not -path '*/node_modules/*' | sort)
 
-# 4. 一覧(トップと各バケットの README、plugin.json の skills 配列)が frontmatter から
-#    生成したものと一致する。昇格済みだけが出荷され、昇格していないものが載らないのも
-#    これで決まる。
-scripts/render-catalog.py --check ||
-  err "the skill catalog is out of date; run scripts/render-catalog.py"
+# 4. 書き出した写しが源と一致する — 一覧(トップと各バケットの README、plugin.json の
+#    skills 配列)は frontmatter と、コメントの判定基準の常駐の写しは AGENTS.md と。
+#    昇格済みだけが出荷され、昇格していないものが載らないのもこれで決まる。
+scripts/render.py --check ||
+  err "generated copies are out of date; run scripts/render.py"
 
 for bucket in $PLUGIN_BUCKETS; do
   side="plugins/$bucket"
@@ -327,38 +327,30 @@ if [ -d ".claude/output-styles" ]; then
   done < <(find .claude/output-styles -mindepth 1 -maxdepth 1 | sort)
 fi
 
-# 16. コメントの判定基準が、常駐する3か所すべてに本文として載っている。スキルは呼ばれて
-#     初めて読まれるが、コメントを書く場面でモデルはスキルを呼ばない — 参照 1 行に痩せた
-#     瞬間に規律は効かなくなり、しかも症状が出ない。4本の柱を別に見るのはテストの宛先を
-#     その1行だけが運んでいるため、優先順位の句を別に見るのはハーネス側の「周囲のコードに
-#     合わせろ」と正面からぶつかる唯一の行だからである。
-#     see AGENTS.md, .agents/adr/0003-never-start-from-init-output.md
-for resident in output-styles/kjfsm.md AGENTS.md skills/kjfsm-skills/engineering/setup-skills/SKILL.md; do
-  grep -q 'コミットログには Why、コードコメントには Why not' "$resident" ||
-    err "$resident lost the four pillars; without them tests have no destination and the routing lives only in a skill nobody calls"
-  grep -q 'コードを読めば分かることは書かない' "$resident" ||
-    err "$resident lost the comment rule's opening test; the convention only works while its body is resident"
-  grep -q '採らなかった素直な書き方' "$resident" ||
-    err "$resident lost what a comment may carry; a pointer to where-to-write-what does not fire on its own"
-  grep -q 'コメントの密度ではない' "$resident" ||
-    err "$resident lost the precedence clause; without it the harness's match-the-surrounding-code line and this rule point opposite ways and the model picks silently"
-done
-
-# 16b. 3か所の段落が一字一句そろっている。目印の語句だけを見ていると、段落の残りが
-#      片方だけ書き換わってもすり抜ける。
-for opening in 'コードを読めば分かることは書かない' 'コメントが運ぶのは' 'JSDoc・コミットメッセージ'; do
-  variants="$(for resident in output-styles/kjfsm.md AGENTS.md skills/kjfsm-skills/engineering/setup-skills/SKILL.md; do
-    grep -m1 "^$opening" "$resident"
-  done | sort -u | wc -l)"
-  [ "$variants" -eq 1 ] ||
-    err "the paragraph starting '$opening' differs across the three resident copies; make them identical"
-done
+# 16. コメントの判定基準が、常駐の写しの源(AGENTS.md)に本文として載っている。スキルは
+#     呼ばれて初めて読まれるが、コメントを書く場面でモデルはスキルを呼ばない — 参照 1 行に
+#     痩せた瞬間に規律は効かなくなり、しかも症状が出ない。写しが源と一字一句そろうのは
+#     4. が見る。4本の柱を別に見るのはテストの宛先をその1行だけが運んでいるため、
+#     優先順位の句を別に見るのはハーネス側の「周囲のコードに合わせろ」と正面からぶつかる
+#     唯一の行だからである。see .agents/adr/0004-enforce-comment-conventions-in-three-layers.md
+grep -q 'コミットログには Why、コードコメントには Why not' AGENTS.md ||
+  err "AGENTS.md lost the four pillars; without them tests have no destination and the routing lives only in a skill nobody calls"
+grep -q 'コードを読めば分かることは書かない' AGENTS.md ||
+  err "AGENTS.md lost the comment rule's opening test; the convention only works while its body is resident"
+grep -q '採らなかった素直な書き方' AGENTS.md ||
+  err "AGENTS.md lost what a comment may carry; a pointer to where-to-write-what does not fire on its own"
+grep -q 'コメントの密度ではない' AGENTS.md ||
+  err "AGENTS.md lost the precedence clause; without it the harness's match-the-surrounding-code line and this rule point opposite ways and the model picks silently"
 
 # 17. コメントのフックが、出荷側(プラグイン)と自家用(このリポジトリ)の両方から
 #     実在する実行可能スクリプトを指している。そして 4本の柱を復唱していない —
 #     復唱した瞬間にこれは常駐 3か所(検査 16.)の同期先 4つ目になり、フックが
 #     黙って壊れた日に、揃っていない本文だけが残る。see AGENTS.md
 hook_script="hooks/nudge-comment-check.sh"
+# 判定はフックと prune-comments の手順0が共有する。消えるとフックは黙って通す。
+comment_lib="skills/kjfsm-skills/engineering/prune-comments/scripts/comment-lines.sh"
+[ -x "$comment_lib" ] ||
+  err "$comment_lib is missing or not executable; the hook would silently pass every edit"
 if [ ! -x "$hook_script" ]; then
   err "$hook_script is missing or not executable; a hook that cannot run fails silently"
 else

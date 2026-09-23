@@ -23,22 +23,8 @@ input=$(cat)
 path=$(jq -r '.tool_input.file_path // empty' <<<"$input" 2>/dev/null) || exit 0
 [ -n "$path" ] || exit 0
 
-# `#` は Markdown の見出しでも YAML のキーでもあるので、コメント記法が一意に
-# 決まる拡張子だけを見る。
-case "${path##*.}" in
-  ts | tsx | js | jsx | mjs | cjs | go | rs | java | c | h | cc | cpp | hpp | cs | swift | kt | kts | scala | php | dart | vue | svelte | css | scss | less)
-    # `*/` を除外する: 数えると JSDoc 1ブロックが常に +1 に嵩上げされ、閉じ括弧
-    # だけの行が点検対象に混ざる。
-    pattern='^[[:space:]]*(//|/\*|\*[^/])' ;;
-  py | rb | sh | bash | zsh | pl | rake)
-    # `#!` を除外する: 素直な `#` だと shebang が数えられ、新規シェルスクリプトを
-    # 書くたびに必ず発火する。
-    pattern='^[[:space:]]*#($|[^!])' ;;
-  sql)
-    pattern='^[[:space:]]*--' ;;
-  *)
-    exit 0 ;;
-esac
+lib="$(dirname "${BASH_SOURCE[0]}")/../skills/kjfsm-skills/engineering/prune-comments/scripts/comment-lines.sh"
+pattern=$("$lib" pattern "$path") || exit 0
 
 count() {
   grep -cE "$pattern" <<<"$1" || true

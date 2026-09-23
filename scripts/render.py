@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-"""スキル一覧を SKILL.md の frontmatter から書き出す。
+"""手で同期していた写しを、1つの源から書き出す。
 
-一覧の各項目は `description` そのものである。要約を別に書くと、トップの README と
-バケットの README とで同じスキルの要約が2部になり、片方だけ直る日が来る。
-
-書き出し先:
+スキル一覧 — 各項目は `description` そのものである。要約を別に書くと、トップの
+README とバケットの README とで同じスキルの要約が2部になり、片方だけ直る日が来る。
   - README.md の `<!-- catalog:begin <バケット> -->` 〜 `<!-- catalog:end -->`
   - skills/**/README.md の `<!-- catalog:begin -->` 〜 `<!-- catalog:end -->`
   - .claude-plugin/plugin.json の `skills` 配列(昇格済みのバケットだけ)
 
+コメントの判定基準 — 常駐3か所に本文として要る(ADR 0004)。源は AGENTS.md で、
+出力スタイルと setup-skills のテンプレートへ写す。後者はコードフェンスの中にあり、
+目印のコメントを置くとテンプレートごと配布先へ写るので、区間は段落の書き出しで探す。
+
 使い方:
-  scripts/render-catalog.py           書き出す
-  scripts/render-catalog.py --check   書き込まず、ずれを報告して非ゼロで抜ける
+  scripts/render.py           書き出す
+  scripts/render.py --check   書き込まず、ずれを報告して非ゼロで抜ける
 """
 
 import json
@@ -96,16 +98,32 @@ def render_plugin():
     return text, new
 
 
+RULE_SOURCE = REPO / "AGENTS.md"
+RULE_COPIES = [REPO / "output-styles/kjfsm.md", REPO / "skills/kjfsm-skills/engineering/setup-skills/SKILL.md"]
+RULE_SPAN = re.compile(r"^\*\*コードには How.*?^JSDoc・コミットメッセージ[^\n]*$", re.S | re.M)
+
+
+def render_rule(path):
+    rule = RULE_SPAN.search(RULE_SOURCE.read_text(encoding="utf-8"))
+    if not rule:
+        sys.exit(f"{RULE_SOURCE.relative_to(REPO)} lost the comment rule; it is the source for the resident copies")
+    text = path.read_text(encoding="utf-8")
+    if not RULE_SPAN.search(text):
+        sys.exit(f"{path.relative_to(REPO)} lost the comment rule; restore the span from AGENTS.md and re-render")
+    return text, RULE_SPAN.sub(lambda _: rule.group(0), text, count=1)
+
+
 def main():
     check = sys.argv[1:] == ["--check"]
     if sys.argv[1:] and not check:
-        sys.exit("usage: render-catalog.py [--check]")
+        sys.exit("usage: render.py [--check]")
 
     targets = [(REPO / "README.md", render_regions(REPO / "README.md", lambda b: (b, f"./skills/{b}/"), PROMOTED))]
     for readme in sorted((REPO / "skills").glob("**/README.md")):
         bucket = str(readme.parent.relative_to(REPO / "skills"))
         targets.append((readme, render_regions(readme, lambda _, b=bucket: (b, "./"), [None])))
     targets.append((PLUGIN, render_plugin()))
+    targets += [(p, render_rule(p)) for p in RULE_COPIES]
 
     drift = False
     for path, (old, new) in targets:
@@ -114,13 +132,13 @@ def main():
         drift = True
         rel = path.relative_to(REPO)
         if check:
-            print(f"DRIFT: {rel} is not what render-catalog.py would write", file=sys.stderr)
+            print(f"DRIFT: {rel} is not what render.py would write", file=sys.stderr)
         else:
             path.write_text(new, encoding="utf-8")
             print(f"rendered {rel}")
 
     if check and drift:
-        print("run scripts/render-catalog.py to fix", file=sys.stderr)
+        print("run scripts/render.py to fix", file=sys.stderr)
         sys.exit(1)
 
 

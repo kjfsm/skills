@@ -11,7 +11,7 @@
 
 すべてのスキルは、その `SKILL.md` のそばに `agents/openai.yaml` も持つ。そこには Codex の UI メタデータ — スキルピッカー用の `interface.display_name` と `interface.short_description` — と、ユーザー呼び出し型のスキルについては `disable-model-invocation` と対になる `policy.allow_implicit_invocation: false` が入る。この2つは同期させておくこと: あるスキルは両方のハーネスでユーザー呼び出し型か、どちらでもないかのいずれかである。
 
-昇格済みバケットの `README.md` とトップレベルの `README.md` は、エントリを **ユーザー呼び出し型** と **モデル呼び出し型** にグループ分けする(`scripts/render-catalog.py` が frontmatter から書き出す)。
+昇格済みバケットの `README.md` とトップレベルの `README.md` は、エントリを **ユーザー呼び出し型** と **モデル呼び出し型** にグループ分けする(`scripts/render.py` が frontmatter から書き出す)。
 
 ## それらの間の依存関係
 

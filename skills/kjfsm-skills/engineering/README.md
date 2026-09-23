@@ -17,7 +17,6 @@
 **モデル呼び出し型**
 
 - **[ai-efficiency](./ai-efficiency/SKILL.md)** — 大量のファイル移動・リネーム・import 付け替えを、1ファイルずつ読み書きせずシェルで機械的に処理する戦略。「大量リネーム」「一括置換」「ディレクトリ再編」「import パスの一括付け替え」などで参照する。
-- **[create-tests](./create-tests/SKILL.md)** — Cloudflare Workers のプロジェクトで、テストが1本も無いところからテストを作り始めるときの規律。Workers / D1 / Durable Objects / Queues にテストを入れたいとき、@cloudflare/vitest-plugin をどう設定するか決めたいとき、何からテストすればいいか分からないときに使う。
 - **[d1-bound-parameters](./d1-bound-parameters/SKILL.md)** — Cloudflare D1 へ多数の値を渡すクエリの規律 — bound parameter は1文あたり100個まで。`D1_ERROR: too many SQL variables` が出たとき、D1 へ大量の行を INSERT するとき、`inArray` / `IN (...)` に長い ID の列を渡すとき、`db.batch()` で分割するときに使う。
 - **[delegation](./delegation/SKILL.md)** — 作業をサブエージェントの子コンテキストへ押し出し、タスクに見合ったモデル階層に回す判断。サブエージェントを起動するとき、大量の出力を伴う作業を始めるとき、他のスキルが委譲の語彙を必要とするときに使う。
 - **[dev-bypass-sign-in](./dev-bypass-sign-in/SKILL.md)** — 叩くだけでサインイン済みになる開発・E2E 用の入口(dev bypass)を作る。ログインの要る画面を E2E やエージェントから駆動したいとき、dev サーバーでソーシャルログインやパスワード登録を踏まずに座りたいとき、better-auth の `testUtils` の使いどころを決めるとき、既存の bypass の戸が本番の成果物に残っていないか確かめたいとき、他のスキルが認証済みのセッションを必要とするときに使う。
@@ -27,8 +26,6 @@
 - **[prune-comments](./prune-comments/SKILL.md)** — 書かれてしまったコメントを1パスで削る。コミットや PR を出す直前、コメントが冗長・AI が書いたように見える・整理したいとき、他のスキルがコメントの掃除を必要とするときに使う。順序の決まった6段のルールと非対称の残す基準を当て、実行ごとのばらつきを潰す。
 - **[prune-tests](./prune-tests/SKILL.md)** — 既存のテストを全部読み、削除・統合できるものを「消すと、どんな現実的な不具合を見逃すか」で洗い出す。テストが多すぎる・遅い・振る舞いを変えない変更のたびに大量に落ちるとき、テストを整理したい・減らしたいとき、他のスキルが削れるテストの判定を必要とするときに使う。
 - **[react-router-route-module](./react-router-route-module/SKILL.md)** — React Router（framework mode）の route module に何をどの export へ置くかの規律。認可ガードを足すとき、loader と action に同じチェックを書いているとき、レイアウトが持つ値を配下のコンポーネントへ渡したいとき、`useRouteLoaderData` と `<Outlet context>` のどちらを使うか迷ったとき、Cloudflare Workers の `env` を loader / action へ渡すときに使う。
-- **[react-router-worker-tests](./react-router-worker-tests/SKILL.md)** — SSR フレームワーク(React Router など)を `main` に載せた Cloudflare Worker のテストを組む規律。テストが1ファイルあたり十数秒かかるとき、`applyD1Migrations` が遅いとき、Worker を HTTP から叩く層を `createTestHarness` で作るとき、`main` に何を指すか決めるとき、SSR を載せた構成でテスト層を分け直すときに使う。
-- **[rebuild-tests](./rebuild-tests/SKILL.md)** — Cloudflare Workers のプロジェクトで、既存のテストスイートを立て直すときの規律。vitest.config が複雑すぎる、テストが遅い・OOM する、vi.mock だらけで信用できない、@cloudflare/vitest-plugin（旧 @cloudflare/vitest-pool-workers）を上げたら壊れた、テストを消して作り直したい、というときに使う。
 - **[setup-cf-access](./setup-cf-access/SKILL.md)** — Cloudflare Access を Worker・ホスト名・パスに、いつもの3層ルール(人間=指定メール / 機械=サービストークン / アプリ側に認証があるパス=bypass)で掛ける。「Access を掛ける」「認証を必要にする」「workers.dev が素通り」「Zero Trust のアプリを作る」で参照する。
 - **[setup-cf-app](./setup-cf-app/SKILL.md)** — 新規の Cloudflare Workers フルスタックアプリを、いつも使う標準ライブラリ構成で立ち上げる。「環境構築」「新規プロジェクト」「新しいアプリを作る」「セットアップ」「スキャフォールド」などで参照する。
 - **[setup-ci](./setup-ci/SKILL.md)** — 記録された検証ゲートを CI に敷き、ローカルの規律を機構に変える。ゲートを強制する仕組みがまだ無いとき（CI が無い、あるいは誰も走らせていない）、CI が `docs/agents/verification.md` とずれてきたとき、`/kjfsm-skills:setup-repo` の工程 C として使う。
@@ -39,5 +36,6 @@
 - **[two-axis-review](./two-axis-review/SKILL.md)** — 固定した基点(コミット、ブランチ、タグ、マージベース)からの変更を二軸でレビューする — Standards(このリポジトリの明文化されたコーディング標準)と Spec(元のイシュー/PRD)。両方を並列サブエージェントで実行し、結果を並べて報告する。ユーザーがブランチ・PR・進行中の変更をレビューしたいとき、「X 以降をレビューして」と求めたとき、他のスキルが差分のレビューを必要とするときに使う。
 - **[verification-loop](./verification-loop/SKILL.md)** — 変更が本当に動くことを、記録された検証ゲートのクリーンラン — 型チェック、lint、テスト、ビルド、そして実際に動かしての観測 — で確かめる。ユーザーが動作確認や検証を求めたとき、変更を完了と宣言する前(コミットや PR を出す直前)、他のスキルが作業の検証を必要とするときに使う。
 - **[where-to-write-what](./where-to-write-what/SKILL.md)** — コード・テスト・コメント・JSDoc・コミットメッセージ・PR 本文・ADR・docs のどこに何を書くかを決めるルーティング規律 — コードには How、テストには What、コミットログには Why、コメントには Why not。コメントを書くか消すか判断するとき、JSDoc に何を載せるか決めるとき、コミットメッセージや PR 本文を書くとき、README を足すか迷ったとき、実装の背景や設計判断をどこに残すか迷ったときに使う。
+- **[workers-tests](./workers-tests/SKILL.md)** — Cloudflare Workers のプロジェクトでテストスイートを作る・立て直すときの規律。テストが1本も無いところから始めるとき、vitest.config が複雑すぎる・テストが遅い・OOM する・vi.mock だらけで信用できないとき、@cloudflare/vitest-plugin(旧 @cloudflare/vitest-pool-workers)を上げたら壊れたとき、React Router などの SSR を `main` に載せていて1ファイルに十数秒かかる・`applyD1Migrations` が遅い・`createTestHarness` で HTTP の層を作るとき、Workers / D1 / Durable Objects / Queues にテストを入れたいときに使う。
 
 <!-- catalog:end -->

@@ -6,13 +6,11 @@
 
 `/mattpocock-skills:tdd` はテストを書ける土台を前提にする。Cloudflare Workers のリポジトリでその土台が揃っていない、あるいは信用できないなら、先にこちらを通す。
 
-- **`/kjfsm-skills:create-tests`** — テストが1本も無い
-- **`/kjfsm-skills:rebuild-tests`** — 既存のスイートが遅い・OOM する・`vi.mock` だらけ
-- **`/kjfsm-skills:react-router-worker-tests`** — SSR を `main` に載せていて、1ファイルに十数秒かかる
+**`/kjfsm-skills:workers-tests`**。テストが1本も無い、既存のスイートが遅い・OOM する・`vi.mock` だらけ、SSR を `main` に載せていて1ファイルに十数秒かかる — どれもここから入り、状況ごとの参照ファイルへ分かれる。
 
 ## テストが多すぎる、振る舞いを変えないのに大量に落ちる
 
-**`/kjfsm-skills:prune-tests`**。スタックを問わない。足場(設定・モックの構造)ではなく、書かれてしまった中身が重いときに入る。各テストを「消すと、どんな現実的な不具合を見逃すか」で判定し、削除・統合の候補を並べて止まる — 消すのはユーザーが選んでから。足場ごと崩れているなら先に `/kjfsm-skills:rebuild-tests`。
+**`/kjfsm-skills:prune-tests`**。スタックを問わない。足場(設定・モックの構造)ではなく、書かれてしまった中身が重いときに入る。各テストを「消すと、どんな現実的な不具合を見逃すか」で判定し、削除・統合の候補を並べて止まる — 消すのはユーザーが選んでから。足場ごと崩れているなら先に `/kjfsm-skills:workers-tests`。
 
 ## スタック固有の規律
 

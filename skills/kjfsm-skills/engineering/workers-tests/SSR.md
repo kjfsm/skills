@@ -1,13 +1,18 @@
----
-name: react-router-worker-tests
-description: SSR フレームワーク(React Router など)を `main` に載せた Cloudflare Worker のテストを組む規律。テストが1ファイルあたり十数秒かかるとき、`applyD1Migrations` が遅いとき、Worker を HTTP から叩く層を `createTestHarness` で作るとき、`main` に何を指すか決めるとき、SSR を載せた構成でテスト層を分け直すときに使う。
----
+# SSR を `main` に載せた Worker
 
-# React Router を載せた Worker のテスト
-
-`create-tests` が「ゼロから何をどこに置くか」、`rebuild-tests` が「壊れたスイートをどう建て直すか」なら、ここが持つのは **`main` に SSR アプリが載っているときにだけ起きること** である。
+[SKILL.md](SKILL.md) の共通の規律に加えて、**`main` に SSR アプリが載っているときにだけ起きること**。
 
 素の Worker では出てこない。`wrangler.jsonc` の `main` が `workers/app.ts` で、それが `virtual:react-router/server-build` を import している構成でだけ、テストの値段が桁で変わる。
+
+## 目次
+
+- 費用は「実行」ではなく `main` が決める
+- 層は3つになる
+- エントリを切り出す
+- `createTestHarness` の実務
+- アプリ側に1つだけ手が要る
+- 公式が引いている線(React Router)
+- 自分の環境で測り直す
 
 ## 費用は「実行」ではなく `main` が決める
 
@@ -30,7 +35,7 @@ description: SSR フレームワーク(React Router など)を `main` に載せ�
 
 ## 層は3つになる
 
-`create-tests` の「node と workerd の2つ」は `main` が軽いときの話である。SSR を載せると、**Worker を HTTP で叩く層**と**バインディングに直に触る層**を分ける価値が出る。
+[SKILL.md](SKILL.md) の「node と workerd の2つ」は `main` が軽いときの話である。SSR を載せると、**Worker を HTTP で叩く層**と**バインディングに直に触る層**を分ける価値が出る。
 
 | 層         | 何に話しかけるか                      | ランタイム                       | 固定費/file |
 | ---------- | ------------------------------------- | -------------------------------- | ----------- |
@@ -56,6 +61,16 @@ export default {
 ```ts
 export { Live } from "../../workers/live";
 ```
+
+## エントリを切り出す
+
+React Router などの SSR フレームワークを使っている場合、`workers/app.ts` のようなエントリは仮想モジュール（`virtual:react-router/server-build`）を import している。**フレームワークの Vite プラグインを vitest の config にも載せれば解決はする** — ただしそのとき、SSR のモジュールグラフが **テストファイルごとに** 変換・評価される（実測 15.2 秒/file）。載せなければ `main` に指定した時点で解決に失敗する。どちらに転んでも、この `main` を全テストの土台にはしない(→ 上の表)。
+
+fetch/queue/scheduled の実体を、SSR ディスパッチャを引数で受け取る関数として切り出す。テストは最小のエントリからそれを組み立て、SSR だけを fake に差し替える。SSR を実際に通す検証は、本番ビルドを起動する `createTestHarness()` の担当になる。
+
+**切り出しは、エントリに fetch 層のロジックが乗ってからでよい。** 委譲 1 行しかない段階で切ると、空のシームが 1 つ増えるだけである（足場と同じ判定 — [START.md](START.md) の「最初の 1 本」）。
+
+ただし **型プロジェクトの側は最初から巻き込まれる**。`wrangler types` が吐く `worker-configuration.d.ts` は `mainModule` を `typeof import("./workers/app")` と型付けするので、このファイルを `include` したテスト用 tsconfig は **エントリごと引き込む**。テストが一度も import していなくても、そのプロジェクトはフレームワークの typegen 出力（`.react-router/types`）と `vite/client` を要求し始める。`Cannot find module 'virtual:…'` がテスト側の tsconfig から出たら、これである。
 
 ## `createTestHarness` の実務
 

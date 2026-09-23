@@ -1,3 +1,0 @@
-interface:
-  display_name: "テストを立て直す"
-  short_description: "崩れたテストスイートを立て直す"

@@ -59,7 +59,7 @@ better-auth 一般の組み方は、better-auth 公式の [better-auth/skills](h
 - Worker の `env` を loader / action へ渡す → `react-router-route-module` スキル
 - E2E のサーバー → `setup-playwright` スキル
 - マイグレーションの安全検査(検査スクリプトと再生テスト)を検証ゲートに置く → `migrate-d1` スキルの「再発を止める」
-- テストのタイムゾーンの固定 → `create-tests` スキル
+- テストのタイムゾーンの固定 → `workers-tests` スキル
 
 テンプレートのコードには、このスキル群が理由を持っている判断についてコメントを書かない — 同じ Why not が2か所に載り、片方だけ直る日が来る。スキルに無い Why not が見つかったら、テンプレートへのコメントより先にスキルへ足す。
 

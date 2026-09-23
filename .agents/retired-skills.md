@@ -11,6 +11,7 @@
 - **request-refactor-plan** — インタビューから小さなコミット単位のリファクタ計画を作る。本家の `to-spec` → `to-tickets` を使う。
 - **setup-pre-commit** — husky + lint-staged の pre-commit を敷く。git hook の層は `/kjfsm-skills:setup-hooks` が持ち、lefthook を既定に pre-commit を1秒未満に保つ — このスキルはどちらの判断とも逆を敷いていた。
 - **ubiquitous-language** — 会話から DDD のユビキタス言語の用語集を抽出する。本家の `domain-modeling` が `CONTEXT.md` を保守する。
+- **create-tests / rebuild-tests / react-router-worker-tests** — 冒頭が互いの違いの説明で、呼ぶ側はクラスタ全体を知らないと1本を選べず、「壊して確かめる」などが重複していた。`/kjfsm-skills:workers-tests` に統合し、状況ごとの参照ファイル(START / REBUILD / SSR)に分けた。
 - **help-skills** — README の一覧の URL を1行返すだけで、interface と中身が同じ大きさだった。`/kjfsm-skills:ask-kjfsm` の冒頭が URL を持つ。
 
 ## 本家の写しだったもの(2026-09-23)

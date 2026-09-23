@@ -1,3 +1,0 @@
-interface:
-  display_name: "テストを作り始める"
-  short_description: "テストがゼロの状態からテストスイートを立ち上げる"

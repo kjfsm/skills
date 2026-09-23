@@ -1,6 +1,6 @@
 ---
 name: react-router-route-module
-description: React Router（framework mode）の route module に何をどの export へ置くかの規律。認可ガードを足すとき、loader と action に同じチェックを書いているとき、レイアウトが持つ値を配下のコンポーネントへ渡したいとき、`useRouteLoaderData` と `<Outlet context>` のどちらを使うか迷ったときに使う。
+description: React Router（framework mode）の route module に何をどの export へ置くかの規律。認可ガードを足すとき、loader と action に同じチェックを書いているとき、レイアウトが持つ値を配下のコンポーネントへ渡したいとき、`useRouteLoaderData` と `<Outlet context>` のどちらを使うか迷ったとき、Cloudflare Workers の `env` を loader / action へ渡すときに使う。
 ---
 
 # React Router の route module に何をどこへ置くか
@@ -56,6 +56,17 @@ middleware に寄せない — ルートごと止めると、読む手段まで�
 | ---------------------------------- | --------------- |
 | このロールはこの画面に入れない     | `middleware`    |
 | 画面は見せるが、この操作はさせない | `action` の入口 |
+
+## Cloudflare Workers の `env` を loader / action へ渡す
+
+Worker の `env` も、middleware が配る値と同じ経路で渡す。`createContext` でキー
+（`cloudflareContext` など）を作り、`workers/app.ts` の `fetch` で `RouterContextProvider` に
+`{ env, ctx }` を `set` して `requestHandler` へ渡す。loader / action / middleware は
+`context.get(cloudflareContext)` で受ける。素のオブジェクトを load context として渡す形は、
+`middleware` を持つルートが1つでもあると実行時に invariant で落ちる(型もビルドも通る)。
+
+モジュールの先頭で `cloudflare:workers` の `env` から組まない — 組んだものがリクエストの外で
+固定され、オリジンのようにリクエストから取るべき値を env に固定値で持つことになる。
 
 ## 画面で隠すのは強制ではない
 

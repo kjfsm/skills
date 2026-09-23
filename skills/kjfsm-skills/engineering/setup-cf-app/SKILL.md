@@ -25,33 +25,46 @@ description: 新規の Cloudflare Workers フルスタックアプリを、い�
 | テスト          | Vitest(+ `@cloudflare/vitest-plugin`)+ Playwright(E2E)                    |
 | 型              | `wrangler types` + `react-router typegen` + `tsc -b`                      |
 
-## 準備・設定の参照先
+## init の落とし穴
 
-各ツールの init と config は公式手順に従う。固定テンプレは持たず、都度最新を確認する。手元にあれば次のオンデマンドスキルを併用する:
-`cloudflare` / `wrangler` / `react-router-framework-mode` / `shadcn` / `durable-objects` / `better-auth-best-practices`。
+各ツールの init と config は公式手順に従う。固定テンプレは持たず、都度最新を確認する。手元にあれば次のオンデマンドスキルを併用する: `cloudflare` / `wrangler` / `durable-objects`(Cloudflare 公式のプラグイン)、`react-router-framework-mode` / `shadcn`。
 
 - スキャフォールドは C3(`pnpm create cloudflare@latest --framework=react-router`)を起点に、各ツールの公式 init(shadcn / oxlint / oxfmt / create-playwright)を実行する。
 - **C3 の直後、各ツールの init より前に `pnpm up --latest` を実行する。** テンプレートが固定している版は最新から遅れていることがあり、その上に init を重ねると古い版に合わせた config ができる。範囲を無視してメジャーまで上がるので、テンプレートにある typecheck と build が通るのを確かめ、別コミットにしてから init へ進む — 混ぜると、赤くなったときに上げた依存と足したものの切り分けがつかない。
 - **フラグを足すほど候補が減る init がある。** ここで挙げるのは版ではなく、公式手順を読んでも出てこない**黙って外れる挙動**である。止まった日は、この形を疑って `--help` で候補そのものを出す。
-  - C3 は `--lang` を渡すと **言語バリアントを持たないフレームワークをテンプレート候補から落とす**。`--platform` も同じで、プラットフォーム別バリアントを持たないものが外れる。どちらも「指定を通す」ではなく `Unsupported framework: <名前>` になるので、フラグが原因だと読めない。フレームワーク名だけを渡すのが確実
+  - C3 は `--lang` を渡すと **言語バリアントを持たないフレームワークをテンプレート候補から落とす**。React Router はバリアントを持たないので、「指定を通す」ではなく `Unsupported framework: react-router` になり、フラグが原因だと読めない。フレームワーク名だけを渡すのが確実
   - C3 の `-y`(`--accept-defaults`)は `--framework` より強い。**カテゴリの既定(Hello World)でテンプレートを作り、成功として終わる**。TTY が無くても `-y` は要らない — フレームワークを渡せば残りの問いは既定で進む。生成物の `package.json` に `react-router` があるかで確かめる
   - shadcn の init は **リポジトリルートの `tsconfig.json` しか見ない**。React Router のように import エイリアスを分割 tsconfig 側へ置くテンプレートでは `Could not find valid path aliases` で止まるので、ルートにも `paths` を同値で置く。TTY が無いときは `-t`・`-b` に加えて `-p <プリセット>` も渡す — `-y` はプリセットの選択を飛ばさず、**そこで入力待ちのまま止まる**
   - `react-router-auto-routes` は `app/routes.ts` を `autoRoutes()` の1行にし、URL を `app/routes/` の配置だけで決める。**フォルダは URL セグメントを作るが `<Outlet />` のネストは作らない** — `_layout.tsx` を置いて初めて包まれる。置き忘れても共有 UI が出ないだけでビルドもテストも通るので、生成された表は `react-router routes` で出して確かめる
 - **`pnpm up --latest` も `pnpm add` も peer の範囲を見ない。** 後から入れるプラグインが peer で上限を持つと(`@cloudflare/vitest-plugin` と `vitest` など)、先に入った最新が範囲外になる。プラグインを足したら peer を読み、範囲に揃える
-- D1/Drizzle・シークレット・E2E などプロジェクト固有の config は、その時点の公式手順で組む。そのうえで公式に書かれていない2つ:
-  - シークレットは `wrangler.jsonc` の `secrets.required` に名前を並べる。無いと `wrangler types` が手元の `.dev.vars` から型を拾い、**`.dev.vars` の無い CI でだけ型が変わる**
-  - E2E のサーバーを `vite preview` で立てない。ビルドが `.dev.vars` を `build/server/` へ複写し、preview はそれを優先してプロセス環境を見ないので、E2E 用の値が渡らない(`.dev.vars` の無い CI では秘密ごと欠ける)。`wrangler dev -c build/server/wrangler.json --env-file <E2E 用の env> --persist-to <E2E 専用>` で立てる
+- 重い UI ライブラリを足したら、まず `pnpm dev` で読み込めるかを見る。dev サーバーは workerd の中で動くので、事前バンドルから漏れた CJS の依存は `require is not defined` で落ちる
+
+## 型・lint・シークレット
+
 - C3 テンプレートの `postinstall: wrangler types` は外し、`worker-configuration.d.ts` をコミットして `wrangler types --check` を検証ゲートの先頭に置く。Workers Builds はデプロイのたびに `pnpm install` を走らせるので、残すと本番のビルドに型生成が混ざる
-- ⚠️ `worker-configuration.d.ts` は標準ライブラリの型を自前で持つ。tsconfig の `lib` を上げても `toSorted` など ES2023 以降は型に出ない
-- DB と better-auth はリクエストごとに組む。`env` は `workers/app.ts` で `RouterContextProvider` に載せて loader / action へ渡し、better-auth の `baseURL` はリクエストのオリジンから取る。モジュールの先頭で `cloudflare:workers` の `env` から組むと `BETTER_AUTH_URL` を固定値で持つことになり、dev・http テスト・E2E でホストやポートが変わるたびに揃え直す。auth の CLI には、同じオプションに空の値を渡すだけのファイルを `--config` で読ませる
-- 生成物(`worker-configuration.d.ts`・`.react-router/`・`build/`・better-auth のスキーマ・`migrations/`)と shadcn の `components/ui/` は、oxlint と oxfmt の両方で除外する
-- マイグレーションの安全検査(検査スクリプトと再生テスト)を検証ゲートに置く。中身は `/kjfsm-skills:migrate-d1` の「再発を止める」
-- テストのタイムゾーンは `/kjfsm-skills:create-tests` のとおり `vitest.config.ts` の先頭で固定する
-- React Router + Workers は CJS 依存パッケージで統合上の相性問題が出ることがある([cloudflare/workers-sdk#14555](https://github.com/cloudflare/workers-sdk/issues/14555) など)。重い UI ライブラリを足す前に現状を確認する。
+- シークレットは公式どおり `wrangler.jsonc` の `secrets.required` に並べる。**並べたキーしか `.dev.vars` / `.env` から読まれない** ので、開発用のフラグのように秘密でない値をそこに置くなら、それも並べる — 漏れると警告も出ずに `undefined` になる
+- 生成物(`worker-configuration.d.ts`・`.react-router/`・`build/`・better-auth のスキーマ・`migrations/`)と shadcn の `components/ui/` は、oxlint と oxfmt の **両方** で除外する。設定ファイルが別々なので、片方にだけ足すと、もう片方が生成物を直そうとする
+
+## better-auth
+
+better-auth 一般の組み方は、better-auth 公式の [better-auth/skills](https://github.com/better-auth/skills) にある `better-auth-best-practices` スキルが持つ(Claude Code のマーケットプレイスとしても、`npx skills` でも入る)。あちらは `BETTER_AUTH_URL` を env に置く前提で書かれているので、Workers では次の2点を優先する。
+
+- DB と better-auth はリクエストごとに組み、`baseURL` にはリクエストのオリジン(`new URL(request.url).origin`)を渡す。`BETTER_AUTH_URL` を env に置くと、dev・http テスト・E2E でホストやポートが変わるたびに揃え直す
+- スキーマ生成の CLI(`auth generate`)はオプションを読むだけで、DB にもシークレットにも触れない。アプリと同じオプションを組む関数に空の値(`{} as D1Database`・空文字・適当なオリジン)を渡すだけのファイルを置き、`--config` で読ませる。オプションを CLI 用に書き写すと、プラグインを足した日に片方だけが古くなり、生成されるスキーマからテーブルが欠ける
+
+## ほかのスキルが持つもの
+
+組むときに呼ぶ。
+
+- Worker の `env` を loader / action へ渡す → `react-router-route-module` スキル
+- E2E のサーバー → `setup-playwright` スキル
+- マイグレーションの安全検査(検査スクリプトと再生テスト)を検証ゲートに置く → `migrate-d1` スキルの「再発を止める」
+- テストのタイムゾーンの固定 → `create-tests` スキル
 
 テンプレートのコードには、このスキル群が理由を持っている判断についてコメントを書かない — 同じ Why not が2か所に載り、片方だけ直る日が来る。スキルに無い Why not が見つかったら、テンプレートへのコメントより先にスキルへ足す。
 
 ## 完了
 
 - [ ] 標準構成のライブラリが入り、各ツールの公式手順どおりに config が組まれている
+- [ ] 上の「ほかのスキルが持つもの」を呼び、当てはまるものを組んだ
 - [ ] `pnpm typecheck && pnpm lint && pnpm test` が green で、`pnpm dev` が起動する。叩く前にポートの空きを確かめる — 別のプロジェクトの dev サーバーが同じポートに居ると、自分は `Port already in use` で落ちたまま、**応答は他人のアプリから返り、書き込みも他人の DB に入る**

@@ -21,7 +21,7 @@ err() {
 PROMOTED_BUCKETS="kjfsm-skills/engineering kjfsm-skills/productivity"
 # バケットごとに専用のプラグイン(plugins/<バケット>/)で配るもの。全員には入れず、
 # 必要なリポジトリや端末で個別に有効にする。see .agents/adr/0005-ship-buckets-as-side-plugins.md
-PLUGIN_BUCKETS="kjfsm-emdash kjfsm-personal matt-skills-jp"
+PLUGIN_BUCKETS="kjfsm-emdash kjfsm-personal"
 PLUGIN=".claude-plugin/plugin.json"
 
 frontmatter() {
@@ -385,7 +385,7 @@ for manifest in hooks/hooks.json .claude/settings.json; do
     err "$manifest does not wire $hook_script; the repository would ship a discipline it does not run on itself"
 done
 
-# 18. `agents/` と `plugins/*/agents/` のサブエージェントが健全で、呼ぶ側と食い違っていない。プラグインは
+# 18. `agents/` のサブエージェントが健全で、呼ぶ側と食い違っていない。プラグインは
 #     このディレクトリを自動で拾う(`plugin.json` に列挙しない — 列挙と走査の両方に
 #     載ると同じエージェントが2度並ぶ)。壊れたときの症状は「そんな subagent_type は
 #     無い」で静かに汎用エージェントへ落ちるか、そもそも起動しないかであり、どちらも
@@ -404,7 +404,7 @@ while IFS= read -r agent; do
 
   grep -rq "\`$base\`" --include='*.md' skills ||
     err "$agent is named by no skill; nothing routes work to it"
-done < <(find agents plugins/*/agents -name '*.md' 2>/dev/null | sort)
+done < <(find agents -name '*.md' | sort)
 
 # verifier がゲートを回せるのは、直せないからである。編集ツールを持った瞬間、
 # 「ゲートは動かさない」は本文のお願いに戻る。see skills/kjfsm-skills/engineering/verification-loop
@@ -428,17 +428,12 @@ grep -q '本物の制約' agents/comment-pruner.md ||
 grep -q 'コードの言い直し' skills/kjfsm-skills/engineering/prune-comments/SKILL.md &&
   err "skills/kjfsm-skills/engineering/prune-comments/SKILL.md copies the graded rules that agents/comment-pruner.md owns"
 
-grep -q 'シームの裏に何を隠すか' plugins/matt-skills-jp/agents/interface-designer.md ||
-  err "plugins/matt-skills-jp/agents/interface-designer.md lost the five-item output contract; the designs would not be comparable"
-grep -q 'シームの裏に何を隠すか' skills/matt-skills-jp/codebase-design/DESIGN-IT-TWICE.md &&
-  err "skills/matt-skills-jp/codebase-design/DESIGN-IT-TWICE.md copies the output contract that plugins/matt-skills-jp/agents/interface-designer.md owns"
-
 grep -q 'モックの自己検証' agents/test-auditor.md ||
   err "agents/test-auditor.md lost the six categories; the audit would prune by taste"
 grep -q 'モックの自己検証' skills/kjfsm-skills/engineering/prune-tests/SKILL.md &&
   err "skills/kjfsm-skills/engineering/prune-tests/SKILL.md copies the categories that agents/test-auditor.md owns"
 
 if [ "$fail" -eq 0 ]; then
-  echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills, $(find agents plugins/*/agents -name '*.md' | wc -l | tr -d ' ') agents)"
+  echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills, $(find agents -name '*.md' | wc -l | tr -d ' ') agents)"
 fi
 exit "$fail"

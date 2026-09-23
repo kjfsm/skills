@@ -1,5 +1,0 @@
-interface:
-  display_name: "引き継ぎ"
-  short_description: "会話を引き継ぎドキュメントへ圧縮する"
-policy:
-  allow_implicit_invocation: false

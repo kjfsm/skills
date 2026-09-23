@@ -6,12 +6,13 @@ EmDash サイトに当ててきたパッチの記録。新しく当てたとき�
 
 ## 目次
 
-- [`@emdash-cms/admin`: 日時フィールドのタイムゾーン](#emdash-cmsadmin-日時フィールドのタイムゾーン)(2026-07-21〜)
+- [`@emdash-cms/admin`: 日時フィールドのタイムゾーン](#emdash-cmsadmin-日時フィールドのタイムゾーン)(2026-07-21〜2026-09-23、0.39.0 で上流が直した)
 - [`emdash`: Cloudflare Access 認証が、リクエストのたびにセッションを KV へ書き込む](#emdash-cloudflare-access-認証がリクエストのたびにセッションを-kv-へ書き込む)(2026-09-17〜)
 
 ## `@emdash-cms/admin`: 日時フィールドのタイムゾーン
 
 - **当て始めた日:** 2026-07-21
+- **外した日:** 2026-09-23(0.39.1 へ上げたとき)。上流 #3146(0.39.0)で、日時フィールドがサイト設定のタイムゾーン(`manifest.timezone`)で表示・入力するようになった。パッチで `+09:00` 付きのまま保存された値は、同じ版のコアマイグレーションが UTC の ISO 文字列へ正規化する
 - **直すファイル:** `dist/index.js`
 
 ### 当てる理由
@@ -61,6 +62,7 @@ EmDash サイトに当ててきたパッチの記録。新しく当てたとき�
 | 2026-09-08        | 0.36.0  |                                                              |
 | 2026-09-14        | 0.37.0  |                                                              |
 | 2026-09-16        | 0.38.0  |                                                              |
+| 2026-09-23        | 0.39.1  | 外した(上流 #3146)                                           |
 
 ## `emdash`: Cloudflare Access 認証が、リクエストのたびにセッションを KV へ書き込む
 
@@ -95,7 +97,8 @@ Workers の無料プランの KV の書き込みは、**アカウント全体で
 
 ```js
 /** [patched: …] Astro persists the session on every set(), even with an unchanged value — skip it so each authenticated request does not cost a KV write. */
-if ((await resolveSessionUser(session))?.id !== user.id) session?.set("user", { id: user.id });
+if ((await resolveSessionUser(session))?.id !== user.id)
+  session?.set("user", { id: user.id });
 ```
 
 - **`resolveSessionUser` を使う理由:** 同じファイルがすでに import している関数で、セッションの読み取りが止まってもリクエストを巻き込まない(#1274 の対策)。新しい import を足すと、`dist` のチャンク名が版ごとに変わるので上げたときに壊れる。
@@ -118,6 +121,13 @@ if ((await resolveSessionUser(session))?.id !== user.id) session?.set("user", { 
   - #733(匿名アクセスでのセッションの KV **読み取り**。解決済み)
   - #2054(Access 認証がリクエストのたびにユーザー名を上書きする。未解決。書き込み先は D1 で、名前が食い違うときだけ起きる)
 - **外せる条件:** 上流の `handleExternalAuth` が、同じユーザーのときに `session.set` を呼ばなくなったとき。
+
+### 作り直しの履歴
+
+| 日付       | 版     | メモ                             |
+| ---------- | ------ | -------------------------------- |
+| 2026-09-17 | 0.38.0 | 導入                             |
+| 2026-09-23 | 0.39.1 | 上流は同じ書き方のまま。作り直し |
 
 ### 残っている課題
 

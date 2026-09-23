@@ -94,7 +94,9 @@ pre-push:
 - **CI も同じコマンドを呼ぶ**(`/kjfsm-skills:setup-ci`)。⚠️ merge-base を使う検査は checkout に `fetch-depth: 0` が要る — 既定の 1 では解決できず、検査が**黙って飛ぶ**
 - **誤爆を潰す。** 禁止パターンを素の grep で探すと、その禁止を説明しているコメント本文や、ヒアドキュメントに書いた例に当たる。コメント・クォート内・ヒアドキュメントを落としてから判定する
 - **例外は理由付きの定数に登録する** — `KNOWN_*` のような配列に「なぜ安全か」を添える。許可そのものが確認の記録になる
-- `prepare: "lefthook install"` を `package.json` に入れる。入れないと clone した人のところで1本も走らない
+- `prepare: "lefthook install"` を `package.json` に入れる。入れないと clone した人のところで1本も走らない。pnpm では lefthook 自身のビルドスクリプトが要らないので、`pnpm-workspace.yaml` の `allowBuilds` に `lefthook: false` と書いて警告を黙らせる
+- ⚠️ CI を main への push 後だけで回すと、merge-base の検査は CI では空振りする(`/kjfsm-skills:setup-ci` の手順3)。そのとき止めるのは pre-push だけである
+- **正当な理由で1回だけ検査を越えるときは、`lefthook.yml` をコメントアウトしない。** コメントアウトはコミットに入り、戻し忘れた日からゲートが黙って外れる。`LEFTHOOK_EXCLUDE=<ジョブ名> git push` でその push だけ外し、理由を PR 本文に書く(例: テンプレートを作り直してマイグレーションの履歴ごと差し替える PR。旧 DB が存在しないことを確かめてから)
 
 ## 3. Claude フックの共通の骨格
 

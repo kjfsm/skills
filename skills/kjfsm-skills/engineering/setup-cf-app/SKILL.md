@@ -45,9 +45,11 @@ description: 新規の Cloudflare Workers フルスタックアプリを、い�
 - ⚠️ `worker-configuration.d.ts` は標準ライブラリの型を自前で持つ。tsconfig の `lib` を上げても `toSorted` など ES2023 以降は型に出ない
 - DB と better-auth はリクエストごとに組む。`env` は `workers/app.ts` で `RouterContextProvider` に載せて loader / action へ渡し、better-auth の `baseURL` はリクエストのオリジンから取る。モジュールの先頭で `cloudflare:workers` の `env` から組むと `BETTER_AUTH_URL` を固定値で持つことになり、dev・http テスト・E2E でホストやポートが変わるたびに揃え直す。auth の CLI には、同じオプションに空の値を渡すだけのファイルを `--config` で読ませる
 - 生成物(`worker-configuration.d.ts`・`.react-router/`・`build/`・better-auth のスキーマ・`migrations/`)と shadcn の `components/ui/` は、oxlint と oxfmt の両方で除外する
-- マイグレーションはテストでも CI でも空の D1 にしか流れないので、データが消えても気づけない。適用済みの書き換えと生成物のままの親テーブル再構築を検査スクリプトで弾き、外部キーを有効にした SQLite に1ファイル1トランザクションで流して行数を見るテストを置く(D1 側の事情は `/kjfsm-skills:migrate-d1`)
-- テストのタイムゾーンは `vitest.config.ts` の先頭で `process.env.TZ` に固定する。`test.env` は Node が日付を決めたあとに効くので固定されない
+- マイグレーションの安全検査(検査スクリプトと再生テスト)を検証ゲートに置く。中身は `/kjfsm-skills:migrate-d1` の「再発を止める」
+- テストのタイムゾーンは `/kjfsm-skills:create-tests` のとおり `vitest.config.ts` の先頭で固定する
 - React Router + Workers は CJS 依存パッケージで統合上の相性問題が出ることがある([cloudflare/workers-sdk#14555](https://github.com/cloudflare/workers-sdk/issues/14555) など)。重い UI ライブラリを足す前に現状を確認する。
+
+テンプレートのコードには、このスキル群が理由を持っている判断についてコメントを書かない — 同じ Why not が2か所に載り、片方だけ直る日が来る。スキルに無い Why not が見つかったら、テンプレートへのコメントより先にスキルへ足す。
 
 ## 完了
 

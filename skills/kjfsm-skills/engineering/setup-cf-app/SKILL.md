@@ -41,14 +41,14 @@ description: 新規の Cloudflare Workers フルスタックアプリを、い�
 
 ## 層ごとの組み方
 
-D1/Drizzle・シークレット・E2E などプロジェクト固有の config は、その時点の公式手順で組む。公式に書かれていないことは層ごとに次にある。組むときにそこを読む。
+D1/Drizzle・シークレット・E2E などプロジェクト固有の config は、その時点の公式手順で組む。公式に書かれていないことは層ごとに次にある。組むときにそこを読む(スキルは呼ぶ)。
 
 - 型の生成物・lint と format の除外・シークレットの型 → [reference/tooling.md](./reference/tooling.md)
 - better-auth を Workers で組む → [reference/auth.md](./reference/auth.md)
-- Worker の `env` を loader / action へ渡す → `/kjfsm-skills:react-router-route-module`
-- E2E のサーバー → `/kjfsm-skills:setup-playwright`
-- マイグレーションの安全検査(検査スクリプトと再生テスト)を検証ゲートに置く → `/kjfsm-skills:migrate-d1` の「再発を止める」
-- テストのタイムゾーンの固定 → `/kjfsm-skills:create-tests`
+- Worker の `env` を loader / action へ渡す → `react-router-route-module` スキル
+- E2E のサーバー → `setup-playwright` スキル
+- マイグレーションの安全検査(検査スクリプトと再生テスト)を検証ゲートに置く → `migrate-d1` スキルの「再発を止める」
+- テストのタイムゾーンの固定 → `create-tests` スキル
 
 テンプレートのコードには、このスキル群が理由を持っている判断についてコメントを書かない — 同じ Why not が2か所に載り、片方だけ直る日が来る。スキルに無い Why not が見つかったら、テンプレートへのコメントより先にスキルへ足す。
 

@@ -4,7 +4,7 @@
 
 C3 テンプレートの `postinstall: wrangler types` は外し、`worker-configuration.d.ts` をコミットして `wrangler types --check` を検証ゲートの先頭に置く。Workers Builds はデプロイのたびに `pnpm install` を走らせるので、残すと本番のビルドに型生成が混ざる。
 
-⚠️ `worker-configuration.d.ts` は標準ライブラリの型を自前で持つ。tsconfig の `lib` を上げても `toSorted` など ES2023 以降は型に出ない。
+⚠️ `worker-configuration.d.ts` は標準ライブラリの型を自前で持つ。tsconfig の `lib` を上げても `toSorted` など ES2023 以降は型に出ない。コピーしてから `sort()` するなど、ES2022 までの書き方で済ませる。
 
 ## シークレットは `secrets.required` に名前を並べる
 

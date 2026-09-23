@@ -18,7 +18,7 @@
 
 どれも `/kjfsm-skills:implement-and-review` と `/mattpocock-skills:tdd` の下敷きになる。呼び出さなくてよい — そのリポジトリのコードを書くときに、モデルが自分で手を伸ばす。
 
-- **`/kjfsm-skills:react-router-route-module`**(React Router framework mode)— 認可の強制点は `middleware`、レイアウトが持つ値は `<Outlet context>`
+- **`/kjfsm-skills:react-router-route-module`**(React Router framework mode)— 認可の強制点は `middleware`、レイアウトが持つ値は `<Outlet context>`、Worker の `env` は `RouterContextProvider` で渡す
 - **`/kjfsm-skills:drizzle-generate-non-interactive`** — TTY を求めるのは rename の判定だけ
 - **`/kjfsm-skills:migrate-d1`** — 再構築の生成物は D1 で子表を空にする
 - **`/kjfsm-skills:d1-bound-parameters`** — D1 の bound parameter は1文100個まで。SQL の中に閉じてから分割する

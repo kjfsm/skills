@@ -4,9 +4,7 @@ better-auth 一般の組み方(プラグイン、セッション、セキュリ�
 
 ## リクエストごとに組み、`baseURL` はオリジンから取る
 
-DB と better-auth はリクエストごとに組む。`env` は route の `context` から受け(→ `/kjfsm-skills:react-router-route-module`)、`baseURL` にはリクエストのオリジン(`new URL(request.url).origin`)を渡す。
-
-モジュールの先頭で `cloudflare:workers` の `env` から組まない。そうすると `BETTER_AUTH_URL` を固定値で持つことになり、dev・http テスト・E2E でホストやポートが変わるたびに揃え直す。
+DB と better-auth はリクエストごとに組む。`env` は route の `context` から受け(→ `react-router-route-module` スキル)、`baseURL` にはリクエストのオリジン(`new URL(request.url).origin`)を渡す。モジュールの先頭で組むと `BETTER_AUTH_URL` を固定値で持つことになり、dev・http テスト・E2E でホストやポートが変わるたびに揃え直す。
 
 ## CLI には空の値を渡すだけの設定ファイルを読ませる
 

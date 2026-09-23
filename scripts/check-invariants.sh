@@ -368,6 +368,16 @@ for resident in output-styles/kjfsm.md AGENTS.md skills/kjfsm-skills/engineering
     err "$resident lost the precedence clause; without it the harness's match-the-surrounding-code line and this rule point opposite ways and the model picks silently"
 done
 
+# 16b. 3か所の段落が一字一句そろっている。目印の語句だけを見ていると、段落の残りが
+#      片方だけ書き換わってもすり抜ける。
+for opening in 'コードを読めば分かることは書かない' 'コメントが運ぶのは' 'JSDoc・コミットメッセージ'; do
+  variants="$(for resident in output-styles/kjfsm.md AGENTS.md skills/kjfsm-skills/engineering/setup-skills/SKILL.md; do
+    grep -m1 "^$opening" "$resident"
+  done | sort -u | wc -l)"
+  [ "$variants" -eq 1 ] ||
+    err "the paragraph starting '$opening' differs across the three resident copies; make them identical"
+done
+
 # 17. コメントのフックが、出荷側(プラグイン)と自家用(このリポジトリ)の両方から
 #     実在する実行可能スクリプトを指している。そして 4本の柱を復唱していない —
 #     復唱した瞬間にこれは常駐 3か所(検査 16.)の同期先 4つ目になり、フックが

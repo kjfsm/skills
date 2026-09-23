@@ -25,6 +25,8 @@ REPO = pathlib.Path(__file__).resolve().parent.parent
 # check-invariants.sh もこの定数を読む。
 PROMOTED = ["kjfsm-skills/engineering", "kjfsm-skills/productivity"]
 PLUGIN = REPO / ".claude-plugin/plugin.json"
+# YAML が真と読む綴りのうち、frontmatter で実際に使われうるもの。check-invariants.sh も読む。
+TRUTHY = ("true", "yes", "on", "1")
 
 BEGIN = re.compile(r"<!-- catalog:begin(?: (\S+))? -->")
 END = "<!-- catalog:end -->"
@@ -52,14 +54,17 @@ def skills_in(bucket):
     out = []
     for skill_md in sorted((REPO / "skills" / bucket).glob("*/SKILL.md")):
         fm = frontmatter(skill_md)
-        user_invoked = fm.get("disable-model-invocation", "").lower() in ("true", "yes", "on", "1")
+        user_invoked = fm.get("disable-model-invocation", "").lower() in TRUTHY
         out.append((skill_md.parent.name, fm.get("description", ""), user_invoked))
     return out
 
 
 def entries(bucket, prefix):
     skills = skills_in(bucket)
-    line = lambda name, desc: f"- **[{name}]({prefix}{name}/SKILL.md)** — {desc}"
+
+    def line(name, desc):
+        return f"- **[{name}]({prefix}{name}/SKILL.md)** — {desc}"
+
     if bucket not in PROMOTED:
         return "\n".join(line(n, d) for n, d, _ in skills) or "(いまは無い)"
     groups = []
@@ -91,6 +96,8 @@ def render_regions(path, bucket_of, required):
 
 
 def render_plugin():
+    # json で読み書きしない: 書き戻すと oxfmt の整形(短い配列を1行に畳む)と食い違い、
+    # 再生成のたびに配列の外まで差分が出る。
     text = PLUGIN.read_text(encoding="utf-8")
     paths = [f"./skills/{b}/{n}" for b in PROMOTED for n, _, _ in skills_in(b)]
     body = ",\n".join(f"    {json.dumps(p)}" for p in paths)
@@ -101,6 +108,9 @@ def render_plugin():
 RULE_SOURCE = REPO / "AGENTS.md"
 RULE_COPIES = [REPO / "output-styles/kjfsm.md", REPO / "skills/kjfsm-skills/engineering/setup-skills/SKILL.md"]
 RULE_SPAN = re.compile(r"^\*\*コードには How.*?^JSDoc・コミットメッセージ[^\n]*$", re.S | re.M)
+# 4本の柱の1行だけを持つ写し。where-to-write-what は規約の本文ではなくルーティングを持つ。
+PILLAR = re.compile(r"^\*\*コードには How[^\n]*$", re.M)
+PILLAR_COPIES = [REPO / "skills/kjfsm-skills/engineering/where-to-write-what/SKILL.md"]
 
 
 def render_rule(path):
@@ -111,6 +121,14 @@ def render_rule(path):
     if not RULE_SPAN.search(text):
         sys.exit(f"{path.relative_to(REPO)} lost the comment rule; restore the span from AGENTS.md and re-render")
     return text, RULE_SPAN.sub(lambda _: rule.group(0), text, count=1)
+
+
+def render_pillar(path):
+    pillar = PILLAR.search(RULE_SOURCE.read_text(encoding="utf-8"))
+    text = path.read_text(encoding="utf-8")
+    if not pillar or not PILLAR.search(text):
+        sys.exit(f"{path.relative_to(REPO)} lost the four pillars line; restore it from AGENTS.md and re-render")
+    return text, PILLAR.sub(lambda _: pillar.group(0), text, count=1)
 
 
 def main():
@@ -124,6 +142,7 @@ def main():
         targets.append((readme, render_regions(readme, lambda _, b=bucket: (b, "./"), [None])))
     targets.append((PLUGIN, render_plugin()))
     targets += [(p, render_rule(p)) for p in RULE_COPIES]
+    targets += [(p, render_pillar(p)) for p in PILLAR_COPIES]
 
     drift = False
     for path, (old, new) in targets:

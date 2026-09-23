@@ -50,11 +50,18 @@ net_in_diff() {
 count() {
   local base total=0 f re n
   base=$(git merge-base "$1" HEAD) || exit 2
-  while IFS= read -r f; do
+  local status old
+  # リネームは旧名と新名を一緒に渡す。新名だけで差分を取ると、全行が追加に見える。
+  while IFS= read -r -d '' status; do
+    old=""
+    case "$status" in
+      R* | C*) IFS= read -r -d '' old ;;
+    esac
+    IFS= read -r -d '' f
     re=$(pattern "$f") || continue
-    n=$(git diff "$base" -- "$f" | net_in_diff "$re")
+    n=$(git diff -M "$base" -- ${old:+"$old"} "$f" | net_in_diff "$re")
     [ "$n" -gt 0 ] && total=$((total + n))
-  done < <(git diff -z --name-only "$base" | tr '\0' '\n')
+  done < <(git diff -z -M --name-status "$base")
   while IFS= read -r f; do
     re=$(pattern "$f") || continue
     total=$((total + $(git diff --no-index /dev/null "$f" | net_in_diff "$re")))

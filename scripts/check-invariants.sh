@@ -18,7 +18,11 @@ err() {
 
 # バケットは skills/ からの相対パスで数える。葉の名前だけで見ると、どこか別の場所に
 # engineering/ を作った日にそのスキルが昇格済みとして通ってしまう。
-PROMOTED_BUCKETS="$(python3 -c 'import sys; sys.path.insert(0, "scripts"); import render; print(" ".join(render.PROMOTED))')"
+from_render() {
+  python3 -c "import sys; sys.path.insert(0, 'scripts'); import render; print($1)"
+}
+PROMOTED_BUCKETS="$(from_render '" ".join(render.PROMOTED)')"
+TRUTHY_RE="$(from_render '"\\|".join(render.TRUTHY)')"
 # バケットごとに専用のプラグイン(plugins/<バケット>/)で配るもの。全員には入れず、
 # 必要なリポジトリや端末で個別に有効にする。see .agents/adr/0005-ship-buckets-as-side-plugins.md
 PLUGIN_BUCKETS="kjfsm-emdash kjfsm-personal"
@@ -120,7 +124,7 @@ while IFS= read -r skill_md; do
     # Read the frontmatter only — a skill body may quote these fields as an example.
     claude_user_invoked=no
     frontmatter "$skill_md" |
-      grep -qi '^disable-model-invocation:[[:space:]]*"\?\(true\|yes\|on\|1\)"\?[[:space:]]*$' &&
+      grep -qi "^disable-model-invocation:[[:space:]]*\"\\?\\($TRUTHY_RE\\)\"\\?[[:space:]]*\$" &&
       claude_user_invoked=yes
     codex_user_invoked=no
     grep -q 'allow_implicit_invocation:[[:space:]]*false' "$yaml" && codex_user_invoked=yes

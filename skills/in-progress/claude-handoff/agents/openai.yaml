@@ -1,5 +1,0 @@
-interface:
-  display_name: "Claude ハンドオフ"
-  short_description: "バックグラウンドエージェントへ引き継ぐ"
-policy:
-  allow_implicit_invocation: false

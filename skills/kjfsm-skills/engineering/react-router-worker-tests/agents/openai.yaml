@@ -1,3 +1,0 @@
-interface:
-  display_name: "React Router Worker Tests"
-  short_description: "Test layers for a Worker with SSR on main"

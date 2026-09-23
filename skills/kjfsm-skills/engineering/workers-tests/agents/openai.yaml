@@ -1,0 +1,3 @@
+interface:
+  display_name: "Workers のテスト"
+  short_description: "Cloudflare Workers のテストスイートを作る・立て直す"

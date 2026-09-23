@@ -1,5 +1,0 @@
-interface:
-  display_name: "ワークフローを設計する"
-  short_description: "作りたいワークフローの仕様を詰める"
-policy:
-  allow_implicit_invocation: false

@@ -1,3 +1,0 @@
-interface:
-  display_name: "Shoehorn への移行"
-  short_description: "テストの型アサーションを shoehorn に置き換える"

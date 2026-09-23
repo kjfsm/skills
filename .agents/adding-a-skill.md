@@ -1,6 +1,6 @@
 # このリポジトリにスキルを足す
 
-配線 — マニフェストへの登録、README への掲載、`agents/openai.yaml` の有無、2つのハーネスの呼び出し方式の一致、frontmatter の上限、参照ファイルの実在と階層 — は `scripts/check-invariants.sh` が機械的に検査する。**走らせて落ちた項目が、まだ済んでいない配線である。** 覚えておく必要はない。
+一覧 — トップと各バケットの README、`plugin.json` の `skills` 配列 — は `scripts/render.py` が frontmatter から書き出す。項目の文面は `description` そのもので、別に要約を書く場所は無い。残りの配線 — `agents/openai.yaml` の有無、2つのハーネスの呼び出し方式の一致、frontmatter の上限、参照ファイルの実在と階層 — は `scripts/check-invariants.sh` が機械的に検査する。**走らせて落ちた項目が、まだ済んでいない配線である。** 覚えておく必要はない。
 
 この文書が扱うのは、検査が見られない2つ: 走らせる前に下す **判断** と、検査に出ない **後始末** である。
 
@@ -12,11 +12,11 @@
 | -------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------- |
 | `kjfsm-skills/engineering/` `kjfsm-skills/productivity/` | **される**(`kjfsm-skills` + `npx skills`)               | 他人のリポジトリでも価値を持つもの                  |
 | `kjfsm-emdash/` `kjfsm-personal/`                        | **入れた場所にだけ**(`kjfsm-emdash` / `kjfsm-personal`) | 特定の CMS のサイト、自分の端末でだけ価値を持つもの |
-| `misc/` `in-progress/` `deprecated/`                     | されない(`npx skills` の個別指定でのみ届く)             | ほとんど使わないもの、下書き、退役したもの          |
+| `in-progress/`                                           | されない(`npx skills` の個別指定でのみ届く)             | 下書き                                              |
 
 判定は1問で済む: **これは他人のリポジトリで価値を持つか。** 持たないなら昇格しないバケットへ入れる — 昇格は後からできる。
 
-本家と同じ名前のスキルは昇格済みのバケットに置かない — `kjfsm-skills` は本家に依存しているので、同じ名前が2度並ぶ(→ [ADR 0006](./adr/0006-depend-on-upstream-ship-translation-separately.md))。
+本家と同じ名前のスキルはどのバケットにも置かない — `kjfsm-skills` は本家に依存しているので同じ名前が2度並び、未昇格でも写しの保守だけが残る。本家のものは本家から入れる(→ [ADR 0006](./adr/0006-depend-on-upstream-ship-translation-separately.md))。
 
 `kjfsm-emdash/`・`kjfsm-personal/` に足したら、`plugins/<バケット>/skills/<名前>` に `../../../skills/<バケット>/<名前>` へのシンボリックリンクを張る(張り忘れは検査 4b. が落とす)。
 
@@ -53,15 +53,16 @@ policy:
 
 **`name` に `claude` と `anthropic` を入れない。** 仕様上の禁止ではないので検査は落とさないが、Anthropic 側の検証(claude.ai へのアップロード、Skills API、`package_skill.py`)はこれを弾く。Claude Code プラグインと `npx skills` で配るぶんには当たらない一方、**個人スキルを Cowork やクラウドセッションで有効にする経路は claude.ai へのアップロードを通る** ので、そこでは弾かれる。トリガー語としての "CLAUDE.md" が要るなら `description` に書く — 予約語の制約がかかるのは `name` だけである。
 
-残っている例外は `claude-handoff` と `git-guardrails-claude-code` の2つで、どちらも未昇格なので配布経路に乗らない。昇格させるなら、そのときに改名する。(`tend-claude-md` は昇格済みだったので `tend-memory-files` に改名した。)
+(`tend-claude-md` はこの理由で `tend-memory-files` に改名した。)
 
 ## 4. 検査を走らせる
 
 ```
+scripts/render.py
 scripts/check-invariants.sh
 ```
 
-落ちた項目を潰す。README への追加も `plugin.json` への登録も、ここに出てくる。**クリーンになるまで、配線は済んでいない。**
+落ちた項目を潰す。**クリーンになるまで、配線は済んでいない。**
 
 `claude plugin validate .` も走らせてよいが、2点で当てにならない。リポジトリルートを渡すと `marketplace.json` しか検証せず、`plugin.json` の壊れたパスを見逃す。そして `--strict` は `version` 不在を error に格上げする — このリポジトリではそれが意図した状態である(→ `CLAUDE.md`)。
 
@@ -75,6 +76,15 @@ scripts/check-invariants.sh
 
 - **`scripts/link-skills.sh` を走らせる** — ローカルのハーネススキルディレクトリへのシンボリックリンクを張り直す。追加・削除・改名のあと。
 - **`pnpm format`** — CI が `format:check` で落とす。
+
+## 評価を足す
+
+`evals/` に `claude plugin eval` のケースを置く(形式と grader の選び方は [`OFFICIAL.md`](../skills/kjfsm-skills/productivity/writing-great-skills/OFFICIAL.md) の「評価と反復」)。回すのは `scripts/eval.sh` で、引数は `claude plugin eval` にそのまま渡る — リポジトリをそのまま対象にすると、依存の `mattpocock-skills` が満たせずプラグインごと無効になるので、依存を外した写しを組んで回す。
+
+- **発火** — `tags: [trigger]`。`tool_used: Skill` で発火を、`min: 0` / `max: 0` と `arm: both` で「近いが別のスキルが正解」の依頼で黙ることを見る
+- **効き目** — `tags: [uplift]`。素のモデルが外しやすい問いに `llm` grader を置き、スキル無しとの `Δ` を見る。**`Δ` が 0 に近いままなら、そのスキルはモデルに追い越されている** — 退役の候補である
+
+費用がかかるので CI では回さない。description を変えたとき、スキルを刈り込むか迷ったときに回す。
 
 ## エージェントを足す
 
@@ -92,7 +102,7 @@ scripts/check-invariants.sh
 
 ## マニフェストの決まり
 
-`plugin.json` の `skills` 配列は、既定の `skills/` スキャンに **追加** されるのが原則で、`marketplace.json` の `source` がマーケットプレイスのルート(`"./"`)に解決される場合に限り **置き換え** になる。昇格していないバケットがプラグインに載らないのはこの例外に乗っているからなので、`source` を変えるときは `deprecated/` や `in-progress/` が出荷対象に混ざらないか確認する。
+`plugin.json` の `skills` 配列は、既定の `skills/` スキャンに **追加** されるのが原則で、`marketplace.json` の `source` がマーケットプレイスのルート(`"./"`)に解決される場合に限り **置き換え** になる。昇格していないバケットがプラグインに載らないのはこの例外に乗っているからなので、`source` を変えるときは `in-progress/` や別プラグインのバケットが出荷対象に混ざらないか確認する。
 
 `version` を両方のマニフェストから省く理由は `AGENTS.md` が持つ。片方にでも書くと、その文字列が固定のキャッシュキーになって更新が止まる。
 
@@ -102,15 +112,15 @@ scripts/check-invariants.sh
 
 ディレクトリ名と frontmatter の `name` は一致していなければならない(仕様の要求であり、検査もする)。両方を同時に変える。
 
-そのうえで、名前を書いている場所すべてを追う: バケットの `README.md`、トップレベルの `README.md`、`plugin.json`、`ask-kjfsm`、そして**他のスキルの本文にある `/旧名` の文中呼び出し**。最後の1つは検査に出ない — `grep -rn '/旧名' skills/` で拾う。
+一覧は `scripts/render.py` を走らせ直せば追随する。残りは手で追う: `ask-kjfsm` と、**他のスキルの本文にある `/旧名` の文中呼び出し**。どちらも検査に出ない — `grep -rn '旧名' skills/ agents/` で拾う。
 
 改名後は `link-skills.sh` を走らせ、古い名前のシンボリックリンクを手で消す(スクリプトは張り直すだけで、消えた名前の後始末はしない)。リポジトリ側の `.claude/skills/` は `scripts/sync-project-skills.sh` が古い名前ごと張り直すので手当ては要らず、忘れれば検査 14. が落ちる。
 
 ## 昇格するとき
 
-`in-progress/` や `misc/` から `engineering/` か `productivity/` へ移す。
+`in-progress/` から `engineering/` か `productivity/` へ移す。
 
-ディレクトリを移動したら、あとは検査が要求してくる — トップレベル `README.md` への追加と `plugin.json` の `skills` 配列への登録。バケットの `README.md` は移動元から消し、移動先へ足す。昇格済みバケットとトップレベルの README は **ユーザー呼び出し型 / モデル呼び出し型** でグループ分けするので、正しい側へ入れる(昇格していないバケットの README はフラットなリストを使う)。掲載されているかは検査 4./5. が弾くが、**どちらのグループに入っているかは弾かない。**
+ディレクトリを移動したら `scripts/render.py` を走らせる — 両方のバケットの README、トップレベルの README、`plugin.json` が書き換わる。ユーザー呼び出し型 / モデル呼び出し型のグループ分けも frontmatter から決まる。
 
 `scripts/sync-project-skills.sh` を走らせ直す — 昇格したスキルはプラグインが配るようになるので、`.claude/skills/` のリンクは外れる(忘れれば検査 14. が落とす)。
 
@@ -118,6 +128,6 @@ scripts/check-invariants.sh
 
 ## 退役させるとき
 
-`deprecated/` へ移し、`deprecated/README.md` に **なぜ退役したかと、代わりに使うもの** を1行で書く — 書かないと、同じものをもう一度作る。`scripts/link-skills.sh` と `scripts/sync-project-skills.sh` はどちらもこのバケットを除外するので、走らせ直せばローカルのハーネスからも `.claude/skills/` からも消える。
+ディレクトリごと削除し、[`retired-skills.md`](./retired-skills.md) に **なぜ退役したかと、代わりに使うもの** を1行で書く — 書かないと、同じものをもう一度作る。本文は git 履歴が持つ。`scripts/sync-project-skills.sh` を走らせ直せば `.claude/skills/` からも消える。`scripts/link-skills.sh` は消えた名前の後始末をしないので、ローカルのリンクは手で消す。
 
-`plugin.json` とトップレベル `README.md` からは消える必要がある(検査が要求する)。`ask-kjfsm` からも消す。他のスキルがその名前を文中呼び出ししていないか `grep` で確かめる — 呼ばれたまま退役したスキルは、実行時に静かに何も起きない。
+一覧は `scripts/render.py` で追随させる。`ask-kjfsm` からは手で消す。他のスキルがその名前を文中呼び出ししていないか `grep` で確かめる — 呼ばれたまま退役したスキルは、実行時に静かに何も起きない。

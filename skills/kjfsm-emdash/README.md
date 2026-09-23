@@ -11,11 +11,15 @@ claude plugin install kjfsm-emdash@kjfsm --scope project
 
 **これらのスキルは EmDash API の一次情報源ではない。** 一次情報源は公式ドキュメント <https://docs.emdashcms.com/>(MCP サーバー `https://docs.emdashcms.com/mcp` の `search_docs` でも引ける)。各スキルには、**公式に書かれていないこと**と**公式が実装と食い違っていること**だけを書く。公式を読めば分かる内容をここに複製しない —— 複製は必ず古くなるため。
 
-- **[building-emdash-site](./building-emdash-site/SKILL.md)** — サイト構築時の落とし穴、公式ドキュメントが実装とズレている箇所(画像フィールドの `src`、`orderBy`、`cacheHint`、`supports`)、公式に一覧のない `emdash/ui` コンポーネント。EmDash の作業はまずここから。
-- **[caching-emdash-site](./caching-emdash-site/SKILL.md)** — Workers Cache でエッジHTMLキャッシュを入れるときの空振り。`routeRules` の catch-all が管理画面を巻き込むこと、`toolbar: false` が編集用応答の opt-out を落とすこと、`private, no-store` がキャッシュを止めず、ページで呼んだ `Astro.cache.set(false)` も後の取得で解除されること、その opt-out を middleware の `set(false)` だけで行う理由(ヘッダを書くと OAuth 認可が 500 になる)、MCP がエッジをパージしないこと、`Server-Timing` の `cache.hit` が KV ではないこと。キャッシュ MISS 時の遅さを決める、Worker を D1 primary に寄せる Targeted Placement(read replica とは併用しない)と primary の colo の調べ方、`swr` があっても低トラフィックでは数分で追い出されること、自分でオンにしない限り off の Smart Tiered Cache。
-- **[creating-plugins](./creating-plugins/SKILL.md)** — 公式が扱っていない npm 配布の `format: "standard"` ディスクリプタ形式、Block Kit の未文書化ブロック、`fields` を持たない Portable Text ブロックが管理エディタで壊れること。
-- **[emdash-cli](./emdash-cli/SKILL.md)** — エージェントから叩くときの自動公開の挙動、`--published`、Portable Text ⇄ markdown の変換仕様、本番の D1 から `export-seed` でシードを作り直す手順。
-- **[local-mcp-access](./local-mcp-access/SKILL.md)** — ローカル dev サーバーの MCP エンドポイント(`/_emdash/api/mcp`)をブラウザなしで叩く。`dev-bypass` + トークン API 経由での PAT 発行(MCP は bearer 専用で、公式の「セッション Cookie も使える」は実装と食い違う)、コア MCP ツールが公開していないプラグイン管理設定の読み書き、MCP にツールの無い操作を REST で行う方法、`wrangler d1 execute` による D1 テーブルの直接参照。
-- **[patching-emdash](./patching-emdash/SKILL.md)** — EmDash 本体の不具合を pnpm パッチで直す判断と手順。当てる前に上流の修正・issue・サイト側の回避を確かめる順序、実行時に読まれるのが `dist/` であること、peer 違いの複数インストールで `pnpm patch` が非 TTY で止まるときの手作り、版付きキーと上げるたびの作り直し、これまで当ててきたパッチの記録(日付・症状・上流の状況)、本番でしか通らない経路の前後比較。
-- **[setup-emdash-site](./setup-emdash-site/SKILL.md)** — `create emdash` で Cloudflare 向けのサイトを作って本番へ出す。非対話で止まらないフラグの組み合わせ、雛形のままのコミット、`wrangler.jsonc` に固定値で入る Worker・D1・R2 の名前、同梱の公式版スキルの kjfsm 版への差し替え、ユーザーが0人のあいだ本番の管理画面で誰でも管理者を作れること。版上げは `updating-emdash` へ引き継ぐ。
-- **[updating-emdash](./updating-emdash/SKILL.md)** — `create emdash` で作った直後のサイトを、初回だけ最新の EmDash に上げてテンプレートの遅れを取り戻す。公式テンプレートは依存の版だけが同期されコードは数版前のまま残ること、版に関係なく全項目を判定するやることリスト(判定の grep・対応・最初のデプロイ後の本番作業)、リストに無い変更を見つけたら足す運用。2度目以降の版上げは扱わない。
+<!-- catalog:begin -->
+
+- **[building-emdash-site](./building-emdash-site/SKILL.md)** — AstroでEmDash CMSサイトを構築・カスタマイズする。ページ作成、コレクション定義、シードファイル作成、コンテンツクエリ、Portable Textのレンダリング、メニュー/タクソノミー/ウィジェットのセットアップ、デプロイ設定など、EmDash搭載Astroサイトに関するあらゆるタスクで使用する。APIの一次情報源は公式ドキュメントで、このスキルは公式に載っていない落とし穴と公式と食い違う挙動を扱う。
+- **[caching-emdash-site](./caching-emdash-site/SKILL.md)** — EmDash + Cloudflare のサイトに Workers Cache でエッジHTMLキャッシュを入れる。本番のTTFBが遅い・しばらく経ってからの初回表示が遅いとき、D1 のリードレプリカや Worker の Placement を決めるとき、`routeRules` や `cacheCloudflare()` を設定するとき、キャッシュから外したい経路(検索・404・管理画面)があるとき、MCPや管理画面で更新したのにサイトに出ないとき、`Server-Timing` の `cache.hit`/`cache.miss` を読むときに使う。公式に無い落とし穴と、公式の素直な読みが実装と食い違う箇所だけを扱う。
+- **[creating-plugins](./creating-plugins/SKILL.md)** — フック、ストレージ、設定、管理UI、APIルート、Portable Textブロックタイプを備えたEmDash CMSプラグインを作成する。EmDashプラグインのビルド・スキャフォールド・実装を求められた場合や、カスタムブロックタイプ・管理ページ・コンテンツフックなどのプラグイン機能を作成する場合にこのスキルを使用する。APIの一次情報源は公式ドキュメントで、このスキルは公式が扱っていないnpm配布形式と実地の落とし穴を扱う。
+- **[emdash-cli](./emdash-cli/SKILL.md)** — コンテンツ、スキーマ、メディアなどを管理するためにEmDash CLIを使用します。実行中のEmDashインスタンスとコマンドラインからやり取りする必要があるとき——コンテンツの作成、コレクションの管理、メディアのアップロード、型の生成、CMS操作のスクリプト化など——にこのスキルを使用してください。コマンドの一覧は公式ドキュメントにあり、このスキルはエージェントから使う際の挙動の差分を扱います。
+- **[local-mcp-access](./local-mcp-access/SKILL.md)** — ローカルのEmDash devサーバーのMCPエンドポイント(/_emdash/api/mcp)をブラウザなしで叩く(dev-bypass経由でPATを発行、Bearer専用)。`emdash-site-local`コネクタが401/未認証のときの復旧もこれ。プラグイン自身の管理設定をBlock Kitの`form_submit`/`block_action`経由で読み書きする方法、および`wrangler d1 execute`(ローカル/`--remote`)でMCPが公開していない情報を直接SQLで読む方法もカバーする。
+- **[patching-emdash](./patching-emdash/SKILL.md)** — EmDash 本体(`emdash`・`@emdash-cms/*`)の不具合を、サイト側の pnpm パッチ(`patchedDependencies`)で直す。原因が node_modules の EmDash のコードにあると分かったとき、パッチを当てるか上げるか回避するか決めるとき、EmDash を上げて `ERR_PNPM_PATCH_FAILED` や版付きキーの不一致で install が落ちたとき、既存のパッチがまだ要るか確かめるときに使う。
+- **[setup-emdash-site](./setup-emdash-site/SKILL.md)** — 新しい EmDash サイトを Cloudflare Workers 向けに `create emdash` で作り、手元で動かして本番へ出すところまで進める。「EmDash のサイトを作りたい」「EmDash をセットアップ」「create emdash」「EmDash で新しいブログ/ポートフォリオを始める」、EmDash を初めてデプロイするときに使う。作ったあとの版上げは `updating-emdash` へ引き継ぐ。
+- **[updating-emdash](./updating-emdash/SKILL.md)** — `create emdash` で作った直後の EmDash サイトを、初回だけ最新の EmDash に上げ、テンプレートから引き継いだ古い書き方のコードを追いつかせる。`setup-emdash-site` から引き継いだとき、雛形のまま手を入れていないサイトでテンプレートの遅れを取り戻したいときに使う。2度目以降の版上げは扱わない。
+
+<!-- catalog:end -->

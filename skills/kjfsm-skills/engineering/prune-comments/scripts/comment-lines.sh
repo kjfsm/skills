@@ -5,7 +5,7 @@
 #   comment-lines.sh pattern <ファイルパス>   その拡張子のコメント行の ERE を出す。
 #                                            コメント記法が一意に決まらなければ終了コード 1
 #   comment-lines.sh count <基点>            マージベースから作業ツリー(未追跡を含む)までで
-#                                            増えたコメント行の正味の数を出す
+#                                            増えたコメント行の数を出す
 
 set -uo pipefail
 
@@ -43,18 +43,20 @@ net_in_diff() {
   '
 }
 
+# ファイルごとの正味の増分のうち、正のものだけを足す。全体で差し引くと、別のファイルを
+# 消した分が新しく書いたコメントを打ち消す。
 count() {
   local base total=0 f re n
   base=$(git merge-base "$1" HEAD) || exit 2
   while IFS= read -r f; do
     re=$(pattern "$f") || continue
-    if git ls-files --error-unmatch -- "$f" >/dev/null 2>&1; then
-      n=$(git diff "$base" -- "$f" | net_in_diff "$re")
-    else
-      n=$(git diff --no-index /dev/null "$f" | net_in_diff "$re")
-    fi
-    total=$((total + n))
-  done < <({ git diff --name-only "$base"; git ls-files --others --exclude-standard; } | sort -u)
+    n=$(git diff "$base" -- "$f" | net_in_diff "$re")
+    [ "$n" -gt 0 ] && total=$((total + n))
+  done < <(git diff --name-only "$base")
+  while IFS= read -r f; do
+    re=$(pattern "$f") || continue
+    total=$((total + $(git diff --no-index /dev/null "$f" | net_in_diff "$re")))
+  done < <(git ls-files --others --exclude-standard)
   echo "$total"
 }
 

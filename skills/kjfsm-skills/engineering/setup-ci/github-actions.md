@@ -9,7 +9,7 @@
 3. [検証ゲートのステップ](#3-検証ゲートのステップ)
 4. [E2E を足す](#4-e2e-を足す)
 5. [他のスタック](#5-他のスタック)
-6. [必須チェックにする](#6-必須チェックにする)
+6. [必須チェックにする(任意)](#6-必須チェックにする任意)
 7. [よくある落ち方](#7-よくある落ち方)
 
 ## 1. 骨格
@@ -109,16 +109,16 @@ jobs:
 
 GitLab CI なら `.gitlab-ci.yml` の `stages` に同じ順で並べ、`interruptible: true` が `concurrency` に当たる。
 
-## 6. 必須チェックにする
+## 6. 必須チェックにする(任意)
 
-ワークフローを置いただけでは、赤いままマージできる。**リポジトリ設定を変えるまで CI は助言である。**
+ワークフローを置いただけでは、赤いままでもマージはできる。止めたいなら branch protection / rulesets で必須にする — ただし **GitHub Free の private リポジトリでは使えない**ので、手順ではなく選択肢として渡す(`SKILL.md` の手順5)。
 
 1. 追加後、PR を1本通してジョブを1回実行する(実行していないジョブ名は選択肢に出ない)
-2. Settings → Branches → `main` のルール → **Require status checks to pass before merging** → ジョブ名(上の例なら `verify`)を選ぶ
+2. Settings → Branches(または Rules)→ `main` → **Require status checks to pass before merging** → ジョブ名(上の例なら `verify`)を選ぶ
 3. **Require branches to be up to date before merging** は、main の動きが速いリポジトリでは付けない — マージのたびに全 PR の再実行が要る
 4. **Require a pull request before merging** を入れるかは、`SKILL.md` の手順5が決める(実態を数える)
 
-これはファイルではないので、**エージェントは代わりに設定できない。** ユーザーに手順として渡す。
+これはファイルではないので、**エージェントは代わりに設定できない。**
 
 ## 7. よくある落ち方
 

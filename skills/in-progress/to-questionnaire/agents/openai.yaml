@@ -1,5 +1,0 @@
-interface:
-  display_name: "アンケートにする"
-  short_description: "質問をまとめて他の人が答える文書にする"
-policy:
-  allow_implicit_invocation: false

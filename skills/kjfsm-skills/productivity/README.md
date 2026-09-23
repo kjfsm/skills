@@ -2,12 +2,6 @@
 
 コードに限らない、一般的なワークフローツール。
 
-## ユーザー呼び出し型
-
-入力したときだけ到達できる(Claude Code: `disable-model-invocation: true`。Codex: `agents/openai.yaml` の `policy.allow_implicit_invocation: false`)。
-
-- **[help-skills](./help-skills/SKILL.md)** — kjfsm のスキル一覧を README で開く。名前を思い出したいだけのときに、一覧をコンテキストへ持ち込まずに済ませる。
-
 ## モデル呼び出し型
 
 モデルからもユーザーからも到達できる(モデルが自動的に手を伸ばせるよう、豊富なトリガー表現を持つ)。

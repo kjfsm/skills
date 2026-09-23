@@ -1,7 +1,0 @@
-# Misc
-
-たまに使うものの、あまり使わないため plugin では promote していないツール群。
-
-- **[git-guardrails-claude-code](./git-guardrails-claude-code/SKILL.md)** — 危険な git コマンド(push, reset --hard, clean など)を実行前にブロックする Claude Code フックをセットアップする。
-- **[migrate-to-shoehorn](./migrate-to-shoehorn/SKILL.md)** — テストファイル内の `as` 型アサーションを @total-typescript/shoehorn へ移行する。
-- **[scaffold-exercises](./scaffold-exercises/SKILL.md)** — セクション・問題・解答・解説から成るエクササイズのディレクトリ構造を作成する。

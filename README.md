@@ -53,17 +53,17 @@ Fetch https://raw.githubusercontent.com/kjfsm/skills/main/setup.md
 
 3つは **配るものが違う**。スキルの数は現時点の実測値である。
 
-|                  | A: シンボリックリンク            | B: プラグイン                          | C: `npx skills`                          |
-| ---------------- | -------------------------------- | -------------------------------------- | ---------------------------------------- |
-| スキル           | **69**(`deprecated/` 以外の全部) | **31**(昇格済み集合のみ)+ 本家 25      | **75**(全部。`deprecated/` も含む)       |
-| 出力スタイル     | 入らない                         | **入る**(有効化は別途)                 | 入らない                                 |
-| サブエージェント | 入らない                         | **入る**(5体)                          | 入らない                                 |
-| 実体             | このリポジトリ(clone が必要)     | `~/.claude/plugins/` のキャッシュ      | コピー先に実ファイル                     |
-| 更新             | `git pull` で即反映              | push のたびに届く(コミット SHA で追随) | 追随しない。`npx skills update` を自分で |
-| スコープ         | ユーザー(`~/.claude/skills`)     | ユーザー / **プロジェクト** / ローカル | プロジェクト、または `--global`          |
-| 向いている人     | このリポジトリ自体を開発する     | ふつうはこちら                         | 実体を手元に置いて改変したい             |
+|                  | A: シンボリックリンク        | B: プラグイン                          | C: `npx skills`                          |
+| ---------------- | ---------------------------- | -------------------------------------- | ---------------------------------------- |
+| スキル           | **39**(全部)                 | **30**(昇格済み集合のみ)+ 本家 25      | **39**(全部)                             |
+| 出力スタイル     | 入らない                     | **入る**(有効化は別途)                 | 入らない                                 |
+| サブエージェント | 入らない                     | **入る**(5体)                          | 入らない                                 |
+| 実体             | このリポジトリ(clone が必要) | `~/.claude/plugins/` のキャッシュ      | コピー先に実ファイル                     |
+| 更新             | `git pull` で即反映          | push のたびに届く(コミット SHA で追随) | 追随しない。`npx skills update` を自分で |
+| スコープ         | ユーザー(`~/.claude/skills`) | ユーザー / **プロジェクト** / ローカル | プロジェクト、または `--global`          |
+| 向いている人     | このリポジトリ自体を開発する | ふつうはこちら                         | 実体を手元に置いて改変したい             |
 
-**`deprecated/` と `in-progress/` を配らないのは B だけである。** C は `--skill` で名前を挙げれば絞れるが、既定は全部入りで、上流で削除したスキルもコピー先には残り続ける。
+**`in-progress/` と別プラグインのバケットを配らないのは B だけである。** C は `--skill` で名前を挙げれば絞れるが、既定は全部入りで、上流で削除したスキルもコピー先には残り続ける。
 
 **サブエージェントと出力スタイルを運べるのも B だけである。** A と C でコメントの判定基準を効かせるには `/kjfsm-skills:setup-repo` を実行して `AGENTS.md` 側に書かせる。
 
@@ -75,7 +75,7 @@ Fetch https://raw.githubusercontent.com/kjfsm/skills/main/setup.md
 scripts/link-skills.sh
 ```
 
-これは(`deprecated/` を除く)すべてのスキルを `~/.claude/skills` と `~/.agents/skills` にシンボリックリンクする。各エントリはこのリポジトリへのシンボリックリンクなので、`git pull` すればインストール済みのスキルは常に最新の状態を保つ。スキルを追加・削除・改名したあとは、このスクリプトを再実行すること。
+これはすべてのスキルを `~/.claude/skills` と `~/.agents/skills` にシンボリックリンクする。各エントリはこのリポジトリへのシンボリックリンクなので、`git pull` すればインストール済みのスキルは常に最新の状態を保つ。スキルを追加・削除・改名したあとは、このスクリプトを再実行すること。
 
 ### 選択肢 B: Claude Code プラグインとしてインストールする
 
@@ -115,12 +115,12 @@ npx -y skills add kjfsm/skills
 - 何が入るかを先に見るには `--list`、個別に選ぶには `--skill tdd,two-axis-review`、対象ハーネスを決め打ちするには `--agent claude-code` を付ける。
 - プロジェクト内で実行するとそのプロジェクトのスキルディレクトリ(`.claude/skills/` など)へ**実ファイルとしてコピー**され、`skills-lock.json` が作られる。`--global` を付けるとユーザーレベル(`~/.claude/skills`)に入る。
 - コピーなので `git pull` では追随しない。更新は `npx skills update`、`skills-lock.json` からの復元は `npx skills experimental_install`。
-- この CLI はリポジトリ全体を走査するため、`--skill '*'` は `deprecated/` や `in-progress/` まで含めて全スキルを入れてしまう。昇格済みの集合だけが欲しいなら選択肢 B を使うか、`--skill` で名前を挙げること。
+- この CLI はリポジトリ全体を走査するため、`--skill '*'` は `in-progress/` や EmDash 専用のバケットまで含めて全スキルを入れてしまう。昇格済みの集合だけが欲しいなら選択肢 B を使うか、`--skill` で名前を挙げること。
 - **`--skill` で絞る場合も `setup-repo` とその工程(`setup-skills`、`setup-rules`、`setup-ci`、`setup-hooks`)は含めること。** この経路では、応答と記述の規約の届け先がそこしかない。
 
 **3つの方法は併用しない。** 同じスキルが2系統で入ると、スラッシュコマンドが重複し、常時読み込まれる description も二重に数えられる。このリポジトリを開発するなら選択肢 A、使うだけなら選択肢 B を選ぶ。
 
-**このリポジトリを clone した場合、昇格していないスキルは何も入れなくても使える。** `.claude/skills/` に、どのプラグインも配らない `misc/`・`in-progress/` のスキルへのシンボリックリンクがコミットされているので、この clone の中で作業するかぎり `/mattpocock-skills:wizard` もそのまま呼べる。**昇格済みのスキルはここに張らない** — 配るのはプラグイン(選択肢 B)の役目で、両方から見えると同じスキルがセッション開始時に2度並び、上の併用の禁止がそのまま当たる。この clone で `/kjfsm-skills:ask-kjfsm` や `/mattpocock-skills:tdd` を呼ぶには、選択肢 A か B のどちらかを1つ入れる。**選択肢 A はこの clone のリンクと重ならない** — どちらもこのリポジトリの同じ実体を指すので、Claude Code はスキルを1回しか読み込まない。重なるのは実体が別になる B・C の側である。リンクの張り直しは `scripts/sync-project-skills.sh` で、ずれは `scripts/check-invariants.sh` が落とす。
+**このリポジトリを clone した場合、下書きのスキルは何も入れなくても使える。** `.claude/skills/` に、どのプラグインも配らない `in-progress/` のスキルへのシンボリックリンクがコミットされているので、この clone の中で作業するかぎりそのまま呼べる。**昇格済みのスキルはここに張らない** — 配るのはプラグイン(選択肢 B)の役目で、両方から見えると同じスキルがセッション開始時に2度並び、上の併用の禁止がそのまま当たる。この clone で `/kjfsm-skills:ask-kjfsm` や `/mattpocock-skills:tdd` を呼ぶには、選択肢 A か B のどちらかを1つ入れる。**選択肢 A はこの clone のリンクと重ならない** — どちらもこのリポジトリの同じ実体を指すので、Claude Code はスキルを1回しか読み込まない。重なるのは実体が別になる B・C の側である。リンクの張り直しは `scripts/sync-project-skills.sh` で、ずれは `scripts/check-invariants.sh` が落とす。
 
 どの方法でも、他のエンジニアリング系スキルを使う前にリポジトリごとに一度 **`/kjfsm-skills:setup-repo`** を実行すること。setup 系4工程の入口であり、届き方の違う4つの層を順に敷く:
 
@@ -223,10 +223,6 @@ npx -y skills add kjfsm/skills
 
 コードに限らない、一般的なワークフローツール。
 
-**ユーザー呼び出し型**
-
-- **[help-skills](./skills/kjfsm-skills/productivity/help-skills/SKILL.md)** — kjfsm のスキル一覧を README で開く。名前を思い出したいだけのときに、一覧をコンテキストへ持ち込まずに済ませる。
-
 **モデル呼び出し型**
 
 - **[writing-great-skills](./skills/kjfsm-skills/productivity/writing-great-skills/SKILL.md)** — スキルを書く・直すための判断基準と、公式が定める仕様: 予測可能性・情報階層・段階的開示・先導語・失敗モードの語彙に、公式の数値上限と frontmatter の規則をまとめた `OFFICIAL.md` が付く。
@@ -238,8 +234,8 @@ npx -y skills add kjfsm/skills
 
 昇格していない(`kjfsm-skills` へのエントリなし、上記の README への掲載もなし) — 中身については各バケット自身の `README.md` を参照:
 
-- [`skills/misc/`](./skills/misc/README.md) — 残してあるがほとんど使われない
 - [`skills/kjfsm-emdash/`](./skills/kjfsm-emdash/README.md) — [EmDash](https://docs.emdashcms.com) CMS のサイト専用。EmDash を使わないプロジェクトでは無価値なので、別プラグイン `kjfsm-emdash` でサイトのリポジトリにだけ入れる
 - [`skills/kjfsm-personal/`](./skills/kjfsm-personal/README.md) — この端末固有のセットアップに紐づく。別プラグイン `kjfsm-personal` で自分の端末にだけ入れる
 - [`skills/in-progress/`](./skills/in-progress/README.md) — まだ出荷準備が整っていない下書き
-- [`skills/deprecated/`](./skills/deprecated/README.md) — もう使われていない
+
+退役したスキルは削除する。理由と代わりに使うものは [`.agents/retired-skills.md`](./.agents/retired-skills.md) にある。

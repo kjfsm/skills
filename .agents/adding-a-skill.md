@@ -12,11 +12,11 @@
 | -------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------- |
 | `kjfsm-skills/engineering/` `kjfsm-skills/productivity/` | **される**(`kjfsm-skills` + `npx skills`)               | 他人のリポジトリでも価値を持つもの                  |
 | `kjfsm-emdash/` `kjfsm-personal/`                        | **入れた場所にだけ**(`kjfsm-emdash` / `kjfsm-personal`) | 特定の CMS のサイト、自分の端末でだけ価値を持つもの |
-| `misc/` `in-progress/` `deprecated/`                     | されない(`npx skills` の個別指定でのみ届く)             | ほとんど使わないもの、下書き、退役したもの          |
+| `in-progress/`                                           | されない(`npx skills` の個別指定でのみ届く)             | 下書き                                              |
 
 判定は1問で済む: **これは他人のリポジトリで価値を持つか。** 持たないなら昇格しないバケットへ入れる — 昇格は後からできる。
 
-本家と同じ名前のスキルは昇格済みのバケットに置かない — `kjfsm-skills` は本家に依存しているので、同じ名前が2度並ぶ(→ [ADR 0006](./adr/0006-depend-on-upstream-ship-translation-separately.md))。
+本家と同じ名前のスキルはどのバケットにも置かない — `kjfsm-skills` は本家に依存しているので同じ名前が2度並び、未昇格でも写しの保守だけが残る。本家のものは本家から入れる(→ [ADR 0006](./adr/0006-depend-on-upstream-ship-translation-separately.md))。
 
 `kjfsm-emdash/`・`kjfsm-personal/` に足したら、`plugins/<バケット>/skills/<名前>` に `../../../skills/<バケット>/<名前>` へのシンボリックリンクを張る(張り忘れは検査 4b. が落とす)。
 
@@ -53,7 +53,7 @@ policy:
 
 **`name` に `claude` と `anthropic` を入れない。** 仕様上の禁止ではないので検査は落とさないが、Anthropic 側の検証(claude.ai へのアップロード、Skills API、`package_skill.py`)はこれを弾く。Claude Code プラグインと `npx skills` で配るぶんには当たらない一方、**個人スキルを Cowork やクラウドセッションで有効にする経路は claude.ai へのアップロードを通る** ので、そこでは弾かれる。トリガー語としての "CLAUDE.md" が要るなら `description` に書く — 予約語の制約がかかるのは `name` だけである。
 
-残っている例外は `claude-handoff` と `git-guardrails-claude-code` の2つで、どちらも未昇格なので配布経路に乗らない。昇格させるなら、そのときに改名する。(`tend-claude-md` は昇格済みだったので `tend-memory-files` に改名した。)
+(`tend-claude-md` はこの理由で `tend-memory-files` に改名した。)
 
 ## 4. 検査を走らせる
 
@@ -92,7 +92,7 @@ scripts/check-invariants.sh
 
 ## マニフェストの決まり
 
-`plugin.json` の `skills` 配列は、既定の `skills/` スキャンに **追加** されるのが原則で、`marketplace.json` の `source` がマーケットプレイスのルート(`"./"`)に解決される場合に限り **置き換え** になる。昇格していないバケットがプラグインに載らないのはこの例外に乗っているからなので、`source` を変えるときは `deprecated/` や `in-progress/` が出荷対象に混ざらないか確認する。
+`plugin.json` の `skills` 配列は、既定の `skills/` スキャンに **追加** されるのが原則で、`marketplace.json` の `source` がマーケットプレイスのルート(`"./"`)に解決される場合に限り **置き換え** になる。昇格していないバケットがプラグインに載らないのはこの例外に乗っているからなので、`source` を変えるときは `in-progress/` や別プラグインのバケットが出荷対象に混ざらないか確認する。
 
 `version` を両方のマニフェストから省く理由は `AGENTS.md` が持つ。片方にでも書くと、その文字列が固定のキャッシュキーになって更新が止まる。
 
@@ -108,7 +108,7 @@ scripts/check-invariants.sh
 
 ## 昇格するとき
 
-`in-progress/` や `misc/` から `engineering/` か `productivity/` へ移す。
+`in-progress/` から `engineering/` か `productivity/` へ移す。
 
 ディレクトリを移動したら、あとは検査が要求してくる — トップレベル `README.md` への追加と `plugin.json` の `skills` 配列への登録。バケットの `README.md` は移動元から消し、移動先へ足す。昇格済みバケットとトップレベルの README は **ユーザー呼び出し型 / モデル呼び出し型** でグループ分けするので、正しい側へ入れる(昇格していないバケットの README はフラットなリストを使う)。掲載されているかは検査 4./5. が弾くが、**どちらのグループに入っているかは弾かない。**
 
@@ -118,6 +118,6 @@ scripts/check-invariants.sh
 
 ## 退役させるとき
 
-`deprecated/` へ移し、`deprecated/README.md` に **なぜ退役したかと、代わりに使うもの** を1行で書く — 書かないと、同じものをもう一度作る。`scripts/link-skills.sh` と `scripts/sync-project-skills.sh` はどちらもこのバケットを除外するので、走らせ直せばローカルのハーネスからも `.claude/skills/` からも消える。
+ディレクトリごと削除し、[`retired-skills.md`](./retired-skills.md) に **なぜ退役したかと、代わりに使うもの** を1行で書く — 書かないと、同じものをもう一度作る。本文は git 履歴が持つ。`scripts/sync-project-skills.sh` を走らせ直せば `.claude/skills/` からも消える。`scripts/link-skills.sh` は消えた名前の後始末をしないので、ローカルのリンクは手で消す。
 
 `plugin.json` とトップレベル `README.md` からは消える必要がある(検査が要求する)。`ask-kjfsm` からも消す。他のスキルがその名前を文中呼び出ししていないか `grep` で確かめる — 呼ばれたまま退役したスキルは、実行時に静かに何も起きない。

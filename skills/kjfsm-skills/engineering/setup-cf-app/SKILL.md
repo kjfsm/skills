@@ -37,7 +37,7 @@ description: 新規の Cloudflare Workers フルスタックアプリを、い�
   - shadcn の init は **リポジトリルートの `tsconfig.json` しか見ない**。React Router のように import エイリアスを分割 tsconfig 側へ置くテンプレートでは `Could not find valid path aliases` で止まるので、ルートにも `paths` を同値で置く。TTY が無いときは `-t`・`-b` に加えて `-p <プリセット>` も渡す — `-y` はプリセットの選択を飛ばさず、**そこで入力待ちのまま止まる**
   - `react-router-auto-routes` は `app/routes.ts` を `autoRoutes()` の1行にし、URL を `app/routes/` の配置だけで決める。**フォルダは URL セグメントを作るが `<Outlet />` のネストは作らない** — `_layout.tsx` を置いて初めて包まれる。置き忘れても共有 UI が出ないだけでビルドもテストも通るので、生成された表は `react-router routes` で出して確かめる
 - **`pnpm up --latest` も `pnpm add` も peer の範囲を見ない。** 後から入れるプラグインが peer で上限を持つと(`@cloudflare/vitest-plugin` と `vitest` など)、先に入った最新が範囲外になる。プラグインを足したら peer を読み、範囲に揃える
-- 重い UI ライブラリを足したら、まず `pnpm dev` で読み込めるかを見る。dev サーバーは workerd の中で動くので、CJS の依存は `require is not defined` で落ちることがある。`noExternal` で束ねて逃げると `react-router` が2重に載り、`RouterContextProvider` の検査が外れるという報告もある([cloudflare/workers-sdk#14555](https://github.com/cloudflare/workers-sdk/issues/14555))
+- 重い UI ライブラリを足したら、まず `pnpm dev` で読み込めるかを見る。dev サーバーは workerd の中で動くので、事前バンドルから漏れた CJS の依存は `require is not defined` で落ちる
 
 ## 型・lint・シークレット
 
@@ -49,7 +49,7 @@ description: 新規の Cloudflare Workers フルスタックアプリを、い�
 
 better-auth 一般の組み方は、better-auth 公式の [better-auth/skills](https://github.com/better-auth/skills) にある `better-auth-best-practices` スキルが持つ(Claude Code のマーケットプレイスとしても、`npx skills` でも入る)。あちらは `BETTER_AUTH_URL` を env に置く前提で書かれているので、Workers では次の2点を優先する。
 
-- DB と better-auth はリクエストごとに組み、`baseURL` にはリクエストのオリジン(`new URL(request.url).origin`)を渡す。`env` は route の `context` から受ける(→ `react-router-route-module` スキル)。モジュールの先頭で組むと `BETTER_AUTH_URL` を固定値で持つことになり、dev・http テスト・E2E でホストやポートが変わるたびに揃え直す
+- DB と better-auth はリクエストごとに組み、`baseURL` にはリクエストのオリジン(`new URL(request.url).origin`)を渡す。`BETTER_AUTH_URL` を env に置くと、dev・http テスト・E2E でホストやポートが変わるたびに揃え直す
 - スキーマ生成の CLI(`auth generate`)はオプションを読むだけで、DB にもシークレットにも触れない。アプリと同じオプションを組む関数に空の値(`{} as D1Database`・空文字・適当なオリジン)を渡すだけのファイルを置き、`--config` で読ませる。オプションを CLI 用に書き写すと、プラグインを足した日に片方だけが古くなり、生成されるスキーマからテーブルが欠ける
 
 ## ほかのスキルが持つもの

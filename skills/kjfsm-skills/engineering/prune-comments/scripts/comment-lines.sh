@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # 「コメント行か」の判定を1か所に持つ。hooks/nudge-comment-check.sh と prune-comments の
 # 入口(増えたコメント行の数え上げ)が両方これを呼ぶ — 別々に書くと拡張子の一覧がずれる。
+# 素直な置き場の hooks/ ではなくスキルの中に置くのは、スキルが `npx skills` で単体でも
+# 配られるからである。フックはプラグインと一緒にしか届かないので、こちらから辿れる。
 #
 #   comment-lines.sh pattern <ファイルパス>   その拡張子のコメント行の ERE を出す。
 #                                            コメント記法が一意に決まらなければ終了コード 1
@@ -52,11 +54,11 @@ count() {
     re=$(pattern "$f") || continue
     n=$(git diff "$base" -- "$f" | net_in_diff "$re")
     [ "$n" -gt 0 ] && total=$((total + n))
-  done < <(git diff --name-only "$base")
+  done < <(git diff -z --name-only "$base" | tr '\0' '\n')
   while IFS= read -r f; do
     re=$(pattern "$f") || continue
     total=$((total + $(git diff --no-index /dev/null "$f" | net_in_diff "$re")))
-  done < <(git ls-files --others --exclude-standard)
+  done < <(git ls-files -z --others --exclude-standard | tr '\0' '\n')
   echo "$total"
 }
 

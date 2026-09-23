@@ -18,7 +18,7 @@ err() {
 
 # バケットは skills/ からの相対パスで数える。葉の名前だけで見ると、どこか別の場所に
 # engineering/ を作った日にそのスキルが昇格済みとして通ってしまう。
-PROMOTED_BUCKETS="kjfsm-skills/engineering kjfsm-skills/productivity"
+PROMOTED_BUCKETS="$(python3 -c 'import sys; sys.path.insert(0, "scripts"); import render; print(" ".join(render.PROMOTED))')"
 # バケットごとに専用のプラグイン(plugins/<バケット>/)で配るもの。全員には入れず、
 # 必要なリポジトリや端末で個別に有効にする。see .agents/adr/0005-ship-buckets-as-side-plugins.md
 PLUGIN_BUCKETS="kjfsm-emdash kjfsm-personal"
@@ -136,6 +136,14 @@ while IFS= read -r skill_md; do
       [ "$(readlink "$side_link" 2>/dev/null)" = "../../../skills/$bucket/$name" ] ||
         err "$name is in $bucket/ but $side_link is not a symlink to ../../../skills/$bucket/$name"
       ;;
+  esac
+
+  # 4c. 昇格していないスキルは、一覧の区間の外にも README.md から手でリンクされていない。
+  #     4. が見るのは生成した区間だけである。
+  case " $PROMOTED_BUCKETS " in
+    *" $bucket "*) ;;
+    *) ! grep -q "](\./$bucket_dir/$name/SKILL\.md)" README.md ||
+      err "$name is in $bucket/ (not promoted) but linked from README.md" ;;
   esac
 
   # 6. skill names are unique across buckets — link-skills.sh flattens them
@@ -344,10 +352,9 @@ grep -q 'コメントの密度ではない' AGENTS.md ||
 
 # 17. コメントのフックが、出荷側(プラグイン)と自家用(このリポジトリ)の両方から
 #     実在する実行可能スクリプトを指している。そして 4本の柱を復唱していない —
-#     復唱した瞬間にこれは常駐 3か所(検査 16.)の同期先 4つ目になり、フックが
+#     復唱した瞬間にこれは常駐 3か所(源は検査 16.、写しは 4.)の同期先 4つ目になり、フックが
 #     黙って壊れた日に、揃っていない本文だけが残る。see AGENTS.md
 hook_script="hooks/nudge-comment-check.sh"
-# 判定はフックと、prune-comments の入口(増えたコメント行の数え上げ)が共有する。
 comment_lib="skills/kjfsm-skills/engineering/prune-comments/scripts/comment-lines.sh"
 [ -x "$comment_lib" ] ||
   err "$comment_lib is missing or not executable; the hook would silently pass every edit"

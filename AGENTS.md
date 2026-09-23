@@ -18,7 +18,7 @@
 
 このリポジトリは [mattpocock/skills](https://github.com/mattpocock/skills) の日本語訳から出発した独立フォークで、git 上の共通祖先が無い。本家由来のスキルは `kjfsm-skills` には置かず、依存先の本家 `mattpocock-skills` が配る。理由は [.agents/adr/0006-depend-on-upstream-ship-translation-separately.md](./.agents/adr/0006-depend-on-upstream-ship-translation-separately.md)。本家のどこまでを突き合わせ済みか、何を意図的に取り込んでいないか、差分をどう測るかは [.agents/upstream-sync.md](./.agents/upstream-sync.md) にある — 本家由来のスキルを直すときは、そこを見てから決める。
 
-このリポジトリは自分のスキルを自分自身で使う。`.claude/skills/` に **どのプラグインも配らない** バケット(`in-progress/`)のスキルの実体へのシンボリックリンクがコミットされているので、クローンした誰にでも、`~` を持ち越せないクラウドセッションにも届く。**プラグインで配るもの(昇格済み、`kjfsm-emdash/`、`kjfsm-personal/`)はここに張らない** — 配るのはプラグインの役目で、両方から見えると Claude Code はセッション開始時に同じスキルを2度並べ、name と description のぶんだけ毎セッション二重に払う。張り直すのは `scripts/sync-project-skills.sh`、ずれの検出は検査 14. が行う。`in-progress/` を張るのは意図的である: 下書きは実際に呼んでみて初めて直せる。退役したスキルは移さず削除し、理由と代わりを [.agents/retired-skills.md](./.agents/retired-skills.md) に1行残す。
+このリポジトリは自分のスキルを自分自身で使う。`.claude/skills/` に **どのプラグインも配らない** バケット(`in-progress/`)のスキルの実体へのシンボリックリンクをコミットするので(下書きが無い時期はディレクトリごと無い)、クローンした誰にでも、`~` を持ち越せないクラウドセッションにも届く。**プラグインで配るもの(昇格済み、`kjfsm-emdash/`、`kjfsm-personal/`)はここに張らない** — 配るのはプラグインの役目で、両方から見えると Claude Code はセッション開始時に同じスキルを2度並べ、name と description のぶんだけ毎セッション二重に払う。張り直すのは `scripts/sync-project-skills.sh`、ずれの検出は検査 14. が行う。`in-progress/` を張るのは意図的である: 下書きは実際に呼んでみて初めて直せる。退役したスキルは移さず削除し、理由と代わりを [.agents/retired-skills.md](./.agents/retired-skills.md) に1行残す。
 
 ユーザーとのやり取りは日本語で行う。コミットメッセージと PR 本文もこのリポジトリの慣習に従って日本語である(識別子とファイル名は英語)。
 

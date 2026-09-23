@@ -22,7 +22,7 @@ import re
 import sys
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
-# check-invariants.sh の PROMOTED_BUCKETS と同じ集合。
+# check-invariants.sh もこの定数を読む。
 PROMOTED = ["kjfsm-skills/engineering", "kjfsm-skills/productivity"]
 PLUGIN = REPO / ".claude-plugin/plugin.json"
 

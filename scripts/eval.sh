@@ -11,9 +11,8 @@ set -euo pipefail
 # 何も起きないので、ケースは kjfsm のスキル単体で答えが出るものに限る。
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
-BUILD="${TMPDIR:-/tmp}/kjfsm-skills-eval"
-
-rm -rf "$BUILD"
+BUILD="$(mktemp -d)"
+trap 'rm -rf "$BUILD"' EXIT
 mkdir -p "$BUILD/.claude-plugin"
 cp -r "$REPO/skills" "$REPO/agents" "$REPO/hooks" "$REPO/output-styles" "$BUILD/"
 rsync -a --exclude results "$REPO/evals/" "$BUILD/evals/"

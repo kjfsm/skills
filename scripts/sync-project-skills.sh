@@ -108,6 +108,7 @@ if [ -d "$DEST" ]; then
     [ -n "$stale" ] || continue
     name="$(basename "$stale")"
     known=0
+    # 素の "${names[@]}" は、下書きが無く配列が空のとき bash 3.2 の set -u で落ちる。
     for n in ${names[@]+"${names[@]}"}; do
       if [ "$n" = "$name" ]; then
         known=1

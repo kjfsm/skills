@@ -75,6 +75,8 @@ E2E は `docs/agents/verification.md` の1行になり、そこから CI に写�
 
 `webServer` にビルドとマイグレーションまで持たせると、手元と CI で E2E の入口が1つになる。CI では `reuseExistingServer: false` にして、前のジョブの残骸を掴ませない。E2E が内部でビルドするなら、CI にビルドの行を重ねて置かない。
 
+`@cloudflare/vite-plugin` で組んだ Worker は、`webServer` を `vite preview` で立てない。ビルドが `.dev.vars` を `build/server/` へ複写し、preview はそれを優先してプロセス環境を見ないので、E2E 用の値が渡らない(`.dev.vars` の無い CI では秘密ごと欠ける)。`wrangler dev -c build/server/wrangler.json --env-file <E2E 用の env> --persist-to <E2E 専用>` で立てる。
+
 手元の `reuseExistingServer: true` は、**そのポートに居る別のプロセスも受け入れる** — 別のプロジェクトの dev サーバーを相手にテストが走る。ポートは環境変数(`E2E_PORT` など)で変えられるようにし、`webServer.command` にも同じ値を渡す。手元の `workers` は上限を置く — WSL では既定の「コア数の半分」だと、Worker とブラウザがメモリを使い切って VM ごと落ちる。
 
 ### 6. 完了

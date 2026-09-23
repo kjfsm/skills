@@ -76,6 +76,7 @@ Anthropic の公式ドキュメントとブログから抽出した、**AI に�
 | `wp` | [How Warp builds self-improving agents on Claude][wp]                  | 規則より理由を渡す、スキルは手続きで安定・メモリは自動で変わり続ける(2026-08-26)             |
 | `mx` | [Maximizing the value of your Claude Code sessions][mx]                | CLAUDE.md に置く日常のコマンド、ワークフロー固有の指示はスキルへ(2026-08-14)                 |
 | `sd` | [The AI-Native SDLC playbook][sd]                                      | CLAUDE.md は1ページ未満、2度間違えたら書く、組織の知識はスキルに(2026-08-21)                 |
+| `o5` | [Getting the most out of Opus 5.5][o5]                                 | 思考の指示を外す、完了の定義を渡す、長時間ランの停止条件とタスク一覧のファイル化             |
 
 [ev]: https://agentskills.io/skill-creation/evaluating-skills
 [sp]: https://agentskills.io/specification
@@ -99,6 +100,7 @@ Anthropic の公式ドキュメントとブログから抽出した、**AI に�
 [wp]: https://claude.com/blog/how-warp-builds-self-improving-agents-on-claude
 [mx]: https://claude.com/blog/maximizing-the-value-of-your-claude-code-sessions
 [sd]: https://claude.com/blog/the-ai-native-sdlc-playbook
+[o5]: https://claude.dev/blog/getting-the-most-out-of-opus-5-5/
 
 ---
 
@@ -135,6 +137,8 @@ Claude Code のシステムプロンプトは Opus 5 / Fable 5 向けに **80%�
 ### 古いモデル向けの「儀式」を外す
 
 フロンティアモデルで逆効果になる指示は5類型ある。(1) **検証の儀式** — 「作業を二重に確かめよ」は文字どおりに実行されてトークンを浪費する。(2) **強調の上乗せ** — 「最大限徹底的に」「CRITICAL: YOU MUST ALWAYS…」は冗長な出力と余計なツール呼び出しを招く。(3) **推論の足場** — 固定の手順や「スクラッチパッドで段階的に考えよ」は不要な儀式で、組み込みの推論に上乗せされる。(4) **古いモデル向けの例** — 旧モデルの失敗に合わせた few-shot は、要らない依頼にまで長い推論を真似させる。(5) **矛盾する規則** — 指示追従が上がった分、矛盾がより文字どおりに実行されて性能が落ちる。Opus 4.8 → Opus 5 の移行で、`/claude-api prompt-audit` でこれらを取り除いたところ、**コスト -14.6%、精度 +5.3%**(平均)だった。対象は API アプリのシステムプロンプトだが、[c5] がスキルと CLAUDE.md について言うことと同じ向きである。 — [rc]
+
+Opus 5.5 は毎回の返信の前に必ず考え、考える量を自分で決める。「think carefully」「think step by step」を外すと、品質を落とさずに返信の出だしが速くなった。 — [o5]
 
 ### 当たり前を書かず、モデルの通常の思考から押し出すものを書く
 

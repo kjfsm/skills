@@ -100,17 +100,16 @@ DROP TABLE `__bak_favorite`;
 
 ## 再発を止める
 
-判定は毎回できるとは限らない。生成物をコミットする瞬間に止めるフックを置く。
+判定は毎回できるとは限らず、生成器は次も同じ SQL を出す。止めるのは検証ゲートに置いた2本で、pre-push と CI の両方から呼ぶ。Claude のフックにはしない — クローンにも CI にも人間の手作業にも届かない(層の選び方は `/kjfsm-skills:setup-hooks`)。
 
-```sh
-# .claude/hooks/block-generated-migration-cascade.sh
-# PRAGMA foreign_keys=OFF と DROP TABLE が同居するマイグレーションを弾く
-for f in $(git diff --cached --name-only --diff-filter=A | grep 'migrations/.*\.sql$'); do
-  if grep -q 'PRAGMA foreign_keys=OFF' "$f" && grep -q 'DROP TABLE' "$f"; then
-    echo "$f: 生成物のまま。子退避レシピで書き直す(→ migrate-d1)" >&2
-    exit 2
-  fi
-done
-```
+**検査スクリプト**(`scripts/check-migrations.*`)は2つを見る。
 
-**これが唯一の決定的な防止策である。** 手順を文書に書いても、生成器は次も同じ SQL を出す。
+- **生成物のままの再構築。** 全ファイルを見て、`PRAGMA foreign_keys=OFF` と `DROP TABLE` が同居するものを弾く。行コメントはクォートの外だけ落としてから判定する — 素の `split("--")` は文字列リテラル中の `--` で行を切り、後ろの `DROP TABLE` を見逃す。被参照の無い葉だと確かめた再構築は、理由を添えて `KNOWN_LEAF_REBUILDS` に登録する。被参照の有無は積み上がったスキーマを辿らないと決まらず、grep では出せないので、許可そのものを確認の記録にする
+- **適用済みの書き換え。** `origin/main` との merge-base から `git diff --name-status --diff-filter=MDR -- 'migrations/*.sql'` を取る。wrangler は適用済みをファイル名で照合するので、書き換えは本番に届かない。`meta/` は新しいマイグレーションのたびに追記されるので見ない。merge-base が解決できない(origin を持たないクローン)ときは落とさずに飛ばす。CI 側の条件は `/kjfsm-skills:setup-ci`
+
+**再生テスト**は、実物の SQLite で行数が落ちないことを確かめる。空の D1 ではデータが消えても気づけないので、種を入れて流す。
+
+- `node:sqlite` の DB に、トランザクションの**外で** `PRAGMA foreign_keys = ON` を立てる。中では効かない
+- `meta/_journal.json` の順に、1ファイル1トランザクションで流す。D1 は暗黙のトランザクションを張るので、これで同じ条件になる
+- 種は最初のマイグレーションの直後に、その形で入れる。後ろにずらすと、回が足された日に種が新しい制約に弾かれる。子の表まで埋める — 子が空だと、親の作り直しが子を巻き込んでも数が落ちない
+- 流し終えたら表ごとの行数を比べる

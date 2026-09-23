@@ -9,7 +9,7 @@
 **ユーザー呼び出し型**
 
 - **[ask-kjfsm](./ask-kjfsm/SKILL.md)** — どのスキルやフローが自分の状況に合うかを尋ねる。このリポジトリのスキルを案内するルーター。
-- **[implement-and-review](./implement-and-review/SKILL.md)** — 本家の /mattpocock-skills:implement でのビルドをユーザーに打ってもらい、そのあとの検証・レビュー・PR までを進める。
+- **[implement-and-review](./implement-and-review/SKILL.md)** — スペックやチケットが記述する作業を、既定ブランチへの追従からビルド・検証・コメント削り・二軸レビュー・PR まで1本で進める。
 - **[setup-repo](./setup-repo/SKILL.md)** — このリポジトリのエージェント向け設定を一括で敷く — 規約とドキュメント配置、パス別ルール、CI、弾く機構。再実行すると現況を読み、足りない工程とずれた箇所だけを当てる。
 - **[squash-d1-migrations](./squash-d1-migrations/SKILL.md)** — 積み上がった D1 のマイグレーションを1本に畳み、適用済みの各環境と突き合わせる。
 - **[tend-memory-files](./tend-memory-files/SKILL.md)** — AGENTS.md・CLAUDE.md と .claude/rules/ を新規に書く、または既存のものを監査してトリムする — 行数の目安に収め、具体的で矛盾のない指示だけを残す。
@@ -33,7 +33,7 @@
 - **[setup-playwright](./setup-playwright/SKILL.md)** — Playwright の E2E を入れ、ブラウザをどの層で用意するか決める。E2E をこれから入れるとき、`Executable doesn't exist` や `Missing system dependencies` が出たとき、コンテナやクラウドのサンドボックスに置いてあるブラウザと Playwright が要求するビルド番号がずれたとき、CI でだけブラウザの取得に失敗するとき、`playwright install` をセットアップスクリプト・SessionStart フック・CI のどこに置くか決めるときに使う。
 - **[setup-rules](./setup-rules/SKILL.md)** — このリポジトリのルールを `.claude/rules/` と `AGENTS.md` の2層に敷く — パスに応じて自動注入されるパス別ルールと、全セッションに効く絶対ルール。Claude Code を使うリポジトリを初めて設定するとき、`.claude/rules/` がまだ無いとき、同じ指摘を2回以上受けてルールに落としたいとき、`/kjfsm-skills:setup-repo` の工程 B として使う。
 - **[setup-skills](./setup-skills/SKILL.md)** — このリポジトリをエンジニアリング系スキル向けに設定する — イシュートラッカー、トリアージラベルの語彙、ドメインドキュメントの配置、検証ゲート、応答と記述の規約。`docs/agents/` がまだ無いとき、他のエンジニアリング系スキルを初めて使う前、`/kjfsm-skills:setup-repo` の工程 A として使う。
-- **[two-axis-review](./two-axis-review/SKILL.md)** — 固定した基点(コミット、ブランチ、タグ、マージベース)からの変更を二軸でレビューする — Standards(このリポジトリの明文化されたコーディング標準)と Spec(元のイシュー/PRD)。両方を並列サブエージェントで実行し、結果を並べて報告する。ユーザーがブランチ・PR・進行中の変更をレビューしたいとき、「X 以降をレビューして」と求めたとき、他のスキルが差分のレビューを必要とするときに使う。
+- **[two-axis-review](./two-axis-review/SKILL.md)** — まだコミットしていない編集と新規ファイルまで含めて、差分を kjfsm のレビュアー2体で並列にレビューする — Standards(明文化された標準、Fowler のスメル、書かれなかった Why not)と Spec(元のイシュー/PRD)。範囲は固定した基点(コミット、ブランチ、タグ)とのマージベースから作業ツリーまで。コミット前の作業をレビューしたいとき、ブランチ・PR・進行中の変更をレビューしたいとき、「X 以降をレビューして」と求めたとき、他のスキルが差分のレビューを必要とするときに使う。
 - **[verification-loop](./verification-loop/SKILL.md)** — 変更が本当に動くことを、記録された検証ゲートのクリーンラン — 型チェック、lint、テスト、ビルド、そして実際に動かしての観測 — で確かめる。ユーザーが動作確認や検証を求めたとき、変更を完了と宣言する前(コミットや PR を出す直前)、他のスキルが作業の検証を必要とするときに使う。
 - **[where-to-write-what](./where-to-write-what/SKILL.md)** — コード・テスト・コメント・JSDoc・コミットメッセージ・PR 本文・ADR・docs のどこに何を書くかを決めるルーティング規律 — コードには How、テストには What、コミットログには Why、コメントには Why not。コメントを書くか消すか判断するとき、JSDoc に何を載せるか決めるとき、コミットメッセージや PR 本文を書くとき、README を足すか迷ったとき、実装の背景や設計判断をどこに残すか迷ったときに使う。
 - **[workers-tests](./workers-tests/SKILL.md)** — Cloudflare Workers のプロジェクトでテストスイートを作る・立て直すときの規律。テストが1本も無いところから始めるとき、vitest.config が複雑すぎる・テストが遅い・OOM する・vi.mock だらけで信用できないとき、@cloudflare/vitest-plugin(旧 @cloudflare/vitest-pool-workers)を上げたら壊れたとき、React Router などの SSR を `main` に載せていて1ファイルに十数秒かかる・`applyD1Migrations` が遅い・`createTestHarness` で HTTP の層を作るとき、Workers / D1 / Durable Objects / Queues にテストを入れたいときに使う。

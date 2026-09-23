@@ -33,7 +33,7 @@ Claude Code、Codex、その他 Agent-Skills 標準に準拠したハーネス�
 | 大きすぎて見通せない   | `/mattpocock-skills:wayfinder`                                                                    |
 | どれを使うか分からない | **`/kjfsm-skills:ask-kjfsm`**                                                                     |
 
-締めまで持つのは `/kjfsm-skills:implement-and-review` である: 途中で本家の `/mattpocock-skills:implement` を打つ行を示して止まり(ビルドはそこで `/mattpocock-skills:tdd` を駆動する)、済んだら`/kjfsm-skills:verification-loop` でクリーンランを取り、`/kjfsm-skills:prune-comments` でコメントを削り、`/kjfsm-skills:two-axis-review` でレビューしてからコミットし、PR を出す。**`/kjfsm-skills:implement-and-review` はユーザーからしか呼べない** ので、打たなければこの並びは丸ごと走らない。
+締めまで持つのは `/kjfsm-skills:implement-and-review` である: `/mattpocock-skills:tdd` でビルドし、`/kjfsm-skills:verification-loop` でクリーンランを取り、`/kjfsm-skills:prune-comments` でコメントを削り、`/kjfsm-skills:two-axis-review` でレビューしてからコミットし、PR を出す。**`/kjfsm-skills:implement-and-review` はユーザーからしか呼べない** ので、打たなければこの並びは丸ごと走らない。
 
 複数セッションにまたがる規模なら、`/mattpocock-skills:grill-with-docs` と `/kjfsm-skills:implement-and-review` の間に `/mattpocock-skills:to-spec` → `/mattpocock-skills:to-tickets` を挟んでチケットへ割る。規模の判定とフロー全体は `/kjfsm-skills:ask-kjfsm` が持つ。
 
@@ -100,7 +100,7 @@ claude plugin marketplace add kjfsm/skills --scope project
 claude plugin install kjfsm-skills@kjfsm --scope project
 ```
 
-`kjfsm-skills` は本家の `mattpocock-skills@mattpocock` に依存しており、インストール時に本家も自動で入る(このマーケットプレイスは `allowCrossMarketplaceDependenciesOn` で `mattpocock` を許可している)。本家の `/mattpocock-skills:implement` はビルドまでで、検証とレビューの流れを締めまで持つのは kjfsm の `/kjfsm-skills:implement-and-review` である。
+`kjfsm-skills` は本家の `mattpocock-skills@mattpocock` に依存しており、インストール時に本家も自動で入る(このマーケットプレイスは `allowCrossMarketplaceDependenciesOn` で `mattpocock` を許可している)。実装からレビュー・PR までの流れは kjfsm の `/kjfsm-skills:implement-and-review` が持つ(本家の `/mattpocock-skills:implement` は経由しない)。
 
 これは `.claude/settings.json` に `extraKnownMarketplaces` と `enabledPlugins` を書き込む。コミットすれば、そのリポジトリで作業する人は何も入れなくてもスキルが有効になる — `npx skills` のようにスキルの実体をリポジトリへコミットせずに済む。
 
@@ -190,7 +190,7 @@ npx -y skills add kjfsm/skills
 **ユーザー呼び出し型**
 
 - **[ask-kjfsm](./skills/kjfsm-skills/engineering/ask-kjfsm/SKILL.md)** — どのスキルやフローが自分の状況に合うかを尋ねる。このリポジトリのスキルを案内するルーター。
-- **[implement-and-review](./skills/kjfsm-skills/engineering/implement-and-review/SKILL.md)** — 本家の /mattpocock-skills:implement でのビルドをユーザーに打ってもらい、そのあとの検証・レビュー・PR までを進める。
+- **[implement-and-review](./skills/kjfsm-skills/engineering/implement-and-review/SKILL.md)** — スペックやチケットが記述する作業を、既定ブランチへの追従からビルド・検証・コメント削り・二軸レビュー・PR まで1本で進める。
 - **[setup-repo](./skills/kjfsm-skills/engineering/setup-repo/SKILL.md)** — このリポジトリのエージェント向け設定を一括で敷く — 規約とドキュメント配置、パス別ルール、CI、弾く機構。再実行すると現況を読み、足りない工程とずれた箇所だけを当てる。
 - **[squash-d1-migrations](./skills/kjfsm-skills/engineering/squash-d1-migrations/SKILL.md)** — 積み上がった D1 のマイグレーションを1本に畳み、適用済みの各環境と突き合わせる。
 - **[tend-memory-files](./skills/kjfsm-skills/engineering/tend-memory-files/SKILL.md)** — AGENTS.md・CLAUDE.md と .claude/rules/ を新規に書く、または既存のものを監査してトリムする — 行数の目安に収め、具体的で矛盾のない指示だけを残す。
@@ -214,7 +214,7 @@ npx -y skills add kjfsm/skills
 - **[setup-playwright](./skills/kjfsm-skills/engineering/setup-playwright/SKILL.md)** — Playwright の E2E を入れ、ブラウザをどの層で用意するか決める。E2E をこれから入れるとき、`Executable doesn't exist` や `Missing system dependencies` が出たとき、コンテナやクラウドのサンドボックスに置いてあるブラウザと Playwright が要求するビルド番号がずれたとき、CI でだけブラウザの取得に失敗するとき、`playwright install` をセットアップスクリプト・SessionStart フック・CI のどこに置くか決めるときに使う。
 - **[setup-rules](./skills/kjfsm-skills/engineering/setup-rules/SKILL.md)** — このリポジトリのルールを `.claude/rules/` と `AGENTS.md` の2層に敷く — パスに応じて自動注入されるパス別ルールと、全セッションに効く絶対ルール。Claude Code を使うリポジトリを初めて設定するとき、`.claude/rules/` がまだ無いとき、同じ指摘を2回以上受けてルールに落としたいとき、`/kjfsm-skills:setup-repo` の工程 B として使う。
 - **[setup-skills](./skills/kjfsm-skills/engineering/setup-skills/SKILL.md)** — このリポジトリをエンジニアリング系スキル向けに設定する — イシュートラッカー、トリアージラベルの語彙、ドメインドキュメントの配置、検証ゲート、応答と記述の規約。`docs/agents/` がまだ無いとき、他のエンジニアリング系スキルを初めて使う前、`/kjfsm-skills:setup-repo` の工程 A として使う。
-- **[two-axis-review](./skills/kjfsm-skills/engineering/two-axis-review/SKILL.md)** — 固定した基点(コミット、ブランチ、タグ、マージベース)からの変更を二軸でレビューする — Standards(このリポジトリの明文化されたコーディング標準)と Spec(元のイシュー/PRD)。両方を並列サブエージェントで実行し、結果を並べて報告する。ユーザーがブランチ・PR・進行中の変更をレビューしたいとき、「X 以降をレビューして」と求めたとき、他のスキルが差分のレビューを必要とするときに使う。
+- **[two-axis-review](./skills/kjfsm-skills/engineering/two-axis-review/SKILL.md)** — まだコミットしていない編集と新規ファイルまで含めて、差分を kjfsm のレビュアー2体で並列にレビューする — Standards(明文化された標準、Fowler のスメル、書かれなかった Why not)と Spec(元のイシュー/PRD)。範囲は固定した基点(コミット、ブランチ、タグ)とのマージベースから作業ツリーまで。コミット前の作業をレビューしたいとき、ブランチ・PR・進行中の変更をレビューしたいとき、「X 以降をレビューして」と求めたとき、他のスキルが差分のレビューを必要とするときに使う。
 - **[verification-loop](./skills/kjfsm-skills/engineering/verification-loop/SKILL.md)** — 変更が本当に動くことを、記録された検証ゲートのクリーンラン — 型チェック、lint、テスト、ビルド、そして実際に動かしての観測 — で確かめる。ユーザーが動作確認や検証を求めたとき、変更を完了と宣言する前(コミットや PR を出す直前)、他のスキルが作業の検証を必要とするときに使う。
 - **[where-to-write-what](./skills/kjfsm-skills/engineering/where-to-write-what/SKILL.md)** — コード・テスト・コメント・JSDoc・コミットメッセージ・PR 本文・ADR・docs のどこに何を書くかを決めるルーティング規律 — コードには How、テストには What、コミットログには Why、コメントには Why not。コメントを書くか消すか判断するとき、JSDoc に何を載せるか決めるとき、コミットメッセージや PR 本文を書くとき、README を足すか迷ったとき、実装の背景や設計判断をどこに残すか迷ったときに使う。
 - **[workers-tests](./skills/kjfsm-skills/engineering/workers-tests/SKILL.md)** — Cloudflare Workers のプロジェクトでテストスイートを作る・立て直すときの規律。テストが1本も無いところから始めるとき、vitest.config が複雑すぎる・テストが遅い・OOM する・vi.mock だらけで信用できないとき、@cloudflare/vitest-plugin(旧 @cloudflare/vitest-pool-workers)を上げたら壊れたとき、React Router などの SSR を `main` に載せていて1ファイルに十数秒かかる・`applyD1Migrations` が遅い・`createTestHarness` で HTTP の層を作るとき、Workers / D1 / Durable Objects / Queues にテストを入れたいときに使う。

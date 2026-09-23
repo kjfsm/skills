@@ -18,7 +18,7 @@ disable-model-invocation: true
 2. **会話だけでは決着しない問い**(状態、ビジネスロジック、実際に見ないと決まらない UI)がある → プロトタイプへ寄り道する。**`/mattpocock-skills:handoff`** で外へ出し、新しいセッションの **`/mattpocock-skills:prototype`** が使い捨てのコードで答え、`/mattpocock-skills:handoff` で持ち帰る。
 3. 複数セッションにまたがるビルド → **`/mattpocock-skills:to-spec`**(スレッドをスペックに変換)、続けて **`/mattpocock-skills:to-tickets`** でトレーサーバレット方式のチケットに分割し、それぞれに **ブロッキングエッジ** を宣言させる。ローカルは `.scratch/<feature>/issues/` に1チケット1ファイル、実トラッカーではそのエッジがネイティブなブロッキングリンクになる。チケットごとに **`/kjfsm-skills:implement-and-review`** を起動し、**チケットごとにコンテキストをクリアする**。1セッションで収まる → その場で **`/kjfsm-skills:implement-and-review`**。
 
-   **`/kjfsm-skills:implement-and-review`** は本家の **`/mattpocock-skills:implement`** を打つ行を示して止まり(ビルドはそこで **`/mattpocock-skills:tdd`** を駆動する)、ビルドが済んだら**`/kjfsm-skills:verification-loop`** で **クリーンラン**(記録されたゲートを中断なく1回で通し、変更した経路を実際に駆動して観測)を取り、コミット前に **`/kjfsm-skills:prune-comments`**(書いたコメントを削る)→ **`/kjfsm-skills:two-axis-review`**(Standards + Spec)を通し、PR を出して締める。単体でも使う: テストファーストで作る → `/mattpocock-skills:tdd`、動くか確かめるだけ → `/kjfsm-skills:verification-loop`、コメントを削るだけ → `/kjfsm-skills:prune-comments`、固定した基点でブランチや PR をレビュー → `/kjfsm-skills:two-axis-review`。
+   **`/kjfsm-skills:implement-and-review`** は **`/mattpocock-skills:tdd`** でビルドし、**`/kjfsm-skills:verification-loop`** で **クリーンラン**(記録されたゲートを中断なく1回で通し、変更した経路を実際に駆動して観測)を取り、コミット前に **`/kjfsm-skills:prune-comments`**(書いたコメントを削る)→ **`/kjfsm-skills:two-axis-review`**(Standards + Spec)を通し、PR を出して締める。単体でも使う: テストファーストで作る → `/mattpocock-skills:tdd`、動くか確かめるだけ → `/kjfsm-skills:verification-loop`、コメントを削るだけ → `/kjfsm-skills:prune-comments`、固定した基点でブランチや PR をレビュー → `/kjfsm-skills:two-axis-review`。
 
 ### コンテキストの衛生管理
 

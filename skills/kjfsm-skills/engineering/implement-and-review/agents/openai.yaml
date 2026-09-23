@@ -1,5 +1,5 @@
 interface:
   display_name: "実装してレビューする"
-  short_description: "本家 /mattpocock-skills:implement でのビルドのあと、検証・レビュー・PR を進める"
+  short_description: "ビルドから検証・レビュー・PR までを1本で進める"
 policy:
   allow_implicit_invocation: false

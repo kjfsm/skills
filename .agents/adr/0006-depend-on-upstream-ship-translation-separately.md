@@ -26,9 +26,12 @@
 ## 覆る条件
 
 - 本家が、`kjfsm-skills` の本文から名指ししているスキルを改名したり退役させたりしたら、呼び先を直す。名指ししているものは列挙しない — `grep -rn` で `skills/kjfsm-skills/` を本家のスキル名で引けば、その時点の全部が出る。
-- 本家の `/mattpocock-skills:implement` が次のどちらかを変えたら、`implement-and-review` がユーザーに示す行を作り直す。この行は、引数が本家の本文の**後ろに付く**こと(`$ARGUMENTS` を持たない)と、最後の2手が `/mattpocock-skills:code-review` とコミットであることを前提に、その2手を止めている。
 - 本家の変更を1回で丸ごと受け取りたくなくなったら、`version` の範囲で固定する。ただし範囲の解決はタグ `mattpocock-skills--v<版>` を探すのに対し、本家のタグは `v1.2.3` の形である(2026-09-18 時点)。このままでは範囲に合う版を取りに行けず、読み込むときに範囲を外れていればプラグインが無効になるだけである。
 
 ## 追記(2026-09-23): 訳のプラグインは廃止した
 
 `matt-skills-jp` のバケットとプラグインを削除した。使われなくなったためである。`kjfsm-skills` が本家 `mattpocock-skills` に依存するという決定はそのまま有効で、上の不変条件のうち訳に関するもの(`matt-skills-jp` が自作スキルを名指ししない、訳しか使わないエージェントを `plugins/matt-skills-jp/agents/` に置く)は対象ごと無くなった。
+
+## 追記(2026-09-23): implement-and-review は本家の implement を経由しない
+
+`implement-and-review` はビルドを本家の `/mattpocock-skills:implement` に任せ、ユーザーに打つ行を示して止まっていた。本家の implement は `tdd`・型チェック・テストの3行に `code-review` とコミットを足しただけで、後ろの2手を止めるために引数の散文と本家の本文の形(`$ARGUMENTS` を持たない)に依存していた。包む側が包まれる側の約15倍の大きさだったので、ビルドの3行を `implement-and-review` に取り込み、本家の `tdd` を直接呼ぶ。本家への依存という決定は変わらない — 依存先が `implement` から `tdd` に移っただけである。

@@ -40,7 +40,13 @@ description: 新規の Cloudflare Workers フルスタックアプリを、い�
 - **`pnpm up --latest` も `pnpm add` も peer の範囲を見ない。** 後から入れるプラグインが peer で上限を持つと(`@cloudflare/vitest-plugin` と `vitest` など)、先に入った最新が範囲外になる。プラグインを足したら peer を読み、範囲に揃える
 - D1/Drizzle・シークレット・E2E などプロジェクト固有の config は、その時点の公式手順で組む。そのうえで公式に書かれていない2つ:
   - シークレットは `wrangler.jsonc` の `secrets.required` に名前を並べる。無いと `wrangler types` が手元の `.dev.vars` から型を拾い、**`.dev.vars` の無い CI でだけ型が変わる**
-  - E2E のサーバーを `vite preview` で立てない。ビルドが `.dev.vars` を `build/server/` へ複写し、preview はそれを優先してプロセス環境を見ないので、E2E 用の値(better-auth の `BETTER_AUTH_URL` とポートなど)が渡らない。`wrangler dev -c build/server/wrangler.json --env-file <E2E 用の env>` で立てる
+  - E2E のサーバーを `vite preview` で立てない。ビルドが `.dev.vars` を `build/server/` へ複写し、preview はそれを優先してプロセス環境を見ないので、E2E 用の値が渡らない(`.dev.vars` の無い CI では秘密ごと欠ける)。`wrangler dev -c build/server/wrangler.json --env-file <E2E 用の env> --persist-to <E2E 専用>` で立てる
+- C3 テンプレートの `postinstall: wrangler types` は外し、`worker-configuration.d.ts` をコミットして `wrangler types --check` を検証ゲートの先頭に置く。Workers Builds はデプロイのたびに `pnpm install` を走らせるので、残すと本番のビルドに型生成が混ざる
+- ⚠️ `worker-configuration.d.ts` は標準ライブラリの型を自前で持つ。tsconfig の `lib` を上げても `toSorted` など ES2023 以降は型に出ない
+- DB と better-auth はリクエストごとに組む。`env` は `workers/app.ts` で `RouterContextProvider` に載せて loader / action へ渡し、better-auth の `baseURL` はリクエストのオリジンから取る。モジュールの先頭で `cloudflare:workers` の `env` から組むと `BETTER_AUTH_URL` を固定値で持つことになり、dev・http テスト・E2E でホストやポートが変わるたびに揃え直す。auth の CLI には、同じオプションに空の値を渡すだけのファイルを `--config` で読ませる
+- 生成物(`worker-configuration.d.ts`・`.react-router/`・`build/`・better-auth のスキーマ・`migrations/`)と shadcn の `components/ui/` は、oxlint と oxfmt の両方で除外する
+- マイグレーションはテストでも CI でも空の D1 にしか流れないので、データが消えても気づけない。適用済みの書き換えと生成物のままの親テーブル再構築を検査スクリプトで弾き、外部キーを有効にした SQLite に1ファイル1トランザクションで流して行数を見るテストを置く(D1 側の事情は `/kjfsm-skills:migrate-d1`)
+- テストのタイムゾーンは `vitest.config.ts` の先頭で `process.env.TZ` に固定する。`test.env` は Node が日付を決めたあとに効くので固定されない
 - React Router + Workers は CJS 依存パッケージで統合上の相性問題が出ることがある([cloudflare/workers-sdk#14555](https://github.com/cloudflare/workers-sdk/issues/14555) など)。重い UI ライブラリを足す前に現状を確認する。
 
 ## 完了

@@ -77,6 +77,15 @@ scripts/check-invariants.sh
 - **`scripts/link-skills.sh` を走らせる** — ローカルのハーネススキルディレクトリへのシンボリックリンクを張り直す。追加・削除・改名のあと。
 - **`pnpm format`** — CI が `format:check` で落とす。
 
+## 評価を足す
+
+`evals/` に `claude plugin eval` のケースを置く(形式と grader の選び方は [`OFFICIAL.md`](../skills/kjfsm-skills/productivity/writing-great-skills/OFFICIAL.md) の「評価と反復」)。回すのは `scripts/eval.sh` で、引数は `claude plugin eval` にそのまま渡る — リポジトリをそのまま対象にすると、依存の `mattpocock-skills` が満たせずプラグインごと無効になるので、依存を外した写しを組んで回す。
+
+- **発火** — `tags: [trigger]`。`tool_used: Skill` で発火を、`min: 0` / `max: 0` と `arm: both` で「近いが別のスキルが正解」の依頼で黙ることを見る
+- **効き目** — `tags: [uplift]`。素のモデルが外しやすい問いに `llm` grader を置き、スキル無しとの `Δ` を見る。**`Δ` が 0 に近いままなら、そのスキルはモデルに追い越されている** — 退役の候補である
+
+費用がかかるので CI では回さない。description を変えたとき、スキルを刈り込むか迷ったときに回す。
+
 ## エージェントを足す
 
 `agents/<名前>.md` に置く。`plugin.json` への登録は要らない — プラグインはこのディレクトリを自動で走査する。**列挙しないことが正しい状態である** — 列挙すると既定の走査が止まり、列挙し忘れたものが黙って消える(→ `AGENTS.md`)。

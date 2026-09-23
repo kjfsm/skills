@@ -385,7 +385,7 @@ for manifest in hooks/hooks.json .claude/settings.json; do
     err "$manifest does not wire $hook_script; the repository would ship a discipline it does not run on itself"
 done
 
-# 18. `agents/` と `plugins/*/agents/` のサブエージェントが健全で、呼ぶ側と食い違っていない。プラグインは
+# 18. `agents/` のサブエージェントが健全で、呼ぶ側と食い違っていない。プラグインは
 #     このディレクトリを自動で拾う(`plugin.json` に列挙しない — 列挙と走査の両方に
 #     載ると同じエージェントが2度並ぶ)。壊れたときの症状は「そんな subagent_type は
 #     無い」で静かに汎用エージェントへ落ちるか、そもそも起動しないかであり、どちらも
@@ -404,7 +404,7 @@ while IFS= read -r agent; do
 
   grep -rq "\`$base\`" --include='*.md' skills ||
     err "$agent is named by no skill; nothing routes work to it"
-done < <(find agents plugins/*/agents -name '*.md' 2>/dev/null | sort)
+done < <(find agents -name '*.md' | sort)
 
 # verifier がゲートを回せるのは、直せないからである。編集ツールを持った瞬間、
 # 「ゲートは動かさない」は本文のお願いに戻る。see skills/kjfsm-skills/engineering/verification-loop
@@ -434,6 +434,6 @@ grep -q 'モックの自己検証' skills/kjfsm-skills/engineering/prune-tests/S
   err "skills/kjfsm-skills/engineering/prune-tests/SKILL.md copies the categories that agents/test-auditor.md owns"
 
 if [ "$fail" -eq 0 ]; then
-  echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills, $(find agents plugins/*/agents -name '*.md' 2>/dev/null | wc -l | tr -d ' ') agents)"
+  echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills, $(find agents -name '*.md' | wc -l | tr -d ' ') agents)"
 fi
 exit "$fail"

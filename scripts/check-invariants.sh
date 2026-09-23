@@ -347,7 +347,7 @@ grep -q 'コメントの密度ではない' AGENTS.md ||
 #     復唱した瞬間にこれは常駐 3か所(検査 16.)の同期先 4つ目になり、フックが
 #     黙って壊れた日に、揃っていない本文だけが残る。see AGENTS.md
 hook_script="hooks/nudge-comment-check.sh"
-# 判定はフックと prune-comments の手順0が共有する。消えるとフックは黙って通す。
+# 判定はフックと、prune-comments の入口(増えたコメント行の数え上げ)が共有する。
 comment_lib="skills/kjfsm-skills/engineering/prune-comments/scripts/comment-lines.sh"
 [ -x "$comment_lib" ] ||
   err "$comment_lib is missing or not executable; the hook would silently pass every edit"

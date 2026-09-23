@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# 「コメント行か」の判定を1か所に持つ。hooks/nudge-comment-check.sh と
-# prune-comments の手順0が両方これを呼ぶ — 別々に書くと拡張子の一覧がずれる。
+# 「コメント行か」の判定を1か所に持つ。hooks/nudge-comment-check.sh と prune-comments の
+# 入口(増えたコメント行の数え上げ)が両方これを呼ぶ — 別々に書くと拡張子の一覧がずれる。
 #
 #   comment-lines.sh pattern <ファイルパス>   その拡張子のコメント行の ERE を出す。
 #                                            コメント記法が一意に決まらなければ終了コード 1

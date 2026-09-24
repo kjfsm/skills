@@ -21,12 +21,12 @@ Anthropic の公式ドキュメントとブログから抽出した、**AI に�
 
 - **隣接項目も一度見る。** 公式はページ単位で改訂される。1項目が変わっていたなら、同じ章の周囲も変わっている
 - **無くなった項目は消す。** 「昔はこうだった」を残さない — [時限情報を書かない](#時限情報を書かない)の規則は、この文書自身にも適用される。数値が差し替わったら、古い数値ごと書き直す
-- **新しいソースを探す。** 前回の突き合わせ日以降で公式ドメイン(anthropic.com、claude.com、claude.dev、platform/code.claude.com、agentskills.io)と Claude Code の changelog を見直す
+- **新しいソースを探す。** ブログと engineering の記事は [`official/blog.md`](official/blog.md) と [`official/engineering.md`](official/engineering.md) の台帳の、仕分け済みの範囲より新しいものだけを読む。docs のページは下の表の確認日が古いものから、changelog は下に書いたバージョンより後を見る
 - **ソースを足したら表にキーを追加する。** 既存項目の引用元と主張が衝突しないか確認する
 - **公式どうしが食い違っていたら両方を書く。** どちらかに丸めない
-- **確認した日を下の行に書き直す。** 突き合わせずに項目だけ足すと、この文書は「確認済みに見えるが確認されていない」という最悪の状態になる
+- **確かめたものの印を書き直す。** docs のページはその行の確認日、記事は台帳の仕分け済みの範囲、changelog は下のバージョン。突き合わせずに項目だけ足すと、この文書は「確認済みに見えるが確認されていない」という最悪の状態になる
 
-ソースとの突き合わせを最後に行った日: **2026-09-23**(表の全ソースと、Claude Code v2.1.280 までの changelog)
+Claude Code の changelog: **v2.1.280 まで**突き合わせ済み
 
 ## 目次
 
@@ -44,37 +44,21 @@ Anthropic の公式ドキュメントとブログから抽出した、**AI に�
 
 ## ソース
 
-| キー  | ソース                                                                 | 何が書いてあるか                                                                                        |
-| ----- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `sp`  | [Agent Skills 仕様][sp]                                                | 標準そのもの。frontmatter の各フィールドの検証規則、ディレクトリ構成、本文のトークン目安                |
-| `ev`  | [Evaluating skill output quality][ev]                                  | 出力の eval。assertion の書き方と採点、ベースライン比較の読み方                                         |
-| `bp`  | [Skill authoring best practices][bp]                                   | 最も密度の高い正典。数値上限、良い例/悪い例、アンチパターン、チェックリスト                             |
-| `ov`  | [Agent Skills overview][ov]                                            | 3層のロード、プラットフォームごとの実行環境、セキュリティ                                               |
-| `cc`  | [Extend Claude with skills (Claude Code)][cc]                          | Claude Code 固有の frontmatter、置き場所、実行モデル、効き目の測り方                                    |
-| `cb`  | [Best practices for Claude Code][cb]                                   | CLAUDE.md の削り方と強調、検証の手段を渡す                                                              |
-| `mm`  | [Claude はプロジェクトをどう記憶するか][mm]                            | `CLAUDE.md` の製品ドキュメント。200行の目安、`.claude/rules/` と `paths`、`/doctor`、`AGENTS.md`        |
-| `sa`  | [Create custom subagents][sa]                                          | サブエージェントの frontmatter、起動時に何が載るか                                                      |
-| `fo`  | [Extend Claude Code][fo]                                               | CLAUDE.md / rules / スキル / サブエージェント / フック / MCP の使い分けと、載せ替える引き金             |
-| `pv`  | [Test plugins with evals][pv]                                          | `claude plugin eval` の仕様。ケースと grader の形式、3回ずつの実行、プラグイン無しとの `Δ`              |
-| `p55` | [Prompting Claude Opus 5.5][p55]                                       | Opus 5.5 向けのプロンプト。effort、早すぎる停止、推論の再現の拒否(2026-09-22)                           |
-| `o5`  | [Getting the most out of Opus 5.5][o5]                                 | 思考の指示を外す、完了の定義、停止と継続のルール、タスク一覧のファイル化(2026-09-22)                    |
-| `tc`  | [What a task costs on Opus 5.5][tc]                                    | effort の選び方、サブエージェントのモデル、prompt-audit の実測(2026-09-22)                              |
-| `rc`  | [Reducing cost and improving performance with Claude Platform][rc]     | フロンティアモデルで逆効果になる指示の6類型と、外したときの実測(2026-09-08、Opus 5.5 で再測定)          |
-| `c5`  | [Claude 5 世代のコンテキストエンジニアリング][c5]                      | 過剰な制約を外す、例より interface 設計、progressive disclosure、CLAUDE.md は gotcha に使う(2026-07-24) |
-| `st`  | [Steering Claude Code][st]                                             | CLAUDE.md / rules / スキル / フック / サブエージェントの使い分け(2026-06-18)                            |
-| `ct`  | [Claude on call: Claude Tag as first responder for CI/CD failures][ct] | 学びを `lessons.md` に書き溜め、繰り返したものをスキルへ昇格させる運用(2026-08-18)                      |
-| `wp`  | [How Warp builds self-improving agents on Claude][wp]                  | 規則より理由を渡す、スキルは手続きで安定・メモリは自動で変わり続ける(2026-08-26)                        |
-| `mx`  | [Maximizing the value of your Claude Code sessions][mx]                | CLAUDE.md に置く日常のコマンド、ワークフロー固有の指示はスキルへ(2026-08-14)                            |
-| `sd`  | [The AI-Native SDLC playbook][sd]                                      | CLAUDE.md は1ページ未満、2度間違えたら書く、組織の知識はスキルに(2026-08-21)                            |
-| `lc`  | [Lessons from building Claude Code: How we use skills][lc]             | Gotchas、トリガーとしての description、最小から育てる、スキルの類型                                     |
-| `eq`  | [Equipping agents for the real world with Agent Skills][eq]            | 段階的開示の設計思想、スクリプト vs 指示、eval 駆動                                                     |
-| `ce`  | [Effective context engineering for AI agents][ce]                      | 適切な高度、最小の高シグナルトークン、just-in-time 取得                                                 |
-| `wt`  | [Writing effective tools for AI agents][wt]                            | ツール定義・命名・レスポンス形式・エラーメッセージ                                                      |
-| `lh`  | [Effective harnesses for long-running agents][lh]                      | 長時間タスク、将来のコンテキストに何を残すか                                                            |
-| `hc`  | [スキルの作成方法][hc]                                                 | 5ステップ、3シナリオのテスト、トリガーの限界                                                            |
-| `se`  | [スキル解説: プロンプト/プロジェクト/MCP/サブエージェントとの比較][se] | どの手段に載せるかの使い分け                                                                            |
-| `cm`  | [CLAUDE.md ファイルの使用][cm]                                         | `CLAUDE.md` に何を書き、何を書かないか(ブログ)                                                          |
-| `pe`  | [プロンプトエンジニアリングのベストプラクティス][pe]                   | 明示性、例示、肯定形、理由を添える                                                                      |
+docs のページは予告なく改訂されるので、行ごとに突き合わせた日を持つ。ブログと engineering の記事は公開後に変わらないので日付を持たず、[`official/blog.md`](official/blog.md) と [`official/engineering.md`](official/engineering.md) の台帳にある — 本文の引用キーのうちこの表に無いものは、そちらで引く。
+
+| キー  | ソース                                        | 何が書いてあるか                                                                                 | 確認日     |
+| ----- | --------------------------------------------- | ------------------------------------------------------------------------------------------------ | ---------- |
+| `sp`  | [Agent Skills 仕様][sp]                       | 標準そのもの。frontmatter の各フィールドの検証規則、ディレクトリ構成、本文のトークン目安         | 2026-09-23 |
+| `ev`  | [Evaluating skill output quality][ev]         | 出力の eval。assertion の書き方と採点、ベースライン比較の読み方                                  | 2026-09-23 |
+| `bp`  | [Skill authoring best practices][bp]          | 最も密度の高い正典。数値上限、良い例/悪い例、アンチパターン、チェックリスト                      | 2026-09-23 |
+| `ov`  | [Agent Skills overview][ov]                   | 3層のロード、プラットフォームごとの実行環境、セキュリティ                                        | 2026-09-23 |
+| `cc`  | [Extend Claude with skills (Claude Code)][cc] | Claude Code 固有の frontmatter、置き場所、実行モデル、効き目の測り方                             | 2026-09-23 |
+| `cb`  | [Best practices for Claude Code][cb]          | CLAUDE.md の削り方と強調、検証の手段を渡す                                                       | 2026-09-23 |
+| `mm`  | [Claude はプロジェクトをどう記憶するか][mm]   | `CLAUDE.md` の製品ドキュメント。200行の目安、`.claude/rules/` と `paths`、`/doctor`、`AGENTS.md` | 2026-09-23 |
+| `sa`  | [Create custom subagents][sa]                 | サブエージェントの frontmatter、起動時に何が載るか                                               | 2026-09-23 |
+| `fo`  | [Extend Claude Code][fo]                      | CLAUDE.md / rules / スキル / サブエージェント / フック / MCP の使い分けと、載せ替える引き金      | 2026-09-23 |
+| `pv`  | [Test plugins with evals][pv]                 | `claude plugin eval` の仕様。ケースと grader の形式、3回ずつの実行、プラグイン無しとの `Δ`       | 2026-09-23 |
+| `p55` | [Prompting Claude Opus 5.5][p55]              | Opus 5.5 向けのプロンプト。effort、早すぎる停止、推論の再現の拒否(2026-09-22)                    | 2026-09-23 |
 
 [sp]: https://agentskills.io/specification
 [ev]: https://agentskills.io/skill-creation/evaluating-skills

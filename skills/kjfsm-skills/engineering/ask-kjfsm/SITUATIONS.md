@@ -57,5 +57,5 @@
 
 - **`/mattpocock-skills:domain-modeling`** — _ドメイン_ の語彙。曖昧な用語に異議を唱え、多義語("account" が3つの役割を兼ねる)を解消し、後戻りしにくい決定を ADR に記録する。`/mattpocock-skills:grill-with-docs` が `CONTEXT.md` を用語集に保つために駆動する。
 - **`/mattpocock-skills:codebase-design`** — モジュールの _形_ の語彙(深さ、シーム、アダプター、レバレッジ、局所性)。小さなインターフェースの裏に多くの振る舞いを隠し、きれいなシームに置く。`/mattpocock-skills:tdd` と `/mattpocock-skills:improve-codebase-architecture` がこの語彙で話す。
-- **`/kjfsm-skills:delegation`** — 作業を _どこで_ 走らせるかの語彙(押し出し、階層、報告の長さ)。読み返さない大量の出力は子コンテキストへ押し出し、探索や事実確認は下位モデル、設計判断は上位モデルへ回す。**スマートゾーン** が1つのコンテキストをどこまで伸ばせるかを扱うのに対し、これは何をそこに入れずに済ませるかを扱う。`/kjfsm-skills:verification-loop` がゲートの生ログを押し出すときに、この語彙で話す。
+- **`/kjfsm-skills:delegation`** — 作業を _どこで_ 走らせるかの語彙(押し出し、階層、報告の中身)。読み返さない大量の出力は子コンテキストへ押し出し、探索や事実確認は下位モデル、設計判断は上位モデルへ回す。**スマートゾーン** が1つのコンテキストをどこまで伸ばせるかを扱うのに対し、これは何をそこに入れずに済ませるかを扱う。`/kjfsm-skills:verification-loop` がゲートの生ログを押し出すときに、この語彙で話す。
 - **`/kjfsm-skills:where-to-write-what`** — 情報の _宛先_ の語彙(コードには How、テストには What、コミットログには Why、コメントには Why not。JSDoc・PR 本文・ADR・docs はこの4本から派生する)。同じ事実は1か所にだけ書き、書きたくなった情報を正しい宛先へ届ける。`/kjfsm-skills:implement-and-review` がコミットを書く前に呼ぶ。

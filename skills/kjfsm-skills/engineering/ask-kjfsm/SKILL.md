@@ -24,7 +24,7 @@ disable-model-invocation: true
 
 手順1〜3は **1つの途切れないコンテキストウィンドウ** で進める — `/mattpocock-skills:to-tickets` の後まで compact もクリアもしない。こうしてグリリング・スペック・チケットが同じ思考の上に積み上がる。各 `/kjfsm-skills:implement-and-review` はその後、チケットをもとに新しいコンテキストから始める。
 
-ここでの限界が **スマートゾーン** である — モデルが依然として鋭く推論できる範囲(最先端でおよそ12万トークン)。超えると、コンテキストが技術的に収まっていても推論の質は落ちる。`/mattpocock-skills:to-tickets` の前にこれへ近づいた → 押し進めず、`/mattpocock-skills:handoff` して新しいスレッドで続ける。
+ここでの限界が **スマートゾーン** である — モデルが依然として鋭く推論できる範囲で、その広さはモデルの世代ごとに動く。超えると、コンテキストが技術的に収まっていても推論の質は落ちる。`/mattpocock-skills:to-tickets` の前にこれへ近づいた → 押し進めず、`/mattpocock-skills:handoff` して新しいスレッドで続ける。
 
 ## オンランプ
 

@@ -24,6 +24,7 @@ game-01 では、最初はエージェントが手でデプロイしていた。
 
 5. PR をマージする
 6. (エージェント)共有 D1 の Time Travel の bookmark と、`<slug>_` の外のスキーマを控える(→ `/kjfsm-personal:kjfsm-shared-db` の「スキーマを変える」)。次の連携で、最初のビルドがマイグレーションを流す
+   - auto mode では、スキーマを読む `wrangler d1 execute --remote` が止められることがある(game-01 で起きた。bookmark は取れた)。止められたら別の手で読みに行かず、そのコマンドを人間に渡す。人間が控えないなら、流れる SQL の全文を読んで、触れる名前が全部 `<slug>_` で始まることを確かめてから進める
 7. ダッシュボードで Workers Builds を繋ぐ: Workers & Pages → `<app>` → Settings → Build → Connect
 
    | 項目                  | 値                                                         |
@@ -33,6 +34,7 @@ game-01 では、最初はエージェントが手でデプロイしていた。
    | Deploy command        | `pnpm db:migrate:remote && npx wrangler deploy`            |
    | API token             | `kjfsm-auth-app build token`(共有 D1 への適用に実績がある) |
    - デプロイのコマンドは、必ずマイグレーションを先にする
+   - 「Builds for non-production branches」は切る。入れたままだと、PR ごとに `npx wrangler preview` が走り、`previews` ブロックが無いと落ちて、PR のチェックが赤くなる(game-01 で起きた)。Durable Objects を持つ Worker にはプレビュー URL が作られないので、入れておく得も無い
    - このトリガーは、エージェントが Builds API で作ろうとしても auto mode の判定に止められる。確認なしに共有 D1 へ流れる設定だからで、それゆえ人間の手順にしてある
    - GitHub App は kjfsm のアカウントに入っていて、新しいリポジトリも読める。Builds API の `config_autofill` が通れば、読めている
 

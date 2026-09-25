@@ -25,8 +25,9 @@ description: スマホでも遊べるブラウザゲームを、kjfsm の構成(
 `cf-workers-full-stack-template` から起こす(kjfsm-auth の RP と共有 D1 の相乗りが組み込み済み)。手順はテンプレートの README「フォークしたら」が持つ。そこに無い落とし穴:
 
 - 手元の clone は古いことがある。`git fetch` してから `git archive origin/main | tar -x -C <新しいリポジトリ>` で写す
-- 写した直後はファイルが未追跡なので、`git grep` では置き換え対象を拾えない。`grep -r --exclude-dir=node_modules` を使う
-- 起こしたばかりのリポジトリは origin/main に `wrangler.jsonc` が無い。そのため `check:migrations` が `git show` で落ちる。game-01 の `scripts/check-migrations.mjs`(`existsAt`)の形で直す
+- テンプレートの `kjfsm/cf-workers-full-stack-template#11` より前の版から起こした場合は、次の2つを踏む
+  - README の置き換え手順が `git grep` になっている。写した直後はファイルが未追跡なので、何も拾わない。`grep -r --exclude-dir=node_modules` を使う
+  - origin/main に `wrangler.jsonc` がまだ無く、`check:migrations` が `git show` で落ちる。#11 の `existsAt` の形で直す
 - 手元のポートは `grep -rhoE 'port: ?[0-9]{4}' ~/github/kjfsm/*/vite.config.ts` で空きを探す
 
 完了基準: 名前・slug・ポートを置き換え、テンプレートの検証ゲートが緑のままコミットした。

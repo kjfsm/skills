@@ -47,6 +47,11 @@ export const middleware: Route.MiddlewareFunction[] = [
   1 ルートのうちは構造を足さない。
 - middleware は `context.set()` でリクエストスコープの値を配れる。loader は `context.get()` で
   受け取る。同じものを loader ごとに引き直さない。
+- **middleware に渡る `request.url` は、正規化されていない生のまま。** 画面の中の遷移とフォームの
+  送信は、データ要求(`/path.data?_routes=…`、トップは `/_.data`)として届く。パスで分岐したり、
+  送り先の `redirectTo` を組み立てたりするなら、先に `.data` と `_routes` を落とす。落とし方は
+  React Router 自身の `getNormalizedPath`(非公開)に合わせる。ドキュメント要求しか撃たない
+  HTTP 層のテストは通り、ブラウザでだけ壊れる(game-01 では E2E が捕まえた)。
 
 **middleware が決めるのは「そのルートに入れるか」。** 読めるが書き込みだけ制限したい画面は
 middleware に寄せない — ルートごと止めると、読む手段まで奪ってしまう。その場合の強制点は

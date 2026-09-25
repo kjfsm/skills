@@ -13,6 +13,7 @@ game-01(もちずもう)で、公開したあとにユーザーから直され�
 関所は root の middleware の1か所に置く。middleware は、アカウントを要求ごとに1回だけ引いて context に置く。名前の無いアカウントは、どのページを開いても `/welcome?redirectTo=<元のパス>` へ送る。
 
 - **`/welcome`・`/login`・`/api/*` は通す。** `/api/` まで止めると、ログアウトもできなくなる
+- **パスは `.data` を落としてから見る。** 画面の中の遷移と送信はデータ要求で届く(→ `/kjfsm-skills:react-router-route-module`)。落とさないと、名前を決める送信そのものを関所が `/welcome` へ送り返し、名前を決められない
 - **loader ごとに判定を書かない。** 写し忘れたページ(game-01 では番付)が、ビルドもテストも通ったまま素通りになる
 - **ログインの戻り先(`callbackURL`)は元のページのままでよい。** 戻った直後の要求を middleware が捕まえる
 - **`/welcome` は、ページ自身の middleware でログインを要求する。** loader と action に同じ判定を2回書かない

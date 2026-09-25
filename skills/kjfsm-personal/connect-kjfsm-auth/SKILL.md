@@ -79,6 +79,8 @@ export function authFor(request: Request, env: Env) {
 
 - **ログインを始めるのは `auth.api.signInSocial({ body: { provider: "kjfsm", callbackURL } })`**(クライアントからなら `POST /api/auth/sign-in/social`)。`genericOAuth` は専用のエンドポイントを持たない
 - **戻り先は `/api/auth/callback/kjfsm`。** `oauth2/` を挟むと 404
+- **ボタンには「Google でログイン」と書く。** 利用者は kjfsm-auth を知らない。「kjfsm でログイン」では何でログインするのか分からない、と game-01 で言われた。実際に通るのは Google の画面である
+- **IdP から来る `user.name` を、他の人に見せる名前にしない。** Google のアカウント名が入り、本名のことが多い。番付やチャットのように人に見える名前は、アプリ側のテーブルに別に持ち、初回のログインで聞く。組み方は `/kjfsm-personal:build-browser-game` の ACCOUNT.md にある
 
 完了基準: 型チェックが通り、`authOptions` が上の設定を1か所で持っている(dev bypass を作るなら、同じ `authOptions` を使う)。
 

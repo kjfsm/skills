@@ -51,7 +51,7 @@ export const middleware: Route.MiddlewareFunction[] = [
   送信は、データ要求(`/path.data?_routes=…`、トップは `/_.data`)として届く。パスで分岐したり、
   送り先の `redirectTo` を組み立てたりするなら、先に `.data` と `_routes` を落とす。落とし方は
   React Router 自身の `getNormalizedPath`(非公開)に合わせる。ドキュメント要求しか撃たない
-  HTTP 層のテストは通り、ブラウザでだけ壊れる(game-01 では E2E が捕まえた)。
+  HTTP 層のテストは通り、ブラウザでだけ壊れる。捕まえるのは E2E である。
 
 **middleware が決めるのは「そのルートに入れるか」。** 読めるが書き込みだけ制限したい画面は
 middleware に寄せない — ルートごと止めると、読む手段まで奪ってしまう。その場合の強制点は

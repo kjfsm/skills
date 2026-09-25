@@ -116,7 +116,7 @@ openssl rand -base64 32 | pnpm exec wrangler secret put BETTER_AUTH_SECRET --nam
 - **`--exec` の子が落ちても、クライアントは残る。** 作り直さず、出力に出る `clients rotate-secret <client_id> --exec ...` でやり直す
 - **`wrangler secret put` が「最新バージョンが未デプロイ」で拒否されたら `wrangler versions secret put`。** 反映にはデプロイが要る
 - `BETTER_AUTH_SECRET` は IdP の値とは無関係の、この RP だけの値。手元と本番で別に作る
-- **初回デプロイより先に入れる。** `secrets.required` が揃わないと deploy が upload で止まる。Worker がまだ無いと `secret put` が作成を対話で尋ねるので、止まったら人間に打ってもらう
+- **初回デプロイより先に入れる。** `secrets.required` が揃わないと deploy が upload で止まる。Worker がまだ無いと `secret put` が作成を尋ねる。TTY が無いところ(エージェントの Bash)では既定の yes で作られて進む(wrangler 4.136 で確認)。対話の端末で止まったら人間に答えてもらう
 
 完了基準: `clients list --redirect-uri <URL>` が環境ごとにちょうど1件を返し、`wrangler secret list --name <app>` に3本が並ぶ。
 

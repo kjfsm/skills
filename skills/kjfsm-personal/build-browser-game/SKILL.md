@@ -10,7 +10,7 @@ description: スマホでも遊べるブラウザゲームを、kjfsm の構成(
 - [SLICES.md](SLICES.md) — チケットの切り方と、各チケットで守ること
 - [NETCODE.md](NETCODE.md) — 部屋の DO と画面の通信
 - [DEPLOY.md](DEPLOY.md) — 本番に出す順
-- [ACCOUNT.md](ACCOUNT.md) — ログインとランキング。手順 1 で入れると決めたときだけ読み、以後の手順にそこに書いた分を足す
+- [ACCOUNT.md](ACCOUNT.md) — ログインとランキング。手順 1 で入れると決めたときだけ読み、以後の手順にそこに書いた分を足す。入れない・あとで外すときは「外す」の節
 
 手順 1〜4 は1つの途切れないコンテキストで進め、そのあとはチケットごとにコンテキストを空ける。`to-spec`・`to-tickets`・`implement-and-review` はユーザー呼び出し型でモデルからは呼べない。ユーザーに打ってもらうか、その本文(プラグインの SKILL.md)を読んで同じ手順を踏む。
 
@@ -38,7 +38,7 @@ description: スマホでも遊べるブラウザゲームを、kjfsm の構成(
 - テンプレートが `kjfsm/cf-workers-full-stack-template#11` より前の版なら、README の置き換えは `git grep` ではなく `grep -r --exclude-dir=node_modules` で探し、`check:migrations` を #11 の `existsAt` の形に直す。写した直後のファイルは未追跡で `git grep` に拾われず、origin/main に無い `wrangler.jsonc` で `git show` が落ちる
 - 手元のポートは `grep -rhoE 'port: ?[0-9]{4}' ~/github/kjfsm/*/vite.config.ts` で空きを探す
 - `.gitignore` に `.claude/worktrees/` を足す。テンプレートには無く、本体のチェックアウトで worktree が未追跡に出る
-- ログインを入れないなら、RP・D1・開発用の入口をここで外す。残すと、使わない secret と共有 D1 の相乗りが、本番に出す前提として残る
+- ログインを入れないなら、RP・D1・開発用の入口をここで外す。残すと、使わない secret と共有 D1 の相乗りが、本番に出す前提として残る。外し方は [ACCOUNT.md](ACCOUNT.md) の「外す」の 1〜4
 
 完了基準: 名前・slug・ポートを置き換え、テンプレートの検証ゲートが緑のままコミットした。
 

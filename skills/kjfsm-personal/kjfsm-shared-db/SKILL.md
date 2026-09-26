@@ -99,8 +99,10 @@ export const session = sqliteTable("<slug>_session", { ... },
 ```sh
 pnpm exec wrangler d1 time-travel info kjfsm-shared-db   # 戻り先の bookmark
 pnpm exec wrangler d1 execute kjfsm-shared-db --remote --command \
-  "select type, name, sql from sqlite_master where name not like '<slug>\_%' escape '\' and name != 'd1_migrations_<slug>' order by name" --json | jq '.[0].results' > before.json
+  "select type, name, sql from sqlite_master where tbl_name not like '<slug>\_%' escape '\' and tbl_name != 'd1_migrations_<slug>' order by name" --json | jq '.[0].results' > before.json
 ```
+
+`name` ではなく `tbl_name` で絞る。`name` だと、SQLite が自分のテーブルに付ける自動インデックス(`sqlite_autoindex_<slug>_…`)が外側に数えられ、適用後の diff に出る。
 
 完了基準: 適用前に、生成された SQL の全文を読み、触れるテーブルが全部 `<slug>_` で始まると言える。適用後に同じクエリを取り直し、`before.json` と `diff` して差分が無い(自分の prefix の外が1つも変わっていない)。
 

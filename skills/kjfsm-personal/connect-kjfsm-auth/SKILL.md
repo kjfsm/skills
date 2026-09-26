@@ -79,6 +79,8 @@ export function authFor(request: Request, env: Env) {
 
 - **ログインを始めるのは `auth.api.signInSocial({ body: { provider: "kjfsm", callbackURL } })`**(クライアントからなら `POST /api/auth/sign-in/social`)。`genericOAuth` は専用のエンドポイントを持たない
 - **戻り先は `/api/auth/callback/kjfsm`。** `oauth2/` を挟むと 404
+- **ボタンには「Google でログイン」と書く。** 利用者は kjfsm-auth を知らない。「kjfsm でログイン」では、何でログインするのか分からない。実際に通るのは Google の画面である
+- **IdP から来る `user.name` を、他の人に見せる名前にしない。** Google のアカウント名が入り、本名のことが多い。ランキングやチャットのように人に見える名前は、アプリ側のテーブルに別に持ち、初回のログインで聞く。組み方は `/kjfsm-personal:build-browser-game` の ACCOUNT.md にある
 
 完了基準: 型チェックが通り、`authOptions` が上の設定を1か所で持っている(dev bypass を作るなら、同じ `authOptions` を使う)。
 
@@ -116,7 +118,7 @@ openssl rand -base64 32 | pnpm exec wrangler secret put BETTER_AUTH_SECRET --nam
 - **`--exec` の子が落ちても、クライアントは残る。** 作り直さず、出力に出る `clients rotate-secret <client_id> --exec ...` でやり直す
 - **`wrangler secret put` が「最新バージョンが未デプロイ」で拒否されたら `wrangler versions secret put`。** 反映にはデプロイが要る
 - `BETTER_AUTH_SECRET` は IdP の値とは無関係の、この RP だけの値。手元と本番で別に作る
-- **初回デプロイより先に入れる。** `secrets.required` が揃わないと deploy が upload で止まる。Worker がまだ無いと `secret put` が作成を対話で尋ねるので、止まったら人間に打ってもらう
+- **初回デプロイより先に入れる。** `secrets.required` が揃わないと deploy が upload で止まる。Worker がまだ無いと `secret put` が作成を尋ねる。TTY が無いところ(エージェントの Bash)では既定の yes で作られて進む(wrangler 4.136 で確認)。対話の端末で止まったら人間に答えてもらう
 
 完了基準: `clients list --redirect-uri <URL>` が環境ごとにちょうど1件を返し、`wrangler secret list --name <app>` に3本が並ぶ。
 

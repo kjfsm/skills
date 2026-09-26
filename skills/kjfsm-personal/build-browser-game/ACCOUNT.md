@@ -1,6 +1,6 @@
 # ログインとランキング
 
-SKILL.md の手順 1 で入れると決めたときだけ読み、各手順にここの分を足す。ログインそのもの(RP の組み方・ボタンの文言)は `/kjfsm-personal:connect-kjfsm-auth`、開発用の入口は `/kjfsm-skills:dev-bypass-sign-in`、共有 D1 は `/kjfsm-personal:kjfsm-shared-db` が持つ。
+SKILL.md の手順 1 で入れると決めたときだけ読み、各手順にここの分を足す。入れないと決めたとき・あとで外すときは「外す」だけを読む。ログインそのもの(RP の組み方・ボタンの文言)は `/kjfsm-personal:connect-kjfsm-auth`、開発用の入口は `/kjfsm-skills:dev-bypass-sign-in`、共有 D1 は `/kjfsm-personal:kjfsm-shared-db` が持つ。
 
 ## 仕様(手順 3 に足す)
 
@@ -58,4 +58,13 @@ SKILL.md の手順 1 で入れると決めたときだけ読み、各手順に�
 5. **確かめる。** ビルドのログでマイグレーションが流れたこと、控えたスキーマと比べ直して `<slug>_` の外が変わっていないことを見る。本番で `/dev/bypass` が 404 を返すこと、`/login` への POST が `auth.kjfsm.net/api/auth/oauth2/authorize` へ正しい `client_id`・`redirect_uri`・`S256` で送ることも見る。その URL を叩くと、IdP のサインイン画面へ 302 で送られる(`invalid_client` にならない)
 6. **人間に渡す。** IdP を通したログインの一巡は、Google と同意画面があるので人間にしか通れない。iOS のホーム画面(standalone)から開いたときのログインは、未確認であることを伝える
 
-あとからログインを外すなら、マージの前に人間が Build command と Deploy command を `pnpm run build` と `npx wrangler deploy` に戻す。スクリプトを消したまま古いコマンドで走ると、ビルドかデプロイが落ちる。共有 D1 の `<slug>_` の表と IdP のクライアントは、一覧を見せて確認を取ってから片付ける(`kjfsm-shared-db` の「抜ける」)。
+## 外す
+
+遊んでみて要らないと分かったら、コードとドキュメントから外す PR と、本番に残ったものの片付けを分ける。手順 2 で最初から入れない場合も、1〜4 は同じである。
+
+1. **`wrangler.jsonc` の `secrets.required` は、空の配列で残す。** 消すと `wrangler types` が手元の `.dev.vars` から古い secret を型に拾う。手元の型チェックは通り、`.dev.vars` の無い CI で `cf-typegen:check` が落ちる。`wrangler types --check --env-file /dev/null` で確かめる
+2. **`.claude/rules/db.md` は、生成物の一覧として残す。** テンプレートの CLAUDE.md の絶対ルール6(全リポジトリで同じ文面)がこのファイルを指す。`worker-configuration.d.ts` と `.react-router/` は D1 を外しても生成物のまま
+3. **`.worktreeinclude` から `.dev.vars` を外す。** 読む側がいないのに、新しい worktree へ古い secret を写し続ける
+4. **ログインのテストファイルを消す前に、ログインと無関係なテストを移す。** ゲストが設定で名前を変えるテストのように、残す画面を守るものが混ざっている
+5. **マージの前に、人間が Workers Builds のコマンドを `pnpm run build` と `npx wrangler deploy` に戻す。** `check:door` と `db:migrate:remote` を消したまま古いコマンドで走ると、ビルドが落ちてデプロイされない
+6. **マージのあと、本番に残ったものを片付ける。** 共有 D1 の `<slug>_` の表と `d1_migrations_<slug>`、IdP のクライアント、Worker の secret 3本である。一覧を見せて確認を取ってから消す(`kjfsm-shared-db` の「抜ける」)。PR 本文に一覧を書いておく。リポジトリからは消えるので、控えないと辿れなくなる

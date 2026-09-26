@@ -63,7 +63,7 @@ SKILL.md の手順 1 で入れると決めたときだけ読み、各手順に�
 遊んでみて要らないと分かったら、コードとドキュメントから外す PR と、本番に残ったものの片付けを分ける。手順 2 で最初から入れない場合も、1〜4 は同じである。
 
 1. **`wrangler.jsonc` の `secrets.required` は、空の配列で残す。** 消すと `wrangler types` が手元の `.dev.vars` から古い secret を型に拾う。手元の型チェックは通り、`.dev.vars` の無い CI で `cf-typegen:check` が落ちる。`wrangler types --check --env-file /dev/null` で確かめる
-2. **`.claude/rules/db.md` は、生成物の一覧として残す。** テンプレートの CLAUDE.md の絶対ルール6(全リポジトリで同じ文面)がこのファイルを指す。`worker-configuration.d.ts` と `.react-router/` は D1 を外しても生成物のまま
+2. **`.claude/rules/db.md` を消すなら、生成物の節を別の rule に移す。** `worker-configuration.d.ts` と `.react-router/` は D1 を外しても生成物のままなので、`paths:` を `wrangler.jsonc` と `worker-configuration.d.ts` に向けた rule に残す
 3. **`.worktreeinclude` から `.dev.vars` を外す。** 読む側がいないのに、新しい worktree へ古い secret を写し続ける
 4. **ログインのテストファイルを消す前に、ログインと無関係なテストを移す。** ゲストが設定で名前を変えるテストのように、残す画面を守るものが混ざっている
 5. **マージの前に、人間が Workers Builds のコマンドを `pnpm run build` と `npx wrangler deploy` に戻す。** `check:door` と `db:migrate:remote` を消したまま古いコマンドで走ると、ビルドが落ちてデプロイされない

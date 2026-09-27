@@ -40,7 +40,7 @@ await waitOnExecutionContext(ctx); // waitUntil() された promise を待って
 
 ## 置き場所を先に決める
 
-- **単一モジュールに対するテストは、対象の隣に置く**（`foo.ts` の隣に `foo.test.ts`）
+- **単一モジュールに対するテストは、対象の隣に置く**（`foo.ts` の隣に `foo.test.ts`）。対象を移動・削除するとテストも一緒に動き、テストの無いモジュールがディレクトリを見るだけで分かる。`tests/` に写し取ると、対象をリネームするたびにテスト側の置き場も手で揃えることになる
 - **複数モジュールにまたがるもの・workerd が要るものは、専用のディレクトリに置く**
 - `tests/workerd/` の中は公式 fixture と同じく **トピック × スタイル**（`fetch-unit` / `fetch-integration-self` / `queue-consumer-unit` / `durable-objects-websockets`）
 

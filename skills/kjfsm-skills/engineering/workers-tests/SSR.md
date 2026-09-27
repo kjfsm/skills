@@ -27,7 +27,7 @@
 
 読み方は3つ。
 
-- **マイグレーションは安い。** 16本 94 文で 0.12 秒。遅いのは `applyD1Migrations` を取るために `cloudflare:test` を import すること — プラグインは `main` が設定されていれば、`cloudflare:test` に `main` の副作用 import を必ず差し込む([`plugin.ts`](https://github.com/cloudflare/workers-sdk/blob/main/packages/vitest-plugin/src/pool/plugin.ts))。watch で Worker の変更を拾うための仕掛けで、切る設定は無い
+- **マイグレーションは安い。** 16本 94 文で 0.12 秒。遅いのは `applyD1Migrations` を取るために `cloudflare:test` を import すること — プラグインは `main` が設定されていれば、`cloudflare:test` に `main` の副作用 import を必ず差し込む([`plugin.ts`](https://github.com/cloudflare/workers-sdk/blob/bfcc4423fa5d2dc007ebdc41293bd68f863777f6/packages/vitest-plugin/src/pool/plugin.ts#L151-L155))。watch で Worker の変更を拾うための仕掛けで、切る設定は無い
 - **`cloudflare:test` を import しなければ `main` は載らない。** `SELECT 1` は 0.06 秒で終わり、transform も 0.03s — `main` が変換すらされていない。ここが非対称なので「D1 が遅い」と読み違えやすい
 - **費用の8割は Vite の変換側にある。** ビルド済みバンドルを指すと 24s → 5s。残る 2.5 秒/file が workerd がアプリを評価する分
 
@@ -45,9 +45,9 @@
 
 これは Cloudflare が [`/workers/testing/`](https://developers.cloudflare.com/workers/testing/) で挙げる2つの道具([ユニット](https://developers.cloudflare.com/workers/testing/#unit-tests) = Vitest 統合、[統合](https://developers.cloudflare.com/workers/testing/#integration-tests) = テストハーネス)にそのまま対応する。
 
-3層に割っても `node` は狭めない。`bindings` が 0.12s/file と安くても、依存を引数で受け取るモジュールを実物で試すために移さない — 偽物なら「R2 の `put` が失敗する」「レート制限に掛かる」「`waitUntil` に積んだ処理が失敗する」を1行で作れるが、実物ではその状態へ持ち込むのが難しい。
+3層に割っても `node` は狭めない。`bindings` が 0.12s/file と安くても、線は [SKILL.md](SKILL.md) の基準(依存の挙動そのものが検証対象か)で引く — 偽物なら「R2 の `put` が失敗する」「`waitUntil` に積んだ処理が失敗する」を1行で作れるが、実物ではその状態へ持ち込めない。
 
-`bindings` の `main` は自分で書き、`cloudflareTest({ main: "./tests/bindings/worker.ts" })` で wrangler の `main` を上書きする([`main`](https://developers.cloudflare.com/workers/testing/vitest-integration/configuration/#cloudflaretestoptions) は `wrangler.configPath` から読む値より優先される)。**アプリを載せないことがこの層の全部である。** 本番の `main` のまま `cloudflare:test` を避けて走らせる手は採らない — 1ファイルが `createExecutionContext` などを import した時点で、黙って 15 秒/file に戻る。
+`bindings` の `main` は自分で書き、`cloudflareTest({ main: "./tests/bindings/worker.ts", wrangler: { configPath: "./wrangler.jsonc" } })` で本番の設定の `main` だけを上書きする([`main`](https://developers.cloudflare.com/workers/testing/vitest-integration/configuration/#cloudflaretestoptions) は `wrangler.configPath` から読む値より優先される)。**アプリを載せないことがこの層の全部である。** `main` だけを変えた2本目の wrangler 設定は作らない — バインディングを二重に持つことになり、[SKILL.md](SKILL.md) の「書き写さない」と同じずれ方をする。本番の `main` のまま `cloudflare:test` を避けて走らせる手も採らない — 1ファイルが `createExecutionContext` などを import した時点で、黙って約 12 秒/file(上の表)に戻る。
 
 ```ts
 // tests/bindings/worker.ts
@@ -64,15 +64,15 @@ export default {
 export { Live } from "../../workers/live";
 ```
 
-**置き場は [START.md](START.md) の規定をそのまま当て、workerd 側だけを `tests/bindings/`・`tests/http/` に分ける。** 2層に割る前の `tests/workerd/` は `tests/bindings/` に改名する — HTTP で叩くものが `http` へ抜けると、残るのはバインディングに直に触るものだけになる。トピック × スタイルの分け方も `tests/bindings/` で続けるが、`fetch-integration-self` のように Worker の `fetch` を通すスタイルは `http` へ移る(ここの `main` は 501 しか返さない)。
+**置き場は [START.md](START.md) の規定をそのまま当て、workerd 側だけを `tests/bindings/`・`tests/http/` に分ける。** 2層に割る前の `tests/workerd/` は `tests/bindings/` に改名する — HTTP で叩くものが `http` へ抜けると、残るのはバインディングに直に触るものだけになる。トピック × スタイルの分け方も `tests/bindings/` で続けるが、`fetch-integration-self` のように Worker の `fetch` を通すスタイルは `http` へ移る(ここの `main` は 501 しか返さない)。エントリを import する `fetch-unit` は、切り出した関数を呼ぶ形に書き換える(→「エントリを切り出す」)。
 
-**middleware や loader を関数として実 D1 で呼ぶテストは `bindings` に置く。** `getLoadContext` と同じく `new RouterContextProvider()` で context を組み([Middleware | React Router](https://reactrouter.com/how-to/middleware))、直接呼べば route は通らない。Vitest 統合のテストは Workers ランタイムの中で走ってバインディングに直に触れ([Unit tests](https://developers.cloudflare.com/workers/testing/#unit-tests))、数える側のモジュールもテストが import したものなのでその値をそのまま読める。ハーネスがテストに渡すのはバインディング・ストレージ・ログで、Worker のモジュールの中の値は含まれない([`getEnv()`](https://developers.cloudflare.com/workers/testing/test-harness/prepare-test-state/#access-configured-bindings)・[`getLogs()`](https://developers.cloudflare.com/workers/testing/test-harness/interact-with-workers/#assert-logged-behavior))。だから発行ステートメント数に上限を置くテストのようにモジュールの中の値を読むものは、`bindings` でしか書けない。認可を本物のルート越しに通す確認だけを `http` に数本足す([Integration tests](https://developers.cloudflare.com/workers/testing/#integration-tests) が挙げる「設定した HTTP ルートを通す網羅」がこれに当たる) — 判定を検証するのは内側の1回である([START.md](START.md) の「書かないもの」)。
+**middleware や loader を関数として実 D1 で呼ぶテストは `bindings` に置く。** SQL の挙動そのものが検証対象なので、[SKILL.md](SKILL.md) の基準で実物の側に来る。`getLoadContext` と同じく `new RouterContextProvider()` で context を組み([Middleware | React Router](https://reactrouter.com/how-to/middleware))、直接呼べば route は通らない。Vitest 統合のテストは Workers ランタイムの中で走ってバインディングに直に触れ([Unit tests](https://developers.cloudflare.com/workers/testing/#unit-tests))、発行ステートメント数を数えるカウンタもテストが import したモジュールに居るので、その値をそのまま読める。ハーネスがテストに渡すのはバインディング・ストレージ・ログで、Worker のモジュールの中の値は含まれない([`getEnv()`](https://developers.cloudflare.com/workers/testing/test-harness/prepare-test-state/#access-configured-bindings)・[`getLogs()`](https://developers.cloudflare.com/workers/testing/test-harness/interact-with-workers/#assert-logged-behavior))。だから発行ステートメント数に上限を置くテストは、`bindings` でしか書けない。認可を本物のルート越しに通す確認だけを `http` に数本足す([Integration tests](https://developers.cloudflare.com/workers/testing/#integration-tests) が挙げる「設定した HTTP ルートを通す網羅」がこれに当たる) — 判定を検証するのは内側の1回である([START.md](START.md) の「書かないもの」)。
 
 **ブラウザを操作しない E2E は `http` へ移す。** ステータスと HTML しか見ない Playwright のテスト(拒否が 404 になりアプリへ戻るリンクがある、不正なクエリでも 200)は、クリック・入力・クライアント JS の実行を待つ手順が無い。それなら `createTestHarness` で足り、ブラウザを起こす分だけ高い。Cloudflare もハーネスと Playwright を組む理由を「実ブラウザでユーザーの操作の流れを確かめるため」に置いている([Integrations](https://developers.cloudflare.com/workers/testing/test-harness/integrations/#playwright))。
 
 ## エントリを切り出す
 
-React Router などの SSR フレームワークを使っている場合、`workers/app.ts` のようなエントリは仮想モジュール（`virtual:react-router/server-build`）を import している。**フレームワークの Vite プラグインを vitest の config にも載せれば解決はする** — ただしそのとき、SSR のモジュールグラフが **テストファイルごとに** 変換・評価される（実測 15.2 秒/file）。載せなければ `main` に指定した時点で解決に失敗する。どちらに転んでも、この `main` を全テストの土台にはしない(→ 上の表)。
+React Router などの SSR フレームワークを使っている場合、`workers/app.ts` のようなエントリは仮想モジュール（`virtual:react-router/server-build`）を import している。**フレームワークの Vite プラグインを vitest の config にも載せれば解決はする** — ただしそのとき、SSR のモジュールグラフが **テストファイルごとに** 変換・評価される（実測 15.2 秒/file）。載せなければ、`main` が読み込まれた時点(`cloudflare:test` の import、DO の解決)で解決に失敗する。どちらに転んでも、この `main` を全テストの土台にはしない(→ 上の表)。
 
 fetch/queue/scheduled の実体を、SSR ディスパッチャを引数で受け取る関数(`createWorkerHandlers` など)として切り出す。**`bindings` の `main` は上の 501 を返す極小 Worker のまま変えない。** 配線のテストはその関数を import し、SSR だけを fake にして直接呼ぶ — 組み立てたものを `main` に据えると、上の 501 が効かなくなる。SSR を実際に通す検証は、本番ビルドを起動する `createTestHarness()` の担当になる。
 
@@ -89,7 +89,7 @@ fetch/queue/scheduled の実体を、SSR ディスパッチャを引数で受け
 - **応答は本体まで読んでから返す。** 読み残した応答が接続を掴んだままになり、続けて投げたリクエストが `Network connection lost` で 500 になる。応答コードしか見ないテストが必ずこれを踏む
 - **`FormData` をそのまま渡さない。** ハーネスの `fetch` は境界を含む `Content-Type` を組み立てないので、Worker 側の `request.formData()` が「知らない MIME だ」と投げて 500 になる。`new Response(formData)` に一度通し、ヘッダとバイト列の両方を自分で取り出す
 - **better-auth は `Content-Type: application/json` を要求する。** JSON を名乗らない POST に 415 を返す。`SELF` 越しの素の POST では通っていたので、移してから気づく
-- **`env` を直に書き換えても届かない。** Worker は別プロセスに居て、こちらが持っているのは写しである。値を差し替えるなら `secrets`(テスト専用の上書き)で Worker を起こし直す
+- **`env` を直に書き換えても届かない。** `getEnv()` が返すのはバインディングへの窓口で、Worker が読む `env` そのものではない。値を差し替えるなら `secrets`(テスト専用の上書き)で Worker を起こし直す
 - **落ちたテストには `server.debug()` を添える**(`afterEach` で `task.result?.state === "fail"` を見る)。これが無いと応答の 500 だけが残り、サーバー側で何が投げられたのかが消える
 
 **一度に投げすぎない。** 100本同時の POST は次のリクエストの接続ごと落とす(60本までは通る)。20本ずつの束に割る。同時に投げること自体が主題のテストは、まず無い。

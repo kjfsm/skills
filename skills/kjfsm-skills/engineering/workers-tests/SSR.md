@@ -43,9 +43,9 @@
 | `bindings` | 実 D1・実 R2 に直に。route は通らない | workerd(極小 `main`)             | **0.12s**   |
 | `http`     | Worker 丸ごと。本物の HTTP で         | 本番ビルド + `createTestHarness` | **2.6s**    |
 
-これは Cloudflare が [`/workers/testing/`](https://developers.cloudflare.com/workers/testing/) で挙げる2つの道具(ユニット = Vitest 統合、統合 = テストハーネス)にそのまま対応する。
+これは Cloudflare が [`/workers/testing/`](https://developers.cloudflare.com/workers/testing/) で挙げる2つの道具([ユニット](https://developers.cloudflare.com/workers/testing/#unit-tests) = Vitest 統合、[統合](https://developers.cloudflare.com/workers/testing/#integration-tests) = テストハーネス)にそのまま対応する。
 
-3層に割っても `node` は狭めない。`bindings` が 0.12s/file と安くても、依存を引数で受け取るモジュールを実物で試すために移さない — 偽物なら「R2 が null を返す」「レート制限に掛かる」「`waitUntil` に積んだ処理が失敗する」を1行で作れるが、実物ではその状態へ持ち込むのが難しい。
+3層に割っても `node` は狭めない。`bindings` が 0.12s/file と安くても、依存を引数で受け取るモジュールを実物で試すために移さない — 偽物なら「R2 の `put` が失敗する」「レート制限に掛かる」「`waitUntil` に積んだ処理が失敗する」を1行で作れるが、実物ではその状態へ持ち込むのが難しい。
 
 `bindings` の `main` は自分で書く。**アプリを載せないことがこの層の全部である。**
 
@@ -66,7 +66,7 @@ export { Live } from "../../workers/live";
 
 **置き場は [START.md](START.md) の規定をそのまま当て、workerd 側だけを `tests/bindings/`・`tests/http/` に分ける。** 2層に割る前の `tests/workerd/` は `tests/bindings/` に改名する — HTTP で叩くものが `http` へ抜けると、残るのはバインディングに直に触るものだけになる。トピック × スタイルの分け方も `tests/bindings/` で続けるが、`fetch-integration-self` のように Worker の `fetch` を通すスタイルは `http` へ移る(ここの `main` は 501 しか返さない)。
 
-**middleware や loader を関数として実 D1 で呼ぶテストは `bindings` に置く。** `RouterContextProvider` を組んで直接呼べば route は通らない。発行ステートメント数に上限を置くテストのようにプロセス内の状態を読むものは、`bindings` でしか書けない(`http` の Worker は別プロセスに居る)。認可を本物のルート越しに通す確認だけを `http` に数本足す — 判定を検証するのは内側の1回である([START.md](START.md) の「書かないもの」)。
+**middleware や loader を関数として実 D1 で呼ぶテストは `bindings` に置く。** `getLoadContext` と同じく `new RouterContextProvider()` で context を組み([Middleware | React Router](https://reactrouter.com/how-to/middleware))、直接呼べば route は通らない。Vitest 統合のテストは Workers ランタイムの中で走ってバインディングに直に触れ([Unit tests](https://developers.cloudflare.com/workers/testing/#unit-tests))、数える側のモジュールもテストが import したものなのでその値をそのまま読める。ハーネスがテストに渡すのはバインディング・ストレージ・ログで、Worker のモジュールの中の値は含まれない([`getEnv()`](https://developers.cloudflare.com/workers/testing/test-harness/prepare-test-state/#access-configured-bindings)・[`getLogs()`](https://developers.cloudflare.com/workers/testing/test-harness/interact-with-workers/#assert-logged-behavior))。だから発行ステートメント数に上限を置くテストのようにモジュールの中の値を読むものは、`bindings` でしか書けない。認可を本物のルート越しに通す確認だけを `http` に数本足す([Integration tests](https://developers.cloudflare.com/workers/testing/#integration-tests) が挙げる「設定した HTTP ルートを通す網羅」がこれに当たる) — 判定を検証するのは内側の1回である([START.md](START.md) の「書かないもの」)。
 
 **ブラウザを操作しない E2E は `http` へ移す。** ステータスと HTML しか見ない Playwright のテスト(拒否が 404 になりアプリへ戻るリンクがある、不正なクエリでも 200)は、クリック・入力・クライアント JS の実行を待つ手順が無い。それなら `createTestHarness` で足り、ブラウザを起こす分だけ高い。Cloudflare もハーネスと Playwright を組む理由を「実ブラウザでユーザーの操作の流れを確かめるため」に置いている([Integrations](https://developers.cloudflare.com/workers/testing/test-harness/integrations/#playwright))。
 

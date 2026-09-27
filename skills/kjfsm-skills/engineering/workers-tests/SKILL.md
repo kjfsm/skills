@@ -38,10 +38,10 @@ gh api repos/cloudflare/workers-sdk/contents/fixtures/vitest-plugin-examples/d1/
 
 Vitest の `projects` を分ける正当な理由は **ランタイムが違うこと** だけである（`environment` / `pool` / `setupFiles` はプロジェクト単位でしか設定できない）。Workers のプロジェクトなら次の 2 つ、DOM が要るなら 3 つ。**SSR を `main` に載せているなら、workerd 側をさらに2つに割る**(→ [SSR.md](SSR.md))。
 
-| プロジェクト | 対象                                                                               |
-| ------------ | ---------------------------------------------------------------------------------- |
-| `node`       | 外部 I/O を持たないもの。純粋なルール、判定、変換、引数で env を受け取るモジュール |
-| `workerd`    | **Cloudflare でしか壊れないもの**。実 D1、Durable Object、Queues、WebSocket        |
+| プロジェクト | 対象                                                                                         |
+| ------------ | -------------------------------------------------------------------------------------------- |
+| `node`       | 外部 I/O を持たないもの。純粋なルール、判定、変換、引数や context で依存を受け取るモジュール |
+| `workerd`    | **Cloudflare でしか壊れないもの**。実 D1、Durable Object、Queues、WebSocket                  |
 
 判定ロジックや変換は全部 `node` に置く。workerd に置くと 1 ファイルあたり数秒の起動コストを払うことになり、得るものが無い。
 

@@ -39,11 +39,19 @@
 
 | 層         | 何に話しかけるか                      | ランタイム                       | 固定費/file |
 | ---------- | ------------------------------------- | -------------------------------- | ----------- |
-| `node`     | 何にも触らない — 判定・解析・変換     | Node                             | ~0          |
+| `node`     | [SKILL.md](SKILL.md) の `node` と同じ | Node                             | ~0          |
 | `bindings` | 実 D1・実 R2 に直に。route は通らない | workerd(極小 `main`)             | **0.12s**   |
 | `http`     | Worker 丸ごと。本物の HTTP で         | 本番ビルド + `createTestHarness` | **2.6s**    |
 
 これは Cloudflare が [`/workers/testing/`](https://developers.cloudflare.com/workers/testing/) で挙げる2つの道具(ユニット = Vitest 統合、統合 = テストハーネス)にそのまま対応する。
+
+3層に割っても `node` は狭めない。R2・レート制限・DO の namespace・`waitUntil` を引数や context で受け取り、テストが偽物を渡すモジュールはここに残る。
+
+**置き場は [START.md](START.md) の規定をそのまま当てる。** `node` の単一モジュールのテストは対象の隣に置き、パターンで拾う。`bindings` と `http` は `tests/bindings/`・`tests/http/` に置く。2層に割る前の `tests/workerd/` は、ここで `tests/bindings/` に改名する — HTTP で叩くものが `http` へ抜けると、残るのはバインディングに直に触るものだけになる。
+
+**middleware や loader を関数として実 D1 で呼ぶテストは `bindings` に置く。** `RouterContextProvider` を組んで直接呼べば route は通らない。発行ステートメント数を数える予算テストのようにプロセス内の状態を読むものは、`bindings` でしか書けない(`http` の Worker は別プロセスに居る)。認可を本物のルート越しに通す確認だけを `http` に数本足す — 判定を検証するのは内側の1回である([START.md](START.md) の「書かないもの」)。
+
+**ブラウザを操作しない E2E は `http` へ移す。** ステータスと HTML しか見ない Playwright のテスト(拒否が 404 になりアプリへ戻るリンクがある、不正なクエリでも 200)は、クリック・入力・クライアント JS の実行を待つ手順が無い。それなら `createTestHarness` で足り、ブラウザを起こす分だけ高い。
 
 `bindings` の `main` は自分で書く。**アプリを載せないことがこの層の全部である。**
 
@@ -66,7 +74,7 @@ export { Live } from "../../workers/live";
 
 React Router などの SSR フレームワークを使っている場合、`workers/app.ts` のようなエントリは仮想モジュール（`virtual:react-router/server-build`）を import している。**フレームワークの Vite プラグインを vitest の config にも載せれば解決はする** — ただしそのとき、SSR のモジュールグラフが **テストファイルごとに** 変換・評価される（実測 15.2 秒/file）。載せなければ `main` に指定した時点で解決に失敗する。どちらに転んでも、この `main` を全テストの土台にはしない(→ 上の表)。
 
-fetch/queue/scheduled の実体を、SSR ディスパッチャを引数で受け取る関数として切り出す。テストは最小のエントリからそれを組み立て、SSR だけを fake に差し替える。SSR を実際に通す検証は、本番ビルドを起動する `createTestHarness()` の担当になる。
+fetch/queue/scheduled の実体を、SSR ディスパッチャを引数で受け取る関数(`createWorkerHandlers` など)として切り出す。**`bindings` の `main` は上の 501 を返す極小 Worker のまま変えない。** 配線のテストはその関数を import し、SSR だけを fake にして直接呼ぶ — 組み立てたものを `main` に据えると、この層から route を叩けるようになり、501 で間違いを知らせる仕組みが消える。SSR を実際に通す検証は、本番ビルドを起動する `createTestHarness()` の担当になる。
 
 **切り出しは、エントリに fetch 層のロジックが乗ってからでよい。** 委譲 1 行しかない段階で切ると、空のシームが 1 つ増えるだけである（足場と同じ判定 — [START.md](START.md) の「最初の 1 本」）。
 

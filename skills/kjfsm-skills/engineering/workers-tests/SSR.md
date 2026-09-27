@@ -27,11 +27,11 @@
 
 読み方は3つ。
 
-- **マイグレーションは安い。** 16本 94 文で 0.12 秒。遅いのは `applyD1Migrations` が `main` の Worker を立ち上げること
-- **バインディングに触るだけなら `main` は載らない。** `SELECT 1` は 0.06 秒で終わる。ここが非対称なので「D1 が遅い」と読み違えやすい
+- **マイグレーションは安い。** 16本 94 文で 0.12 秒。遅いのは `applyD1Migrations` を取るために `cloudflare:test` を import すること — プラグインは `main` が設定されていれば、`cloudflare:test` に `main` の副作用 import を必ず差し込む([`plugin.ts`](https://github.com/cloudflare/workers-sdk/blob/main/packages/vitest-plugin/src/pool/plugin.ts))。watch で Worker の変更を拾うための仕掛けで、切る設定は無い
+- **`cloudflare:test` を import しなければ `main` は載らない。** `SELECT 1` は 0.06 秒で終わり、transform も 0.03s — `main` が変換すらされていない。ここが非対称なので「D1 が遅い」と読み違えやすい
 - **費用の8割は Vite の変換側にある。** ビルド済みバンドルを指すと 24s → 5s。残る 2.5 秒/file が workerd がアプリを評価する分
 
-**遅延 import では消えない。** `createRequestHandler(() => import("virtual:react-router/server-build"))` は既に動的 import だが、1度も fetch していないファイルでも満額かかる。費用が居るのは実行時ではなくモジュールグラフの解決・変換で、コード側のリファクタでは動かない。
+**遅延 import では消えない。** `createRequestHandler(() => import("virtual:react-router/server-build"))` は既に動的 import だが、1度も fetch していないファイルでも満額かかる。費用が居るのは実行時ではなく、差し込まれた静的 import が引くモジュールグラフの解決・変換で、コード側のリファクタでは動かない。
 
 ## 層は3つになる
 
@@ -47,7 +47,7 @@
 
 3層に割っても `node` は狭めない。`bindings` が 0.12s/file と安くても、依存を引数で受け取るモジュールを実物で試すために移さない — 偽物なら「R2 の `put` が失敗する」「レート制限に掛かる」「`waitUntil` に積んだ処理が失敗する」を1行で作れるが、実物ではその状態へ持ち込むのが難しい。
 
-`bindings` の `main` は自分で書く。**アプリを載せないことがこの層の全部である。**
+`bindings` の `main` は自分で書き、`cloudflareTest({ main: "./tests/bindings/worker.ts" })` で wrangler の `main` を上書きする([`main`](https://developers.cloudflare.com/workers/testing/vitest-integration/configuration/#cloudflaretestoptions) は `wrangler.configPath` から読む値より優先される)。**アプリを載せないことがこの層の全部である。** 本番の `main` のまま `cloudflare:test` を避けて走らせる手は採らない — 1ファイルが `createExecutionContext` などを import した時点で、黙って 15 秒/file に戻る。
 
 ```ts
 // tests/bindings/worker.ts

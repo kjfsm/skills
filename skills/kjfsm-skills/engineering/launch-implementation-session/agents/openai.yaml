@@ -1,0 +1,3 @@
+interface:
+  display_name: "実装セッションを立てる"
+  short_description: "設計を終えたら別セッションで実装させ、終わったら知らせてもらう"

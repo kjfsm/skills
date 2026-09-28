@@ -19,3 +19,7 @@
 訳の配布をやめた(→ [ADR 0006](./adr/0006-depend-on-upstream-ship-translation-separately.md))あとに `misc/` と `in-progress/` に残っていた、本家に同名で存在するスキル。どのプラグインも配らず、検査と `.claude/skills/` の二重表示のコストだけを払っていた。使うなら本家から入れる — `wizard`・`to-questionnaire` は `mattpocock-skills` プラグインが配り、残りは `npx skills add mattpocock/skills --skill <名前>` で届く。
 
 `claude-handoff`、`loop-me`、`setup-ts-deep-modules`、`to-questionnaire`、`wizard`、`writing-beats`、`writing-fragments`、`writing-shape`、`git-guardrails-claude-code`、`migrate-to-shoehorn`、`scaffold-exercises`
+
+## 本家の訳が残っていたもの(2026-09-28)
+
+- **edit-article** — 記事をセクションに分けて書き直す。本家 `personal/edit-article` の訳が1行違いで残っていた。本家も使わないスキルとして削除済み(`c66bdee`)で、代わりは無い。

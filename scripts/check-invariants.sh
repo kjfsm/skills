@@ -22,7 +22,6 @@ from_render() {
   python3 -c "import sys; sys.path.insert(0, 'scripts'); import render; print($1)"
 }
 PROMOTED_BUCKETS="$(from_render '" ".join(render.PROMOTED)')"
-TRUTHY_RE="$(from_render '"\\|".join(render.TRUTHY)')"
 # バケットごとに専用のプラグイン(plugins/<バケット>/)で配るもの。全員には入れず、
 # 必要なリポジトリや端末で個別に有効にする。see .agents/adr/0005-ship-buckets-as-side-plugins.md
 PLUGIN_BUCKETS="kjfsm-emdash kjfsm-personal"
@@ -115,23 +114,6 @@ while IFS= read -r skill_md; do
   declared="$(field "$skill_md" name)"
   [ "$declared" = "$name" ] || err "$skill_md declares name '$declared' but lives in '$name/'"
 
-  # 2. every skill carries its Codex metadata
-  yaml="$dir/agents/openai.yaml"
-  [ -f "$yaml" ] || err "$name is missing agents/openai.yaml"
-
-  # 3. the two harnesses agree on who may invoke the skill
-  if [ -f "$yaml" ]; then
-    # Read the frontmatter only — a skill body may quote these fields as an example.
-    claude_user_invoked=no
-    frontmatter "$skill_md" |
-      grep -qi "^disable-model-invocation:[[:space:]]*\"\\?\\($TRUTHY_RE\\)\"\\?[[:space:]]*\$" &&
-      claude_user_invoked=yes
-    codex_user_invoked=no
-    grep -q 'allow_implicit_invocation:[[:space:]]*false' "$yaml" && codex_user_invoked=yes
-    [ "$claude_user_invoked" = "$codex_user_invoked" ] ||
-      err "$name: disable-model-invocation=$claude_user_invoked but openai.yaml allow_implicit_invocation:false=$codex_user_invoked"
-  fi
-
   # 4b. バケット単位のプラグインは、そのバケットのスキルを1本ずつシンボリックリンクで
   #     持つ。リンク先がマーケットプレイスの中なら、インストール時に実体がコピーされる。
   case " $PLUGIN_BUCKETS " in
@@ -150,7 +132,7 @@ while IFS= read -r skill_md; do
       err "$name is in $bucket/ (not promoted) but linked from README.md" ;;
   esac
 
-  # 6. skill names are unique across buckets — link-skills.sh flattens them
+  # 6. skill names are unique across buckets — plugins and .claude/skills/ flatten them
   case " $seen_names " in
     *" $name "*) err "duplicate skill name '$name' across buckets" ;;
   esac
@@ -176,8 +158,8 @@ while IFS= read -r skill_md; do
   fi
 
   # 8b. 引用符なしの値が YAML として読める。上の `field` は1行を切り出すだけで YAML を
-  #     解釈しないので、ここを通っても `npx skills` のような厳密なパーサーはスキルごと
-  #     読み飛ばす。依存を足さずに済むよう、実際に踏んだ2つの形だけを弾く。
+  #     解釈しないので、ここを通っても厳密な YAML パーサーはスキルごと読み飛ばす。
+  #     依存を足さずに済むよう、実際に踏んだ2つの形だけを弾く。
   while IFS= read -r line; do
     value="${line#*: }"
     case "$value" in

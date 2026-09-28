@@ -2,7 +2,7 @@
 
 日々のコード作業のために使うスキル。
 
-**ユーザー呼び出し型** は入力したときだけ到達できる(Claude Code: `disable-model-invocation: true`。Codex: `agents/openai.yaml` の `policy.allow_implicit_invocation: false`)。**モデル呼び出し型** はモデルからもユーザーからも到達できる(モデルが自動的に手を伸ばせるよう、豊富なトリガー表現を持つ)。
+**ユーザー呼び出し型** は入力したときだけ到達できる(`disable-model-invocation: true`)。**モデル呼び出し型** はモデルからもユーザーからも到達できる(モデルが自動的に手を伸ばせるよう、豊富なトリガー表現を持つ)。
 
 <!-- catalog:begin -->
 

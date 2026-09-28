@@ -1,6 +1,6 @@
 # kjfsm's Skills
 
-Claude Code、Codex、その他 Agent-Skills 標準に準拠したハーネス向けのエージェントスキル(スラッシュコマンドと振る舞い) — 雰囲気で書くコーディングではなく、実務のエンジニアリングのために使う。
+Claude Code のプラグインとして配るエージェントスキル(スラッシュコマンドと振る舞い) — 雰囲気で書くコーディングではなく、実務のエンジニアリングのために使う。
 
 [mattpocock/skills](https://github.com/mattpocock/skills) を日本語訳し、kjfsm 向けに調整した独立フォークから出発した。**本家由来のスキル(`/mattpocock-skills:tdd`、`/mattpocock-skills:grill-with-docs`、`/mattpocock-skills:to-spec` など)は、依存先の本家 `mattpocock-skills` がそのまま配る。** このリポジトリの `kjfsm-skills` が持つのは自作のスキルと、本家から離れて自作の流れの中心になったもの(`/kjfsm-skills:implement-and-review`、`/kjfsm-skills:ask-kjfsm`、`/kjfsm-skills:setup-skills`、`/kjfsm-skills:writing-great-skills`)である。
 
@@ -39,47 +39,7 @@ Claude Code、Codex、その他 Agent-Skills 標準に準拠したハーネス�
 
 ## インストール
 
-### いちばん手っ取り早い方法: Claude に貼る
-
-Claude Code に次の1行を貼れば、あとはエージェントが[セットアップ手順](./setup.md)を読んでインストールまで済ませる:
-
-```
-Fetch https://raw.githubusercontent.com/kjfsm/skills/main/setup.md
-```
-
-自分の手で入れたい場合は、以下から選ぶ。
-
-### 入るものの差
-
-3つは **配るものが違う**。スキルの数は現時点の実測値である。
-
-|                  | A: シンボリックリンク        | B: プラグイン                          | C: `npx skills`                          |
-| ---------------- | ---------------------------- | -------------------------------------- | ---------------------------------------- |
-| スキル           | **39**(全部)                 | **30**(昇格済み集合のみ)+ 本家 25      | **39**(全部)                             |
-| 出力スタイル     | 入らない                     | **入る**(有効化は別途)                 | 入らない                                 |
-| サブエージェント | 入らない                     | **入る**(5体)                          | 入らない                                 |
-| 実体             | このリポジトリ(clone が必要) | `~/.claude/plugins/` のキャッシュ      | コピー先に実ファイル                     |
-| 更新             | `git pull` で即反映          | push のたびに届く(コミット SHA で追随) | 追随しない。`npx skills update` を自分で |
-| スコープ         | ユーザー(`~/.claude/skills`) | ユーザー / **プロジェクト** / ローカル | プロジェクト、または `--global`          |
-| 向いている人     | このリポジトリ自体を開発する | ふつうはこちら                         | 実体を手元に置いて改変したい             |
-
-**`in-progress/` と別プラグインのバケットを配らないのは B だけである。** C は `--skill` で名前を挙げれば絞れるが、既定は全部入りで、上流で削除したスキルもコピー先には残り続ける。
-
-**サブエージェントと出力スタイルを運べるのも B だけである。** A と C でコメントの判定基準を効かせるには `/kjfsm-skills:setup-repo` を実行して `AGENTS.md` 側に書かせる。
-
-### 選択肢 A: ローカルのハーネススキルディレクトリへシンボリックリンクする
-
-リポジトリのルートから:
-
-```bash
-scripts/link-skills.sh
-```
-
-これはすべてのスキルを `~/.claude/skills` と `~/.agents/skills` にシンボリックリンクする。各エントリはこのリポジトリへのシンボリックリンクなので、`git pull` すればインストール済みのスキルは常に最新の状態を保つ。スキルを追加・削除・改名したあとは、このスクリプトを再実行すること。
-
-### 選択肢 B: Claude Code プラグインとしてインストールする
-
-昇格済みのスキル集合(`engineering/` + `productivity/`)は、ネイティブな [Claude Code プラグイン](https://code.claude.com/docs/en/plugins)としても出荷されている:
+Claude Code のプラグインとしてだけ配っている:
 
 ```
 /plugin marketplace add kjfsm/skills
@@ -100,29 +60,17 @@ claude plugin marketplace add kjfsm/skills --scope project
 claude plugin install kjfsm-skills@kjfsm --scope project
 ```
 
+これは `.claude/settings.json` に `extraKnownMarketplaces` と `enabledPlugins` を書き込む。コミットすれば、そのリポジトリで作業する人は何も入れなくてもスキルが有効になる。
+
+入るのは昇格済みのスキル(`engineering/` + `productivity/`)、[出力スタイル](#出力スタイル)、[サブエージェント](#サブエージェント)である。`in-progress/` の下書きと、別プラグインのバケット(`kjfsm-emdash`、`kjfsm-personal`)は入らない。`version` を持たないので、push のたびに更新が届く。
+
 `kjfsm-skills` は本家の `mattpocock-skills@mattpocock` に依存しており、インストール時に本家も自動で入る(このマーケットプレイスは `allowCrossMarketplaceDependenciesOn` で `mattpocock` を許可している)。実装からレビュー・PR までの流れは kjfsm の `/kjfsm-skills:implement-and-review` が持つ(本家の `/mattpocock-skills:implement` は経由しない)。
 
-これは `.claude/settings.json` に `extraKnownMarketplaces` と `enabledPlugins` を書き込む。コミットすれば、そのリポジトリで作業する人は何も入れなくてもスキルが有効になる — `npx skills` のようにスキルの実体をリポジトリへコミットせずに済む。
+以前 `npx skills` やシンボリックリンクで入れていたなら、そのコピーやリンクは消す。同じスキルが2系統で入ると、スラッシュコマンドが重複し、常時読み込まれる description も二重に数えられる。
 
-### 選択肢 C: `npx skills` でコピーとして入れる
+**このリポジトリを clone した場合、下書きのスキルは何も入れなくても使える。** `.claude/skills/` に、どのプラグインも配らない `in-progress/` のスキルへのシンボリックリンクをコミットするので(下書きが無い時期はディレクトリごと無い)、この clone の中で作業するかぎりそのまま呼べる。**プラグインで配るスキルはここに張らない** — 両方から見えると同じスキルがセッション開始時に2度並ぶ。リンクの張り直しは `scripts/sync-project-skills.sh` で、ずれは `scripts/check-invariants.sh` が落とす。
 
-スキルの **実体** を手元に置きたい場合(このリポジトリを clone せずに使いたい、プロジェクトに同梱したい、など):
-
-```bash
-npx -y skills add kjfsm/skills
-```
-
-- 何が入るかを先に見るには `--list`、個別に選ぶには `--skill tdd,two-axis-review`、対象ハーネスを決め打ちするには `--agent claude-code` を付ける。
-- プロジェクト内で実行するとそのプロジェクトのスキルディレクトリ(`.claude/skills/` など)へ**実ファイルとしてコピー**され、`skills-lock.json` が作られる。`--global` を付けるとユーザーレベル(`~/.claude/skills`)に入る。
-- コピーなので `git pull` では追随しない。更新は `npx skills update`、`skills-lock.json` からの復元は `npx skills experimental_install`。
-- この CLI はリポジトリ全体を走査するため、`--skill '*'` は `in-progress/` や EmDash 専用のバケットまで含めて全スキルを入れてしまう。昇格済みの集合だけが欲しいなら選択肢 B を使うか、`--skill` で名前を挙げること。
-- **`--skill` で絞る場合も `setup-repo` とその工程(`setup-skills`、`setup-rules`、`setup-ci`、`setup-hooks`)は含めること。** この経路では、応答と記述の規約の届け先がそこしかない。
-
-**3つの方法は併用しない。** 同じスキルが2系統で入ると、スラッシュコマンドが重複し、常時読み込まれる description も二重に数えられる。このリポジトリを開発するなら選択肢 A、使うだけなら選択肢 B を選ぶ。
-
-**このリポジトリを clone した場合、下書きのスキルは何も入れなくても使える。** `.claude/skills/` に、どのプラグインも配らない `in-progress/` のスキルへのシンボリックリンクをコミットするので(下書きが無い時期はディレクトリごと無い)、この clone の中で作業するかぎりそのまま呼べる。**昇格済みのスキルはここに張らない** — 配るのはプラグイン(選択肢 B)の役目で、両方から見えると同じスキルがセッション開始時に2度並び、上の併用の禁止がそのまま当たる。この clone で `/kjfsm-skills:ask-kjfsm` や `/mattpocock-skills:tdd` を呼ぶには、選択肢 A か B のどちらかを1つ入れる。**選択肢 A はこの clone のリンクと重ならない** — どちらもこのリポジトリの同じ実体を指すので、Claude Code はスキルを1回しか読み込まない。重なるのは実体が別になる B・C の側である。リンクの張り直しは `scripts/sync-project-skills.sh` で、ずれは `scripts/check-invariants.sh` が落とす。
-
-どの方法でも、他のエンジニアリング系スキルを使う前にリポジトリごとに一度 **`/kjfsm-skills:setup-repo`** を実行すること。setup 系4工程の入口であり、届き方の違う4つの層を順に敷く:
+他のエンジニアリング系スキルを使う前にリポジトリごとに一度 **`/kjfsm-skills:setup-repo`** を実行すること。setup 系4工程の入口であり、届き方の違う4つの層を順に敷く:
 
 | 層                     | 効くとき                 | 工程                                                                                                                                       |
 | ---------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -162,8 +110,6 @@ npx -y skills add kjfsm/skills
 | `test-auditor`       | `/kjfsm-skills:prune-tests`       | テストの棚卸しと削除・統合の判定(スライスごと)   |
 
 理由は並列化ではなく **押し出し** である — 中間のツール結果は子のコンテキストに留まり、親に戻るのは要約だけになる(→ [`/kjfsm-skills:delegation`](./skills/kjfsm-skills/engineering/delegation/SKILL.md))。`verifier` が `Edit` も `Write` も持たないのは意図で、ゲートを回す側がゲートを動かせてはならない。`comment-pruner` を分けてあるのは、**直前に自分で書いたコメントは目的が思い出せてしまう分だけ残る**からである。`test-auditor` を分けてあるのは、数百のテストファイルを1つのコンテキストで読むと後半ほど判定が雑になるからで、`Write` は棚卸し表を書き出すためにだけ持つ。二軸のレビュアーを2体に分けてあるのも同じく意図で、**互いのコンテキストを汚染しないこと自体が成果物である。**
-
-**A と C ではこれらは入らない。** 呼ぶ側のスキルは依頼内容をエージェント側に預けているので、落ちる先は汎用のサブエージェントか手元の実行になり、**規律の本文はそこには無い** — `/kjfsm-skills:two-axis-review` の Standards 軸はスメルの基準線を、`/kjfsm-skills:prune-comments` は6段のルールを、`/kjfsm-skills:prune-tests` は判定の問いと6分類を失う。この3つを本来の形で使うなら B を選ぶ。
 
 ## これらのスキルが存在する理由
 

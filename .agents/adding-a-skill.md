@@ -1,6 +1,6 @@
 # このリポジトリにスキルを足す
 
-一覧 — トップと各バケットの README、`plugin.json` の `skills` 配列 — は `scripts/render.py` が frontmatter から書き出す。項目の文面は `description` そのもので、別に要約を書く場所は無い。残りの配線 — `agents/openai.yaml` の有無、2つのハーネスの呼び出し方式の一致、frontmatter の上限、参照ファイルの実在と階層 — は `scripts/check-invariants.sh` が機械的に検査する。**走らせて落ちた項目が、まだ済んでいない配線である。** 覚えておく必要はない。
+一覧 — トップと各バケットの README、`plugin.json` の `skills` 配列 — は `scripts/render.py` が frontmatter から書き出す。項目の文面は `description` そのもので、別に要約を書く場所は無い。残りの配線 — frontmatter の上限、参照ファイルの実在と階層 — は `scripts/check-invariants.sh` が機械的に検査する。**走らせて落ちた項目が、まだ済んでいない配線である。** 覚えておく必要はない。
 
 この文書が扱うのは、検査が見られない2つ: 走らせる前に下す **判断** と、検査に出ない **後始末** である。
 
@@ -8,11 +8,11 @@
 
 `skills/<バケット>/<スキル名>/SKILL.md` に置く(昇格済みだけは `skills/kjfsm-skills/<バケット>/<スキル名>/`)。バケットが決めるのは**配布されるかどうか**である。
 
-| バケット                                                 | 配布                                                    | ここに入れるもの                                    |
-| -------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------- |
-| `kjfsm-skills/engineering/` `kjfsm-skills/productivity/` | **される**(`kjfsm-skills` + `npx skills`)               | 他人のリポジトリでも価値を持つもの                  |
-| `kjfsm-emdash/` `kjfsm-personal/`                        | **入れた場所にだけ**(`kjfsm-emdash` / `kjfsm-personal`) | 特定の CMS のサイト、自分の端末でだけ価値を持つもの |
-| `in-progress/`                                           | されない(`npx skills` の個別指定でのみ届く)             | 下書き                                              |
+| バケット                                                 | 配布                                                      | ここに入れるもの                                    |
+| -------------------------------------------------------- | --------------------------------------------------------- | --------------------------------------------------- |
+| `kjfsm-skills/engineering/` `kjfsm-skills/productivity/` | **される**(`kjfsm-skills`)                                | 他人のリポジトリでも価値を持つもの                  |
+| `kjfsm-emdash/` `kjfsm-personal/`                        | **入れた場所にだけ**(`kjfsm-emdash` / `kjfsm-personal`)   | 特定の CMS のサイト、自分の端末でだけ価値を持つもの |
+| `in-progress/`                                           | されない(このリポジトリの `.claude/skills/` でだけ見える) | 下書き                                              |
 
 判定は1問で済む: **これは他人のリポジトリで価値を持つか。** 持たないなら昇格しないバケットへ入れる — 昇格は後からできる。
 
@@ -26,22 +26,7 @@
 
 判定基準は [`.agents/invocation.md`](./invocation.md) にある: **モデルがこれを自律的に使いこなせるか。** 再利用性は切り出す理由ではあっても、この判定基準ではない。
 
-決めたら2つのファイルを揃える。片方だけ書くのが最も多い取りこぼしだが、検査が捕まえる。
-
-|                    | `SKILL.md` frontmatter           | `agents/openai.yaml`                      |
-| ------------------ | -------------------------------- | ----------------------------------------- |
-| ユーザー呼び出し型 | `disable-model-invocation: true` | `policy.allow_implicit_invocation: false` |
-| モデル呼び出し型   | (書かない)                       | (`policy` ブロックを書かない)             |
-
-`agents/openai.yaml` は**どちらの方式でも必要**で、Codex のスキルピッカー用に `interface.display_name` と `interface.short_description` を持つ:
-
-```yaml
-interface:
-  display_name: "良いスキルを書く"
-  short_description: "スキルを予測可能にする原則"
-policy:
-  allow_implicit_invocation: false # ユーザー呼び出し型のときだけ
-```
+ユーザー呼び出し型なら frontmatter に `disable-model-invocation: true` を書く。モデル呼び出し型は何も書かない。
 
 `description` の宛先も方式で変わる。モデル呼び出し型は**モデル向け**でトリガー表現を厚く持ち、ユーザー呼び出し型は**人間向け**の1行に刈り込む — 後者の description はモデルのコンテキストに載らないので、トリガーを書いても誰も読まない。
 
@@ -51,7 +36,7 @@ policy:
 
 数値上限(`name` の形式、`description` の長さ、本文の行数、参照ファイルの階層)は**暗記しなくてよい** — 検査が落とす。`OFFICIAL.md` を引くのは、上限を確かめるためではなく、何をどう書くかを決めるためである。
 
-**`name` に `claude` と `anthropic` を入れない。** 仕様上の禁止ではないので検査は落とさないが、Anthropic 側の検証(claude.ai へのアップロード、Skills API、`package_skill.py`)はこれを弾く。Claude Code プラグインと `npx skills` で配るぶんには当たらない一方、**個人スキルを Cowork やクラウドセッションで有効にする経路は claude.ai へのアップロードを通る** ので、そこでは弾かれる。トリガー語としての "CLAUDE.md" が要るなら `description` に書く — 予約語の制約がかかるのは `name` だけである。
+**`name` に `claude` と `anthropic` を入れない。** 仕様上の禁止ではないので検査は落とさないが、Anthropic 側の検証(claude.ai へのアップロード、Skills API、`package_skill.py`)はこれを弾く。Claude Code プラグインで配るぶんには当たらない一方、**個人スキルを Cowork やクラウドセッションで有効にする経路は claude.ai へのアップロードを通る** ので、そこでは弾かれる。トリガー語としての "CLAUDE.md" が要るなら `description` に書く — 予約語の制約がかかるのは `name` だけである。
 
 (`tend-claude-md` はこの理由で `tend-memory-files` に改名した。)
 
@@ -74,7 +59,6 @@ scripts/check-invariants.sh
 
   どちらに置くかは **作業の起点になるか** だけで決める。ルーターは呼ばれた瞬間に全文がコンテキストに乗るので、起点にならないものを `SKILL.md` に置くと呼び出しのたびに重くなる。
 
-- **`scripts/link-skills.sh` を走らせる** — ローカルのハーネススキルディレクトリへのシンボリックリンクを張り直す。追加・削除・改名のあと。
 - **`pnpm format`** — CI が `format:check` で落とす。
 
 ## 評価を足す
@@ -106,15 +90,13 @@ scripts/check-invariants.sh
 
 `version` を両方のマニフェストから省く理由は `AGENTS.md` が持つ。片方にでも書くと、その文字列が固定のキャッシュキーになって更新が止まる。
 
-昇格していないバケットのスキルは、プラグインではなく利用側リポジトリでの `npx skills` による実体配置で配る(`skills-lock.json` に載り、`npx skills update` で追随できる)。`kjfsm-emdash/` がこの経路の主な利用者である。
-
 ## 改名するとき
 
 ディレクトリ名と frontmatter の `name` は一致していなければならない(仕様の要求であり、検査もする)。両方を同時に変える。
 
 一覧は `scripts/render.py` を走らせ直せば追随する。残りは手で追う: `ask-kjfsm` と、**他のスキルの本文にある `/旧名` の文中呼び出し**。どちらも検査に出ない — `grep -rn '旧名' skills/ agents/` で拾う。
 
-改名後は `link-skills.sh` を走らせ、古い名前のシンボリックリンクを手で消す(スクリプトは張り直すだけで、消えた名前の後始末はしない)。リポジトリ側の `.claude/skills/` は `scripts/sync-project-skills.sh` が古い名前ごと張り直すので手当ては要らず、忘れれば検査 14. が落ちる。
+リポジトリ側の `.claude/skills/` は `scripts/sync-project-skills.sh` が古い名前ごと張り直すので手当ては要らず、忘れれば検査 14. が落ちる。
 
 ## 昇格するとき
 
@@ -128,6 +110,6 @@ scripts/check-invariants.sh
 
 ## 退役させるとき
 
-ディレクトリごと削除し、[`retired-skills.md`](./retired-skills.md) に **なぜ退役したかと、代わりに使うもの** を1行で書く — 書かないと、同じものをもう一度作る。本文は git 履歴が持つ。`scripts/sync-project-skills.sh` を走らせ直せば `.claude/skills/` からも消える。`scripts/link-skills.sh` は消えた名前の後始末をしないので、ローカルのリンクは手で消す。
+ディレクトリごと削除し、[`retired-skills.md`](./retired-skills.md) に **なぜ退役したかと、代わりに使うもの** を1行で書く — 書かないと、同じものをもう一度作る。本文は git 履歴が持つ。`scripts/sync-project-skills.sh` を走らせ直せば `.claude/skills/` からも消える。別プラグインのバケットなら `plugins/<バケット>/skills/<名前>` のリンクも消す。
 
 一覧は `scripts/render.py` で追随させる。`ask-kjfsm` からは手で消す。他のスキルがその名前を文中呼び出ししていないか `grep` で確かめる — 呼ばれたまま退役したスキルは、実行時に静かに何も起きない。

@@ -1,3 +1,0 @@
-interface:
-  display_name: "CF Access を掛ける"
-  short_description: "Worker を3層ルール(人間 / 機械 / 自前認証パス)で塞ぐ"

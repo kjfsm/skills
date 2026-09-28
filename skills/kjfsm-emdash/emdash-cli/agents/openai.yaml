@@ -1,3 +1,0 @@
-interface:
-  display_name: "EmDash CLI"
-  short_description: "コンテンツ・スキーマ・メディアを CLI から操作する"

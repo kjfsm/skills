@@ -1,3 +1,0 @@
-interface:
-  display_name: "ルールを敷く"
-  short_description: "リポジトリのルールを rules と AGENTS.md の2層に置く"

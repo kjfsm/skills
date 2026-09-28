@@ -1,3 +1,0 @@
-interface:
-  display_name: "kjfsm-auth に RP を繋ぐ"
-  short_description: "kjfsm のアプリに auth.kjfsm.net でのログインを付ける"

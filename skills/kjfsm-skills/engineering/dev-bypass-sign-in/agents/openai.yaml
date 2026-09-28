@@ -1,3 +1,0 @@
-interface:
-  display_name: "開発用のバイパスサインイン"
-  short_description: "叩くだけでサインイン済みになる入口を作り、本番で閉じる"

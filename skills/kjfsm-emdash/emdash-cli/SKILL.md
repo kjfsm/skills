@@ -68,5 +68,5 @@ npx emdash content get posts 01ABC123 --raw         # Portable Text→markdown�
 
 ## 編集フロー
 
-Portable Text ⇄ markdownの自動変換、未知ブロックの扱い、rawモードは
-**[EDITING-FLOW.md](./EDITING-FLOW.md)** を参照(公式ドキュメントには書かれていない)。
+Portable Text ⇄ markdownの自動変換、未知ブロックの扱い、rawモードは、`create emdash` のテンプレートが
+サイトに置く公式スキルの `.agents/skills/emdash-cli/EDITING-FLOW.md` にある(公式ドキュメントには無い)。

@@ -1,3 +1,0 @@
-interface:
-  display_name: "partyserver を Durable Object に載せる"
-  short_description: "公式に載らない4点 — stub の取り方・onStart・ハイバネーション・上限"

@@ -1,3 +1,0 @@
-interface:
-  display_name: "Playwright を入れる"
-  short_description: "E2E のブラウザをどの層で用意するか決める"

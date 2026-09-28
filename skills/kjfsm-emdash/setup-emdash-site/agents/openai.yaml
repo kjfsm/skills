@@ -1,3 +1,0 @@
-interface:
-  display_name: "EmDash サイトをセットアップする"
-  short_description: "create emdash で Cloudflare 向けのサイトを作り、手元で動かして本番へ出す"

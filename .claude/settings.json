@@ -3,7 +3,6 @@
   "permissions": {
     "allow": [
       "Bash(scripts/check-invariants.sh)",
-      "Bash(scripts/list-skills.sh)",
       "Bash(scripts/sync-project-skills.sh)",
       "Bash(scripts/sync-project-skills.sh --check)",
       "Bash(claude plugin validate:*)",

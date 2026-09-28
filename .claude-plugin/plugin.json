@@ -23,6 +23,7 @@
   "skills": [
     "./skills/kjfsm-skills/engineering/ai-efficiency",
     "./skills/kjfsm-skills/engineering/ask-kjfsm",
+    "./skills/kjfsm-skills/engineering/close-session",
     "./skills/kjfsm-skills/engineering/d1-bound-parameters",
     "./skills/kjfsm-skills/engineering/delegation",
     "./skills/kjfsm-skills/engineering/dev-bypass-sign-in",

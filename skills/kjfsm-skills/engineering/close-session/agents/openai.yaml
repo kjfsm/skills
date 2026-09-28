@@ -1,0 +1,3 @@
+interface:
+  display_name: "セッションを閉じる"
+  short_description: "立てたサーバーを止め、残った変更を確かめてから自分の tmux を閉じる"

@@ -39,7 +39,17 @@ Claude Code のプラグインとして配るエージェントスキル(スラ�
 
 ## インストール
 
-Claude Code のプラグインとしてだけ配っている:
+Claude Code のプラグインとしてだけ配っている。
+
+### いちばん手っ取り早い方法: Claude に貼る
+
+Claude Code に次の1行を貼れば、あとはエージェントが[セットアップ手順](./setup.md)を読んでインストールまで済ませる:
+
+```
+Fetch https://raw.githubusercontent.com/kjfsm/skills/main/setup.md
+```
+
+### 自分で入れる
 
 ```
 /plugin marketplace add kjfsm/skills

@@ -24,28 +24,33 @@
 - [0.36](#036)
 - [0.37](#037)
 - [0.38](#038)
+- [0.40.1](#0401)
+- [0.41](#041)
+- [0.42](#042)
+- [1.0](#10)
 
 ## blog-cloudflare で当たる項目
 
-[`emdash-cms/templates` の `blog-cloudflare`](https://github.com/emdash-cms/templates/tree/main/blog-cloudflare) を、**0.38.0 の同期(2026-09-15)時点** で判定した結果。どこから手を付けるかの目安であり、判定の代わりにはならない — サイトでも判定は流す。
+[`emdash-cms/templates` の `blog-cloudflare`](https://github.com/emdash-cms/templates/tree/main/blog-cloudflare) を、**1.0.1 の同期(2026-09-28)時点** で判定した結果。どこから手を付けるかの目安であり、判定の代わりにはならない — サイトでも判定は流す。
 
-| 項目                                                                                                | 当たる箇所                                                                                                                     |
-| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| [cron の頻度](#cron-の頻度を決める)                                                                 | `wrangler.jsonc`(毎分)                                                                                                         |
-| [`search()` のページング](#search-が-cursor-でページングできるようになった)                         | `search.astro`(30件で打ち切り)                                                                                                 |
-| [Turnstile](#コメントの-turnstile-をサーバーで検証するようになった)                                 | `posts/[slug].astro` の `CommentForm`(`commentsEnabled: true`)                                                                 |
-| [`siteUrl`](#siteurl-を設定する)                                                                    | `astro.config.mjs` にも `wrangler.jsonc` にも無い                                                                              |
-| [`sortOrder`](#コレクションのサイドバーの並び順sortorder)                                           | `seed/seed.json`(全コレクション)                                                                                               |
-| [trigram](#検索に-trigram-を選べるようになった)                                                     | `posts` / `pages` の検索                                                                                                       |
-| [Node の版](#nodejs-2216-以上が必須になった)                                                        | `package.json` に `engines` が無い                                                                                             |
-| [`avatarStorageKey`](#バイラインのアバターを-avatarstoragekey-で組む)                               | `PostCard.astro`、`index.astro`、`posts/index.astro`、`posts/[slug].astro`                                                     |
-| [`getPublicMediaUrl`](#生のメディア-url-を-getpublicmediaurl-で組む)                                | 上の4か所 + `posts/[slug].astro` の `getImageUrl`(og:image)                                                                    |
-| [SEO パネルの自動適用](#emdashhead-が-seo-パネルの値を自動で重ねる)                                 | `posts/[slug].astro` の `getSeoMeta` の手組み、`pages` の `supports` に `seo` が無い                                           |
-| [Worker Loader とサンドボックス](#worker-loader-が無いとサンドボックスのプラグインは読み込まれない) | `astro.config.mjs` の `sandboxed: [webhookNotifier]`(`--no-sandboxed-plugins` で作ったとき)                                    |
-| [`group`](#コレクションの-group)                                                                    | `seed/seed.json`                                                                                                               |
-| [一覧の `edit`](#一覧のエントリにも-edit-が付くようになった)                                        | `index.astro`、`posts/index.astro`、`category/[slug].astro`、`tag/[slug].astro`(`rss.xml.ts` も出るが HTML ではないので対象外) |
+| 項目                                                                                                | 当たる箇所                                                                                                                                               |
+| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [cron の頻度](#cron-の頻度を決める)                                                                 | `wrangler.jsonc`(毎分)                                                                                                                                   |
+| [`search()` のページング](#search-が-cursor-でページングできるようになった)                         | `search.astro`(30件で打ち切り)                                                                                                                           |
+| [Turnstile](#コメントの-turnstile-をサーバーで検証するようになった)                                 | `posts/[slug].astro` の `CommentForm`(`commentsEnabled: true`)                                                                                           |
+| [`siteUrl`](#siteurl-を設定する)                                                                    | `astro.config.mjs` にも `wrangler.jsonc` にも無い                                                                                                        |
+| [`sortOrder`](#コレクションのサイドバーの並び順sortorder)                                           | `seed/seed.json`(全コレクション)                                                                                                                         |
+| [trigram](#検索に-trigram-を選べるようになった)                                                     | `posts` / `pages` の検索                                                                                                                                 |
+| [Node の版](#nodejs-2216-以上が必須になった)                                                        | `package.json` に `engines` が無い                                                                                                                       |
+| [`avatarStorageKey`](#バイラインのアバターを-avatarstoragekey-で組む)                               | `PostCard.astro`、`index.astro`、`posts/index.astro`、`posts/[slug].astro`                                                                               |
+| [`getPublicMediaUrl`](#生のメディア-url-を-getpublicmediaurl-で組む)                                | 上の4か所 + `posts/[slug].astro` の `getImageUrl`(og:image)                                                                                              |
+| [SEO パネルの自動適用](#emdashhead-が-seo-パネルの値を自動で重ねる)                                 | `posts/[slug].astro` の `getSeoMeta` の手組み(`supports` の `seo` は追随済み)                                                                            |
+| [Worker Loader とサンドボックス](#worker-loader-が無いとサンドボックスのプラグインは読み込まれない) | `astro.config.mjs` の `sandboxed: [webhookNotifier]`(`--no-sandboxed-plugins` で作ったとき)                                                              |
+| [`group`](#コレクションの-group)                                                                    | `seed/seed.json`                                                                                                                                         |
+| [一覧の `edit`](#一覧のエントリにも-edit-が付くようになった)                                        | `category/[slug].astro`、`tag/[slug].astro`(`rss.xml.ts` も出るが HTML ではないので対象外。`index.astro`・`posts/index.astro` は 1.0.1 の同期で追随済み) |
+| [`<WidgetArea>` の二重取得](#widgetarea-が自分でキャッシュタグを立てるようになった)                 | 当たらない(`<WidgetArea>` を素のまま置いている)                                                                                                          |
 
-当たらなかった項目(すでに追随済み): `emdash/ui/comments`、`.light` クラス、`includeCounts: false`、詳細ページの `content` の受け渡し。エッジキャッシュ(`routeRules`)は入っていないので、キャッシュタグの項目と `toolbar: "client"`(0.29)も当たらない。デプロイ時にマイグレーションを当てる方式(0.35、`emdash migrate`)は、既定が実行時に当てる `auto` のままなので載せていない。
+当たらなかった項目(すでに追随済み): `emdash/ui/comments`(1.0 で旧 import が消えたので、追随していないと build が落ちる)、`.light` クラス、`includeCounts: false`、詳細ページの `content` の受け渡し、1.0 系の項目すべて(内部サブパス・`experimental`・非推奨 capability・`emdash plugin`)。エッジキャッシュ(`routeRules`)は入っていないので、キャッシュタグの項目と `toolbar: "client"`(0.29)も当たらない。デプロイ時にマイグレーションを当てる方式(0.35、`emdash migrate`)は、既定が実行時に当てる `auto` のままなので載せていない。
 
 テンプレートが次の版に同期されたら、この表を判定し直して日付と版を書き換える。更新の有無は `gh api repos/emdash-cms/templates/commits -q '.[0].commit.message'` で分かる。
 
@@ -91,12 +96,12 @@
 ### `emdash dev` が非推奨になった
 
 - **判定:** `grep -rn "emdash dev" --exclude-dir=node_modules --exclude-dir=.git .`
-- **対応:** `pnpm dev`(`astro dev`)に書き換える。ドキュメント・`AGENTS.md`・同梱スキルも対象。
+- **対応:** `pnpm dev`(`astro dev`)に書き換える。ドキュメント・`AGENTS.md`・同梱スキルも対象。**1.0 で `emdash dev` と `emdash auth secret` は消えた**(`Unknown command` で落ちる)。`package.json` の `emdash.url` は `emdash dev --types` しか読んでいなかったので消してよい。
 
 ### コメントの部品が `emdash/ui/comments` へ移った
 
 - **判定:** `grep -rn "Comment.*from \"emdash/ui\"" src`
-- **対応:** `Comments` / `CommentForm` を `emdash/ui/comments` から import する。
+- **対応:** `Comments` / `CommentForm` を `emdash/ui/comments` から import する。**1.0 で `emdash/ui` からの export は消えた** — 残っていると build が落ちる。
 
 ### term の並び順をコアが持つようになった
 
@@ -211,3 +216,43 @@
 - **判定:** `grep -rln "content_update" --exclude-dir=node_modules docs .claude .agents AGENTS.md 2>/dev/null`
 - **対応:** 管理画面で開いているエントリを MCP から更新すると 409 が返る旨を、運用手順に書く。
 - **本番:** マイグレーションはランタイムが当てるので作業は無い。
+
+## 0.40.1
+
+### MCP の `media_upload` が base64 だけを受けるようになった
+
+- **判定:** `grep -rn "media_upload" --exclude-dir=node_modules docs .claude .agents AGENTS.md 2>/dev/null`
+- **対応:** `url` を渡して取り込ませる手順を、ファイルを取得して base64 と `contentType` を渡す手順に書き換える。署名付き URL で上げたあとに確定するのは `media_create`(`POST /_emdash/api/media/upload-url` が返す `storageKey` を渡す)。
+
+## 0.41
+
+### `<WidgetArea>` が自分でキャッシュタグを立てるようになった
+
+- **判定:** `grep -rn "getWidgetAreaWithCacheHint" src`
+- **対応:** ページ側で先に `getWidgetAreaWithCacheHint()` を呼んで `Astro.cache.set()` に渡していたなら消す(0.37 の項目で足した処理)。`<WidgetArea>` が `Astro.cache.enabled` のとき自分で立てる。ウィジェットを編集したあとに古いエリアがエッジに残る不具合もこの版で直った。
+
+## 0.42
+
+### `relations` が予約スラグになり、`emdash plugin` が消えた
+
+- **判定:** `grep -n '"slug": "relations"' seed/seed.json; grep -rn "emdash plugin" --exclude-dir=node_modules --exclude-dir=.git .`
+- **対応:** `relations` というコレクションがあるなら別名にする(既存のものは中身も API も残るが、管理画面から開けなくなる)。`emdash plugin`(login / scaffold / validate / bundle / publish)を呼ぶスクリプトは、レジストリ側の手順へ移す。
+
+## 1.0
+
+1.0 の最初の版は **1.0.1** である。npm には誤って公開された `emdash@1.0.0`(0.7 相当のコード)が deprecated で残っているので入れない。0.42 からの移行は公式の [upgrade guide](https://docs.emdashcms.com/upgrade-to-v1/)。以降、破壊的変更はメジャー版でしか入らない。
+
+### 内部サブパスが `internal/` の下へ移った
+
+- **判定:** `grep -rnE 'emdash/(db/(sqlite|libsql|postgres)-migrations|database/(pg-)?migration-lock)|cloudflare/db/(d1|hyperdrive)-migrations' --exclude-dir=node_modules src plugins astro.config.mjs 2>/dev/null`
+- **対応:** 公開のエントリポイントに付け替える。`emdash/internal/…` は公開 API ではないので、直接 import しない。上げたら再ビルドする(`emdash migrate` は古い版が書いたマイグレーションのマニフェストを受け付けない)。
+
+### `experimental` オプションが消えた
+
+- **判定:** `grep -n "experimental" astro.config.mjs`
+- **対応:** `experimental.registry` は起動時にエラーになる。トップレベルの `registry` へ移す。`experimental: {}` は実行時には無視されるが、TypeScript の設定では型から消えたので削る。
+
+### 非推奨の capability 名が起動時に警告される
+
+- **判定:** `grep -rnE '"(read|write):[a-z]+"|network:fetch|page:inject' --exclude-dir=node_modules src plugins astro.config.mjs 2>/dev/null`
+- **対応:** 自前のプラグインが宣言している旧名(`read:content`・`network:fetch`・`page:inject` など)を、起動時の警告が一覧する現行名(`content:read`・`network:request` など)へ替える。警告はプラグインごとに1度、起動時に出る。

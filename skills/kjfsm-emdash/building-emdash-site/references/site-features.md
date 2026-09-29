@@ -53,6 +53,8 @@ import { WidgetArea } from "emdash/ui";
 文言と`aria-label`が`Search`固定で、変えられるのは`placeholder`だけ。これらが合わないなら、コアの
 ウィジェットを置かずに自前のコンポーネントを書く。
 
+`<WidgetArea>`は0.41から、ウィジェットを編集したときにエッジキャッシュが無効化されるよう、自分でキャッシュタグを立てる。ページ側で`getWidgetAreaWithCacheHint`を先に呼ぶ必要はない。
+
 細かく制御したいときだけ`getWidgetArea`で手組みする。
 
 ## 検索の前提条件
@@ -83,7 +85,7 @@ import LiveSearch from "emdash/ui/search";
 クレジットをサポートする。シードでの定義形式は
 [themes/seed-files](https://docs.emdashcms.com/themes/seed-files/)にある。
 
-クエリレイヤーが全エントリに`data.bylines`として付加する(単数の`data.byline`は存在しない)。
+クエリレイヤーが全エントリに`data.bylines`(クレジットの配列)として付加する。1.0.1の生成型には単数の`data.byline`(`BylineSummary | null`、`primaryBylineId`の著者)も載る。0.40までは無かったので、古い版のコードでは`bylines`から引く。
 
 ```astro
 {post.data.bylines?.map(credit => (
@@ -119,13 +121,13 @@ interface BylineSummary {
 
 ```astro
 ---
-import { Comments, CommentForm } from "emdash/ui";
+import { Comments, CommentForm } from "emdash/ui/comments";
 ---
 <Comments collection="posts" contentId={post.data.id} threaded />
 <CommentForm collection="posts" contentId={post.data.id} />
 ```
 
-`contentId`は`post.data.id`(ULID)。コメントはシード内でコレクションごとに有効化する:
+`emdash/ui`からの`Comments` / `CommentForm`は**1.0で削除された**(0.33で`emdash/ui/comments`へ移り、非推奨のまま残っていた)。`contentId`は`post.data.id`(ULID)。コメントはシード内でコレクションごとに有効化する:
 `"commentsEnabled": true`。
 
 ## ページコントリビューション(公式にテンプレート側の記載なし)

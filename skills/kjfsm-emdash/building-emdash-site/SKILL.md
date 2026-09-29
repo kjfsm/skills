@@ -110,7 +110,7 @@ my-site/
 ## 実行と検証
 
 ```bash
-npx emdash dev          # devサーバー起動(マイグレーション、型生成。空DBならシードのスキーマ部分だけ適用)
+pnpm dev                # devサーバー起動(`astro dev`。マイグレーション、型生成。空DBならシードのスキーマ部分だけ適用)
 ```
 
 管理UIは`http://localhost:4321/_emdash/admin`。

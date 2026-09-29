@@ -31,8 +31,8 @@ npx wrangler d1 execute <database_name> --remote \
   そのもの**に直接クエリが飛ぶ(コピーではない)。`wrangler whoami` で
   ログイン済みかつそのアカウントに対象D1への権限があれば、それだけで動く
   ——`dev-bypass`もPATも一切不要。
-- `--remote` を外す(または `--local` を付ける)と、`npx emdash dev` /
-  `astro dev` が使っているのと**同じローカルのMiniflareエミュレートD1**
+- `--remote` を外す(または `--local` を付ける)と、`astro dev`
+  (`pnpm dev`)が使っているのと**同じローカルのMiniflareエミュレートD1**
   (`.wrangler/state` 以下)を読む。devサーバーを起動していなくても読める。
 - **`--remote` に対しては、ユーザーの明示的な許可なしにSELECT以外の文を
   実行しないこと。** UPDATE/DELETE/INSERTを`--remote`に対して実行するのは

@@ -66,7 +66,7 @@ const { entries, nextCursor, cacheHint } = await getEmDashCollection("posts", {
 
 公式の`ContentEntry`の説明には出てこないが、クエリレイヤーが各エントリに次を付加する。
 
-- `entry.data.bylines?: ContentBylineCredit[]` — 著者クレジットの配列(単数の`data.byline`は**存在しない**)
+- `entry.data.bylines?: ContentBylineCredit[]` — 著者クレジットの配列。1.0.1の型には主著者の`entry.data.byline?: BylineSummary | null`もあるが、0.40までは**存在しない**
 - `entry.data.terms?: Record<string, TaxonomyTerm[]>` — タクソノミー名 → 用語配列(例: `post.data.terms?.tag`)
 
 そのため、著者やタグを表示するだけなら`getByline` / `getEntryTerms`を追加で呼ぶ必要はない。

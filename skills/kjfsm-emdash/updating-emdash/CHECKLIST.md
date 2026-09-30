@@ -247,6 +247,16 @@
 - **判定:** `grep -rnE 'emdash/(db/(sqlite|libsql|postgres)-migrations|database/(pg-)?migration-lock)|cloudflare/db/(d1|hyperdrive)-migrations' --exclude-dir=node_modules src plugins astro.config.mjs 2>/dev/null`
 - **対応:** 公開のエントリポイントに付け替える。`emdash/internal/…` は公開 API ではないので、直接 import しない。上げたら再ビルドする(`emdash migrate` は古い版が書いたマイグレーションのマニフェストを受け付けない)。
 
+### `cloudflareCache()` が消えた
+
+- **判定:** `grep -rnE "cloudflareCache|@emdash-cms/cloudflare/cache|CF_ZONE_ID|CF_CACHE_PURGE_TOKEN" --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null`
+- **対応:** `@emdash-cms/cloudflare` の `cloudflareCache()` と、そのエントリポイント `@emdash-cms/cloudflare/cache`・`/cache/config` は消えた(import が解決できずビルドが落ちる)。`@astrojs/cloudflare/cache` の `cacheCloudflare()`(Workers Cache)へ替え、`CF_ZONE_ID` と `CF_CACHE_PURGE_TOKEN` のシークレットは消す。`kvCache()`(オブジェクトキャッシュ)は変わらない。設定の書き方は `caching-emdash-site`。
+
+### `emdash auth secret` の代わりに `emdash secrets generate`
+
+- **判定:** `grep -rn "auth secret" --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null`
+- **対応:** スクリプトから `emdash auth secret` を消す。暗号鍵は `emdash secrets generate` で作る。`EMDASH_AUTH_SECRET` がすでに設定してあれば消さない(コメント投稿者の IP ハッシュが変わらなくなる)。
+
 ### `experimental` オプションが消えた
 
 - **判定:** `grep -n "experimental" astro.config.mjs`

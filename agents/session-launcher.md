@@ -1,6 +1,6 @@
 ---
 name: session-launcher
-description: 新しい Claude セッションを worktree + tmux で立て、画面を読んで「入力欄が出ているか・何で止まっているか」だけを返す。/kjfsm-skills:new-session が起動する。立てたセッションの中身には関与しない。
+description: 新しい Claude セッションを worktree + tmux で立て、画面を読んで「入力欄が出ているか・何で止まっているか」だけを返す。/kjfsm-skills:new-session と /kjfsm-skills:restart-session が起動する。立てたセッションの中身には関与しない。
 tools: Bash
 model: haiku
 ---

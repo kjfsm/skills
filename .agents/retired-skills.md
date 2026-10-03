@@ -6,7 +6,9 @@
 
 - **batch-grill-me** — ラウンド単位で設計ツリーを進めるインタビュー。中身は本家の `grilling` に取り込まれた。
 - **design-an-interface** — 並列サブエージェントで根本的に異なるインターフェース案を出す。本家 `codebase-design` の DESIGN-IT-TWICE が同じことをする。
-- **new-session** — worktree と tmux で独立したセッションを立てる。Claude Code の `claude -w <名前> --tmux` が同じことをする。
+- **new-session**(と、それが呼んでいた `session-launcher` エージェント) — worktree つきのバックグラウンドセッションを立て、状態と画面を読んで報告する。立てるのは公式の `claude --bg --name <名前> "<最初の入力>"` の1行で(過去の会話の続きなら `--resume <ID>` を足す)、worktree への隔離はセッションが自分で行い、状態はユーザーが `claude agents`(agent view)の行で見る。実装セッションを立てるなら `launch-implementation-session`。
+- **close-session** — 作業を終えたセッションが、自分の立てた開発サーバーとバックグラウンドのタスクを止め、残った変更を確かめてから閉じてよいと報告する。公式の `claude rm <id>`(agent view では `Ctrl+X` を2回)が同じことをする — 引き継いだバックグラウンドのシェルコマンドごと止め、未 push のものがある worktree は消さずに残す。`claude stop` ではサーバーが残るので、閉じるなら `rm` を使う。
+- **restart-session** — バックグラウンドセッションを `claude respawn` で立て直し、状態を読んで報告する。自分自身なら別のセッションに頼む。公式の `claude respawn <id>` がそのまま同じことをする — 会話・ID・worktree を残し、走っていたバックグラウンドのシェルコマンドも次のプロセスへ引き継ぐ。自分自身を立て直すときも、ユーザーがシェルで同じ1行を叩けばよい。
 - **qa** — 会話で報告されたバグを GitHub イシューにする対話セッション。本家の `triage` を使う。
 - **request-refactor-plan** — インタビューから小さなコミット単位のリファクタ計画を作る。本家の `to-spec` → `to-tickets` を使う。
 - **setup-pre-commit** — husky + lint-staged の pre-commit を敷く。git hook の層は `/kjfsm-skills:setup-hooks` が持ち、lefthook を既定に pre-commit を1秒未満に保つ — このスキルはどちらの判断とも逆を敷いていた。

@@ -57,8 +57,11 @@ Stack で積むときだけ。Claude に worktree を作らせない — 既定�
 git fetch
 git worktree add .claude/worktrees/<名前> <Stack の一番上のブランチ>
 cd .claude/worktrees/<名前>
+gh stack checkout <一番上の層の PR 番号>
 gh stack add <新しい層のブランチ>
 ```
+
+`gh stack checkout` を飛ばさない。gh stack の状態は worktree ごと(`.git/worktrees/<名前>/gh-stack`)にあるので、作ったばかりの worktree は Stack を知らず、`gh stack add` が `current branch is not part of a stack` で落ちる。`checkout` が GitHub から Stack を取り込む。
 
 続けて、その worktree に gitignore されたローカルの設定(`.dev.vars` など、`.worktreeinclude` に挙がっているもの)を本体からコピーし、依存を **実体で** 入れる(pnpm なら `pnpm install --frozen-lockfile`)。型やバインディングの生成がある(`typegen` など)なら、それも走らせる。
 

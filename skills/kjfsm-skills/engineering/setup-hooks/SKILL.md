@@ -68,7 +68,7 @@ description: 散文のルールでは守られないものを機構へ落とし�
 
 ### 3. `permissions.deny` に書けるものを書く
 
-パスの保護はここで終わる。スクリプトは0本でよい。
+パスの保護はここで終わる。スクリプトは0本でよい。settings.json への書き込みそのもの(JSON の形、既存の設定とのマージ)は組み込みの `update-config` スキルに任せ、ここでは何を `deny` するかだけを決める。
 
 - **`deny` は Bash の中も見る。** リダイレクトの先(`> .env`)と、名指しされたファイルコマンド(`cat`、`sed`、`tee`)の引数は、同じ規則で判定される。**取り逃すのはパスを名指ししない読み書き**である — `grep -r pattern .`、`pnpm install` による lock の書き換え、スクリプトが自分で開くファイル
 - **参照されるのは `Read(...)` と `Edit(...)` だけ。** `Write(...)` のパス付きルールは受理されたうえで**一度も見られない**。`Read` の deny は同じパスへの `Edit` と `Write` も塞ぐ
@@ -100,7 +100,7 @@ lefthook.yml             ← 薄い呼び出し役。pre-commit は1秒未満、
 
 ### 5. 残りを Claude Code のフックにする
 
-雛形は [recipes.md](./recipes.md) にある。作法は5つ。
+雛形は [recipes.md](./recipes.md) にある。settings.json の `hooks` への登録は `update-config` スキルに任せる。ここが持つのは、フックのスクリプトの作法5つである。
 
 **拒否は終了コード 0 と `hookSpecificOutput.permissionDecision: "deny"` で返す。** 終了コード 2 でも今のところ止まるが、そちらは非推奨の経路である。
 

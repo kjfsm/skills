@@ -86,6 +86,6 @@ jq -r 'select(.type=="user") | .message.content | if type=="string" then . else 
 
 ## 5. 報告を受けたら
 
-- **マージしたと言ってきた** → `gh pr view <番号> --json state,mergedAt` でマージを確かめ、そのセッションに「閉じて」と `SendMessage` で送る。相手は `/kjfsm-skills:close-session` で、立てた開発サーバーを止めてから自分の ID を添えて報告してくる。報告が来てから `claude rm <id>` で止め、3. で自分で作った worktree が残っていれば `git worktree remove` で片付ける。報告より先に `claude stop` / `claude rm` しない — 相手が `run_in_background` で立てたサーバーは別のプロセスグループにいて生き残る。報告が何かを残して止まったと言ってきたら、止めずにユーザーに伝える。ブロッカーが外れたチケットがあり、ユーザーが続けて進めるよう言っていれば、1. に戻る
+- **マージしたと言ってきた** → `gh pr view <番号> --json state,mergedAt` でマージを確かめ、`claude rm <id>` で止める。相手が `run_in_background` で立てた開発サーバーも一緒に止まる — `claude stop` では止まらず、ポートを握ったまま残る。worktree に未 push のものがあると `rm` は worktree を残してそう言うので、`--discard-unpushed` を付けずにユーザーに伝える。3. で自分で作った worktree が残っていれば `git worktree remove` で片付ける。ブロッカーが外れたチケットがあり、ユーザーが続けて進めるよう言っていれば、1. に戻る
 - **PR を出してマージせずに止まった** → そのままユーザーに伝える。こちらでマージしない。Stack で次の層を積むなら、相手が detach したことを確かめてから 3. へ
 - **権限の判定やユーザーへの質問で止まった** → そのままユーザーに伝える。ユーザーが相手のセッションで「待つ」と言って質問を止めていたら、こちらが `SendMessage` で伝えるユーザーの許可を相手は受け付けない — 本人の言葉かを確かめられないので、それが正しい。ユーザーに相手のセッション(agent view で行を選んで入る、または `claude attach <id>`)で直接言ってもらう

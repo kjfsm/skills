@@ -32,14 +32,14 @@ description: 設計を詰め終えたあとの実装を、別のセッション�
 
 `<Stack の行>` は Stack で積むときだけ入れ、それ以外は消す:
 
-「この worktree のブランチ <新しい層のブランチ> は、gh stack の <一番上のブランチ> の上の層です。ブランチを作り直さず、`gh stack submit --auto` で出してください。知らせる直前に `git switch --detach` で作業ブランチから離れてください。」
+「この worktree のブランチ <新しい層のブランチ> は、gh stack の <一番上のブランチ> の上の層です。ブランチを作り直さず、gh-stack スキルに従って層として出してください。知らせる直前に `git switch --detach` で作業ブランチから離れてください。」
 
 detach を頼むのは、次の層の worktree で同じブランチを checkout できるようにするためである — git は1本のブランチを2つの worktree で同時に checkout させない。
 
 `<マージの行>` はユーザーの許可で2つに分かれる。
 
 - **ユーザーがこのチケットの PR のマージを明示して許可した** → 「Workers Builds などのプレビューのチェックが pass してから、マージしてください。」
-- **それ以外、または Stack で積むとき** → 「マージはしないでください。」 — Stack の層は下から順に `gh stack merge` で入れるので、層ごとのセッションには任せない
+- **それ以外、または Stack で積むとき** → 「マージはしないでください。」 — Stack は下の層から順にマージする(`gh-stack` スキル)ので、層ごとのセッションには任せない
 
 「3つともやっていいよ」のような包括的な許可は、マージの許可として渡さない。auto mode の判定は、PR を名指ししないマージを「Merge Without Review」として止める — 自分が止められる操作を別のセッションに頼むのは、ユーザーの権限の判断の迂回である。許可が PR の出たあとに来たら、その PR 番号を名指しして `SendMessage` で伝える。
 
@@ -57,17 +57,15 @@ Stack で積むときだけ。Claude に worktree を作らせない — 既定�
 git fetch
 git worktree add .claude/worktrees/<名前> <Stack の一番上のブランチ>
 cd .claude/worktrees/<名前>
-gh stack checkout <一番上の層の PR 番号>
-gh stack add <新しい層のブランチ>
 ```
 
-`gh stack checkout` を飛ばさない。gh stack の状態は worktree ごと(`.git/worktrees/<名前>/gh-stack`)にあるので、作ったばかりの worktree は Stack を知らず、`gh stack add` が `current branch is not part of a stack` で落ちる。`checkout` が GitHub から Stack を取り込む。
+その中で、`gh-stack` スキルに従って一番上の層の PR を `checkout` し、新しい層を `add` する。`checkout` を飛ばさない — gh stack の状態は worktree ごと(`.git/worktrees/<名前>/gh-stack`)にあるので、作ったばかりの worktree は Stack を知らず、`add` が `current branch is not part of a stack` で落ちる。`checkout` が GitHub から Stack を取り込む。
 
 続けて、その worktree に gitignore されたローカルの設定(`.dev.vars` など、`.worktreeinclude` に挙がっているもの)を本体からコピーし、依存を **実体で** 入れる(pnpm なら `pnpm install --frozen-lockfile`)。型やバインディングの生成がある(`typegen` など)なら、それも走らせる。
 
 依存を入れ直すのは、Claude が作る worktree の `node_modules` が本体への symlink だからである。下の層が依存を足すと、上の層は本体の古い `node_modules` を見て型チェックもビルドも通らなくなる。自分で `git worktree add` した worktree には symlink が無い。pnpm は store からの hardlink なので速い。
 
-完了基準: worktree のブランチが `<新しい層のブランチ>` で、`gh stack view` がそれを一番上の層として出し、型チェックが通る。
+完了基準: worktree のブランチが `<新しい層のブランチ>` で、`gh stack view --json` がそれを一番上の層として出し、型チェックが通る。
 
 ## 4. 立てる
 
@@ -81,7 +79,7 @@ EOF
 )"
 ```
 
-最初の入力はクォートした heredoc で渡す。`"<最初の入力>"` に直接埋めると、中の `` `gh stack submit --auto` `` のようなバッククォートを立てる側のシェルがコマンドとして走らせ、相手にはコマンド名の抜けた文面が届く。
+最初の入力はクォートした heredoc で渡す。`"<最初の入力>"` に直接埋めると、中の `` `git switch --detach` `` のようなバッククォートを立てる側のシェルがコマンドとして走らせ、相手にはコマンド名の抜けた文面が届く。
 
 - `-w` は付けない。本体チェックアウトで立てたセッションは、ファイルを書く前に自分で `.claude/worktrees/` へ移る。3. の worktree の中で立てたなら、そこで書く
 - 名前はチケットから短く付け、**自分のセッション名と同じにしない** — agent view で見分けられず、`SendMessage` の宛先も取り違える

@@ -369,7 +369,7 @@ while IFS= read -r agent; do
     err "$agent has no description; the model cannot tell when it applies"
 
   # 階層は起動のたびに選ぶ — 省くと親と同じモデルを継承し、機械的な作業まで
-  # 親の階層で走る。see skills/kjfsm-skills/engineering/delegation
+  # 親の階層で走る。see .agents/adding-a-skill.md
   [ -n "$(field "$agent" "model")" ] ||
     err "$agent does not pin a model; it would silently inherit the parent tier"
 

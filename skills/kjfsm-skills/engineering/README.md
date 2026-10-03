@@ -18,7 +18,6 @@
 
 - **[ai-efficiency](./ai-efficiency/SKILL.md)** — 大量のファイル移動・リネーム・import 付け替えを、1ファイルずつ読み書きせずシェルで機械的に処理する戦略。「大量リネーム」「一括置換」「ディレクトリ再編」「import パスの一括付け替え」などで参照する。
 - **[d1-bound-parameters](./d1-bound-parameters/SKILL.md)** — Cloudflare D1 へ多数の値を渡すクエリの規律 — bound parameter は1文あたり100個まで。`D1_ERROR: too many SQL variables` が出たとき、D1 へ大量の行を INSERT するとき、`inArray` / `IN (...)` に長い ID の列を渡すとき、`db.batch()` で分割するときに使う。
-- **[delegation](./delegation/SKILL.md)** — 作業をサブエージェントの子コンテキストへ押し出し、タスクに見合ったモデル階層に回す判断。サブエージェントを起動するとき、大量の出力を伴う作業を始めるとき、他のスキルが委譲の語彙を必要とするときに使う。
 - **[dev-bypass-sign-in](./dev-bypass-sign-in/SKILL.md)** — 叩くだけでサインイン済みになる開発・E2E 用の入口(dev bypass)を作る。ログインの要る画面を E2E やエージェントから駆動したいとき、dev サーバーでソーシャルログインやパスワード登録を踏まずに座りたいとき、better-auth の `testUtils` の使いどころを決めるとき、既存の bypass の戸が本番の成果物に残っていないか確かめたいとき、他のスキルが認証済みのセッションを必要とするときに使う。
 - **[drizzle-generate-non-interactive](./drizzle-generate-non-interactive/SKILL.md)** — TTY の無いところで `drizzle-kit generate` を完走させる。エージェント・フック・CI から generate を回すとき、`Interactive prompts require a TTY terminal` で落ちたとき、`missing_hints` で exit 2 したとき、rename を含むスキーマ変更のマイグレーションを生成するときに使う。
 - **[launch-implementation-session](./launch-implementation-session/SKILL.md)** — 設計を詰め終えたあとの実装を、別のセッションで `/kjfsm-skills:implement-and-review` に走らせ、終わったら立てた側へ知らせるよう最初の入力で伝える。grill や to-spec・to-tickets を終えて作業を始めるとき、「別セッションで実装して」と言われたとき、gh stack の層を別セッションで積むとき、他のスキルがチケットの実装セッションを立てる必要があるときに使う。

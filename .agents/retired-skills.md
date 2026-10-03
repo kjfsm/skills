@@ -6,7 +6,7 @@
 
 - **batch-grill-me** — ラウンド単位で設計ツリーを進めるインタビュー。中身は本家の `grilling` に取り込まれた。
 - **design-an-interface** — 並列サブエージェントで根本的に異なるインターフェース案を出す。本家 `codebase-design` の DESIGN-IT-TWICE が同じことをする。
-- **new-session** — worktree と tmux で独立したセッションを立てる。Claude Code の `claude -w <名前> --tmux` が同じことをする。
+- **new-session**(と、それが呼んでいた `session-launcher` エージェント) — worktree つきのバックグラウンドセッションを立て、状態と画面を読んで報告する。立てるのは公式の `claude --bg --name <名前> "<最初の入力>"` の1行で、worktree への隔離はセッションが自分で行い、状態はユーザーが `claude agents`(agent view)の行で見る。実装セッションに固有の部分(最初の入力、Stack の worktree、全文が届いたかの確認)は `launch-implementation-session` が持つ。
 - **qa** — 会話で報告されたバグを GitHub イシューにする対話セッション。本家の `triage` を使う。
 - **request-refactor-plan** — インタビューから小さなコミット単位のリファクタ計画を作る。本家の `to-spec` → `to-tickets` を使う。
 - **setup-pre-commit** — husky + lint-staged の pre-commit を敷く。git hook の層は `/kjfsm-skills:setup-hooks` が持ち、lefthook を既定に pre-commit を1秒未満に保つ — このスキルはどちらの判断とも逆を敷いていた。

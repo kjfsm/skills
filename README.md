@@ -154,7 +154,6 @@ claude plugin install kjfsm-skills@kjfsm --scope project
 **モデル呼び出し型**
 
 - **[ai-efficiency](./skills/kjfsm-skills/engineering/ai-efficiency/SKILL.md)** — 大量のファイル移動・リネーム・import 付け替えを、1ファイルずつ読み書きせずシェルで機械的に処理する戦略。「大量リネーム」「一括置換」「ディレクトリ再編」「import パスの一括付け替え」などで参照する。
-- **[close-session](./skills/kjfsm-skills/engineering/close-session/SKILL.md)** — 作業を終えたセッションが、自分の立てた開発サーバーとバックグラウンドのタスクを止め、残った変更を確かめてから、閉じてよいと報告する。ユーザーがセッションを終える意味で「終わり」「おしまい」「閉じて」「セッション閉じて」と言ったとき、立てた側から「閉じて」と SendMessage で届いたとき、他のスキルがセッションの後始末を必要とするときに使う。PR やイシューを閉じる意味の「閉じて」では使わない。
 - **[d1-bound-parameters](./skills/kjfsm-skills/engineering/d1-bound-parameters/SKILL.md)** — Cloudflare D1 へ多数の値を渡すクエリの規律 — bound parameter は1文あたり100個まで。`D1_ERROR: too many SQL variables` が出たとき、D1 へ大量の行を INSERT するとき、`inArray` / `IN (...)` に長い ID の列を渡すとき、`db.batch()` で分割するときに使う。
 - **[delegation](./skills/kjfsm-skills/engineering/delegation/SKILL.md)** — 作業をサブエージェントの子コンテキストへ押し出し、タスクに見合ったモデル階層に回す判断。サブエージェントを起動するとき、大量の出力を伴う作業を始めるとき、他のスキルが委譲の語彙を必要とするときに使う。
 - **[dev-bypass-sign-in](./skills/kjfsm-skills/engineering/dev-bypass-sign-in/SKILL.md)** — 叩くだけでサインイン済みになる開発・E2E 用の入口(dev bypass)を作る。ログインの要る画面を E2E やエージェントから駆動したいとき、dev サーバーでソーシャルログインやパスワード登録を踏まずに座りたいとき、better-auth の `testUtils` の使いどころを決めるとき、既存の bypass の戸が本番の成果物に残っていないか確かめたいとき、他のスキルが認証済みのセッションを必要とするときに使う。

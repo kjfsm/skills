@@ -28,6 +28,7 @@
 - [0.41](#041)
 - [0.42](#042)
 - [1.0](#10)
+- [1.1](#11)
 
 ## blog-cloudflare で当たる項目
 
@@ -49,8 +50,9 @@
 | [`group`](#コレクションの-group)                                                                    | `seed/seed.json`                                                                                                                                         |
 | [一覧の `edit`](#一覧のエントリにも-edit-が付くようになった)                                        | `category/[slug].astro`、`tag/[slug].astro`(`rss.xml.ts` も出るが HTML ではないので対象外。`index.astro`・`posts/index.astro` は 1.0.1 の同期で追随済み) |
 | [`<WidgetArea>` の二重取得](#widgetarea-が自分でキャッシュタグを立てるようになった)                 | 当たらない(`<WidgetArea>` を素のまま置いている)                                                                                                          |
+| [404 を `rewrite` で返す](#見つからないエントリを-astrorewrite404-で返す)                           | `posts/[slug].astro`、`pages/[slug].astro`、`category/[slug].astro`、`tag/[slug].astro`(1.1 の項目。2026-10-07 にテンプレートを判定)                     |
 
-当たらなかった項目(すでに追随済み): `emdash/ui/comments`(1.0 で旧 import が消えたので、追随していないと build が落ちる)、`.light` クラス、`includeCounts: false`、詳細ページの `content` の受け渡し、1.0 系の項目すべて(内部サブパス・`experimental`・非推奨 capability・`emdash plugin`)。エッジキャッシュ(`routeRules`)は入っていないので、キャッシュタグの項目と `toolbar: "client"`(0.29)も当たらない。デプロイ時にマイグレーションを当てる方式(0.35、`emdash migrate`)は、既定が実行時に当てる `auto` のままなので載せていない。
+当たらなかった項目(すでに追随済み): `emdash/ui/comments`(1.0 で旧 import が消えたので、追随していないと build が落ちる)、`.light` クラス、`includeCounts: false`、詳細ページの `content` の受け渡し、1.0 系の項目すべて(内部サブパス・`experimental`・非推奨 capability・`emdash plugin`)、`htmlBlock` の差し替え(1.1、差し替えていない)。エッジキャッシュ(`routeRules`)は入っていないので、キャッシュタグの項目と `toolbar: "client"`(0.29)も当たらない。デプロイ時にマイグレーションを当てる方式(0.35、`emdash migrate`)は、既定が実行時に当てる `auto` のままなので載せていない。
 
 テンプレートが次の版に同期されたら、この表を判定し直して日付と版を書き換える。更新の有無は `gh api repos/emdash-cms/templates/commits -q '.[0].commit.message'` で分かる。
 
@@ -73,7 +75,7 @@
 
 - **判定:** `grep -rn "<CommentForm" src | grep -v turnstileSiteKey`
 - **対応:** コメントを受け付けるなら、`CommentForm` に `turnstileSiteKey` を渡す。渡さないと、公開のコメント欄の対策は honeypot だけになる。
-- **本番:** Turnstile のウィジェットを作り、`pnpm wrangler secret put EMDASH_TURNSTILE_SECRET_KEY` で秘密鍵を入れる。**サイトキーを渡したフォームをデプロイしてから入れる** — 鍵があるとトークンの無い投稿はすべて拒否されるので、順番を逆にするとコメントが1件も通らない。鍵が無いあいだはサーバーの検証が行われない。
+- **本番:** Turnstile のウィジェットを作り、`pnpm wrangler secret put EMDASH_TURNSTILE_SECRET_KEY` で秘密鍵を入れる。**サイトキーを渡したフォームをデプロイしてから入れる** — 鍵があるとトークンの無い投稿はすべて拒否されるので、順番を逆にするとコメントが1件も通らない。鍵が無いあいだはサーバーの検証が行われない。**1.1.0 未満は `wrangler secret put` で入れた鍵を読まない**([emdash#3622](https://github.com/emdash-cms/emdash/pull/3622)) — ビルド時に在った鍵だけを、サーバーのバンドルへ焼き込んで使う。1.1.0 以上に上げてから入れ、ビルド時に鍵を置いていたなら作り直す。
 
 ## 0.30
 
@@ -266,3 +268,15 @@
 
 - **判定:** `grep -rnE '"(read|write):[a-z]+"|network:fetch|page:inject' --exclude-dir=node_modules src plugins astro.config.mjs 2>/dev/null`
 - **対応:** 自前のプラグインが宣言している旧名(`read:content`・`network:fetch`・`page:inject` など)を、起動時の警告が一覧する現行名(`content:read`・`network:request` など)へ替える。警告はプラグインごとに1度、起動時に出る。
+
+## 1.1
+
+### 見つからないエントリを `Astro.rewrite("/404")` で返す
+
+- **判定:** `grep -rn 'redirect("/404")' src`
+- **対応:** `Astro.rewrite("/404")` に替える(上流のテンプレートも [emdash#3650](https://github.com/emdash-cms/emdash/pull/3650) で替えた)。リダイレクトだと元の URL は 302 を返し、検索エンジンには 404 が伝わらない。しかもその 302 は元のルートの `routeRules` を継承してキャッシュに載り、あとでエントリを公開してもパージが当たらない。`rewrite` の 404 は 1.1.0 から EmDash のミドルウェアがキャッシュから外す。
+
+### `htmlBlock` の描画を差し替えているなら、isolated のブロックを上流へ渡す
+
+- **判定:** `grep -rn "htmlBlock:" src`
+- **対応:** 1.1.0 から、管理画面で作る HTML ブロックは `isolated: true` が付き、CSS・JS を sandbox の iframe で動かす前提になった。自前の描画が `html` を sanitize してインラインに出していると、CSS・JS が黙って落ちる。`node.isolated` が真のときだけ `emdash/ui` の `HtmlBlock` に `node` を渡し、それ以外は今までどおり描く。差し替えていなければ上流の描画が両方を扱うので要らない。

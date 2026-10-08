@@ -161,11 +161,15 @@ exit 0
 ```bash
 # .claude/hooks/session-start.sh
 cd "$CLAUDE_PROJECT_DIR" || exit 0
-[ -d node_modules ] || pnpm install --frozen-lockfile >&2
+# 本体チェックアウトへの symlink のまま install すると、本体の node_modules をこの worktree の lock で書き換える
+[ -L node_modules ] && rm node_modules
+cmp -s pnpm-lock.yaml node_modules/.pnpm/lock.yaml || pnpm install --frozen-lockfile >&2
 ```
 
 - `SessionStart` の**標準出力はそのままコンテキストに入る**。インストールのログを流し込まないよう `>&2` へ送る
-- **すでに用意できていれば何もしない。** 毎回インストールすると、セッション開始が数十秒重くなる
+- **lock と入っている依存が一致していれば何もしない。** pnpm は入れたときの lock の写しを `node_modules/.pnpm/lock.yaml` に置くので、`pnpm-lock.yaml` と違えば依存が古い。毎回インストールすると、セッション開始が数十秒重くなる
+- ⚠️ **`[ -d node_modules ]` で判定しない。** 本体への symlink でも、古い lock で入れた `node_modules` でも真になり、`git pull` や origin/main から切った worktree で lock が進んだことを見逃す — 型チェックが、入っていない依存の分だけ大量に落ちる
+- **worktree の `node_modules` を本体と共有しない**(`worktree.symlinkDirectories` に入れない)。このフックが worktree ごとに入れ、pnpm は store からの hardlink なので安い。理由は `/kjfsm-skills:setup-repo` の手順5
 - クラウドセッション(`CLAUDE_CODE_REMOTE=true`)でだけ走らせたいなら、その環境変数で分岐する
 - 重い準備は `"async": true` を付けて背後で走らせられる。ただし最初のツール呼び出しが準備完了を待たない点に注意する
 

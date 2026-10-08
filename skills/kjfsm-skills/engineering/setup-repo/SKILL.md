@@ -49,6 +49,7 @@ Claude Code を使わないリポジトリでは **B と D を飛ばす** — `.
 - `.claude/rules/` の `paths:` が、いまも存在するディレクトリを指しているか
 - 本体の絶対ルールが名指ししているパス(生成物、シークレットのファイル)が実在するか
 - `.worktreeinclude` が、いま実在する秘密のファイルを挙げているか(手順5)
+- `.claude/settings.json` の `worktree.symlinkDirectories` に `node_modules` が入っていないか(手順5)
 - `.claude/settings.json` のフックが指すスクリプトが実在し、実行可能か
 - **フックにだけ存在する検査が無いか** — 同じ述語が CI にも検証ゲートにも無いフックは、クローンでも CI でも効いていない。ここは工程 D へ回す
 - **散文が、いま存在しない保護を謳っていないか** — 層を移したあと名前だけ置換された行は、嘘を書き直して温存している。`permissions.deny` が見るのは名指しされたパスだけで、`pnpm install` による lock の書き換えは通る
@@ -79,6 +80,8 @@ A → B → C → D の順に、選ばれた工程だけを実行する。各工
 そのうえで **手で置き直さないと落ちるもの**だけを挙げる。`.gitignore` にも `*.example` にも手掛かりが無ければ飛ばす — 空のファイルは置かない。
 
 **生成物は挙げない。** `build/`、`.react-router/`、`worker-configuration.d.ts`、`node_modules` は worktree 側のコマンドが作り直す。コピーすると、作り直されない限り古い版がそこに居座る。
+
+**`node_modules` は symlink でも共有しない** — `worktree.symlinkDirectories` に入れない。`claude -w` の worktree は origin/main から切られるが、本体チェックアウトは古い main のままのことが多く、共有した依存は worktree の lock より古い。存在しない依存で型チェックが数百件落ち、pre-push を越えられなくなる。worktree ごとに `pnpm install --frozen-lockfile` で入れ直す — pnpm は store からの hardlink なので安い。入れ直すのは工程 D の `SessionStart` フックで、lock と `node_modules/.pnpm/lock.yaml` がずれていれば install する(`/kjfsm-skills:setup-hooks` の recipes.md §5)。`symlinkDirectories` に入っていれば外し、フックがまだ無ければ工程 D に回す。
 
 ```
 # Claude Code worktree へコピーする gitignore 済みファイル（.gitignore 構文）。

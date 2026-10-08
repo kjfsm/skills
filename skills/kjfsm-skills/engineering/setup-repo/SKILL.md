@@ -81,7 +81,7 @@ A → B → C → D の順に、選ばれた工程だけを実行する。各工
 
 **生成物は挙げない。** `build/`、`.react-router/`、`worker-configuration.d.ts`、`node_modules` は worktree 側のコマンドが作り直す。コピーすると、作り直されない限り古い版がそこに居座る。
 
-**`node_modules` は symlink でも共有しない** — `worktree.symlinkDirectories` に入れない。`claude -w` の worktree は origin/main から切られるが、本体チェックアウトは古い main のままのことが多く、共有した依存は worktree の lock より古い。存在しない依存で型チェックが数百件落ち、pre-push を越えられなくなる。worktree ごとに `pnpm install --frozen-lockfile` で入れ直す — pnpm は store からの hardlink なので安い。入れ直すのは工程 D の `SessionStart` フックで、lock と `node_modules/.pnpm/lock.yaml` がずれていれば install する(`/kjfsm-skills:setup-hooks` の recipes.md §5)。`symlinkDirectories` に入っていれば外し、フックがまだ無ければ工程 D に回す。
+**`node_modules` は symlink でも共有しない** — `worktree.symlinkDirectories` に入れない(公式の設定例に `node_modules` が載っているが、鮮度の注意書きは無い)。`claude -w` の worktree は origin/main から切られるが、本体チェックアウトは古い main のままのことが多く、共有した依存は worktree の lock より古い。存在しない依存で型チェックが数百件落ち、pre-push を越えられなくなる。そこで install すれば、今度は symlink 越しに本体の `node_modules` を書き換える。worktree ごとに入れ直す — pnpm は store からの hardlink なので安い。入れ直すのは工程 D の `SessionStart` フックである(`/kjfsm-skills:setup-hooks` の recipes.md §5)。`symlinkDirectories` に入っていれば外し、フックがまだ無ければ工程 D に回す。
 
 ```
 # Claude Code worktree へコピーする gitignore 済みファイル（.gitignore 構文）。

@@ -65,7 +65,7 @@ cd .claude/worktrees/<名前>
 
 続けて、その worktree に gitignore されたローカルの設定(`.dev.vars` など、`.worktreeinclude` に挙がっているもの)を本体からコピーし、依存を **実体で** 入れる(pnpm なら `pnpm install --frozen-lockfile`)。型やバインディングの生成がある(`typegen` など)なら、それも走らせる。
 
-依存を入れ直すのは、Claude が作る worktree の `node_modules` が本体への symlink だからである。下の層が依存を足すと、上の層は本体の古い `node_modules` を見て型チェックもビルドも通らなくなる。自分で `git worktree add` した worktree には symlink が無い。pnpm は store からの hardlink なので速い。
+依存は worktree ごとに入れ、本体の `node_modules` を流用しない。下の層が依存を足すと、本体の古い `node_modules` を見る上の層は型チェックもビルドも通らなくなる。`SessionStart` フックが lock とのずれを見て入れ直すリポジトリ(`/kjfsm-skills:setup-hooks` の recipes.md §5)でも、ここで入れておけば完了基準の型チェックをこの場で確かめられる。pnpm は store からの hardlink なので速い。
 
 完了基準: worktree のブランチが `<新しい層のブランチ>` で、`gh stack view --json` がそれを一番上の層として出し、型チェックが通る。
 

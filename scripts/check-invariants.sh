@@ -373,6 +373,8 @@ while IFS= read -r agent; do
   [ -n "$(field "$agent" "model")" ] ||
     err "$agent does not pin a model; it would silently inherit the parent tier"
 
+  # researcher と worker はスキルではなくメインのモデルが description で振り分ける。see AGENTS.md
+  case "$base" in researcher | worker) continue ;; esac
   grep -rq "\`$base\`" --include='*.md' skills ||
     err "$agent is named by no skill; nothing routes work to it"
 done < <(find agents -name '*.md' | sort)

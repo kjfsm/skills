@@ -83,6 +83,8 @@ A → B → C → D の順に、選ばれた工程だけを実行する。各工
 
 **`node_modules` は symlink でも共有しない** — `worktree.symlinkDirectories` に入れない(公式の設定例に `node_modules` が載っているが、鮮度の注意書きは無い)。`claude -w` の worktree は origin/main から切られるが、本体チェックアウトは古い main のままのことが多く、共有した依存は worktree の lock より古い。存在しない依存で型チェックが数百件落ち、pre-push を越えられなくなる。そこで install すれば、今度は symlink 越しに本体の `node_modules` を書き換える。worktree ごとに入れ直す — pnpm は store からの hardlink なので安い。入れ直すのは工程 D の `SessionStart` フックである(`/kjfsm-skills:setup-hooks` の recipes.md §5)。`symlinkDirectories` に入っていれば外し、フックがまだ無ければ工程 D に回す。
 
+**`.gitignore` に `/.claude/worktrees/` を足す。** worktree は本体チェックアウトの中に作られるので、無いと本体の `git status` に未追跡のディレクトリとして出続け、`git add -A` で巻き込む。C3 で生成した `vite-react-template` の `.gitignore` にも入っていなかった。
+
 ```
 # Claude Code worktree へコピーする gitignore 済みファイル（.gitignore 構文）。
 # worktree は新規チェックアウトのため未追跡ファイルが存在しない。

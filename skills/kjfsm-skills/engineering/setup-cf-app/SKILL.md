@@ -23,25 +23,25 @@ description: 新規の Cloudflare Workers フルスタックアプリを、Free 
 | テスト         | Vitest + `@cloudflare/vitest-plugin`(Worker の API)。E2E は `setup-playwright`       |
 | 型             | `wrangler types` + `tsr generate` + `tsc -b`                                         |
 
-**React Router と TanStack Start は使わない。** どちらも Worker の中で React を動かす。React Router の SSR は HTML の生成だけで 22〜57ms、冷えた isolate でのバンドル評価に 13〜37ms かかり、10ms に収まらなかった。TanStack Start は SPA mode でも `react-dom/server` がサーバーバンドルに残り、Worker が起きるたびに約 13ms の固定費を払う。Vite の SPA + Hono なら起動は 0〜4ms で済む(2026-10 の実測)。
+**React Router と TanStack Start は使わない。** どちらも Worker の中で React を動かす。React Router の SSR は HTML の生成だけで 22〜57ms、冷えた isolate でのバンドル評価に 13〜37ms かかり、10ms に収まらなかった。React Router の SPA Mode は SSR を前提にした概念を切って使う形で、Worker 側に React Router が残る。TanStack Start は SPA mode でも `react-dom/server` がサーバーバンドルに残り、Worker が起きるたびに約 13ms の固定費を払う。Vite の SPA + Hono なら起動は 0〜4ms で済む(2026-10 の実測)。
 
 ## 1. 決める
 
 組み始める前に、ユーザーに2つだけ聞く。推測で埋めない — どちらもあとから替えると、スキーマとマイグレーションを作り直す。
 
-- **認証先** — kjfsm の共通 IdP(→ `/kjfsm-personal:connect-kjfsm-auth`。別プラグイン)、Google などの social、email/password。**email/password は CPU を食う。** パスワードのハッシュ化(scrypt)が予算ぎりぎりで動く(better-auth#8860)ので、選んだら登録とログインの経路を本番で別に測る
-- **DB** — 共有 D1 に相乗りする(→ `/kjfsm-personal:kjfsm-shared-db`)か、このアプリだけの D1 を作るか
+- **認証先** — Google などの social、email/password、`kjfsm-personal` プラグインが入っていれば kjfsm の共通 IdP(→ `/kjfsm-personal:connect-kjfsm-auth`)。**email/password は CPU を食う。** パスワードのハッシュ化(scrypt)が予算ぎりぎりで動く(better-auth#8860)ので、選んだら登録とログインの経路を本番で別に測る
+- **DB** — このアプリだけの D1 を作るか、`kjfsm-personal` プラグインが入っていれば共有 D1 に相乗りするか(→ `/kjfsm-personal:kjfsm-shared-db`)
 
 完了基準: 2つの答えが出ている。
 
 ## 2. 雛形を作る
 
-- `pnpm create cloudflare@latest <名前> --template=cloudflare/templates/vite-react-template` に、git 初期化・デプロイ・ブラウザ起動を抑えるフラグを付ける(`--help` で確かめる)。**生成物を、手を入れずに最初のコミットにする。** 公式との差分が `git diff <起点>` でいつでも読め、公式の更新を取り込むときの比較元になる
+- `pnpm create cloudflare@latest <名前> --template=cloudflare/templates/vite-react-template` に、git 初期化・デプロイ・ブラウザ起動を抑えるフラグを付ける(`--help` で確かめる)。`cf init` は使わない — hello-world の Worker か既存ディレクトリの autoconfig しか作らず、公式テンプレートを起点にできない(2026-10、v1.0.0-beta.5。この構成では `cf build` も `Hono cannot be automatically configured` で落ちた)。**生成物を、手を入れずに最初のコミットにする。** 公式との差分が `git diff <起点>` でいつでも読め、公式の更新を取り込むときの比較元になる
 - **生成直後、各ツールの init より前に `pnpm up --latest` を実行する。** テンプレートが固定している版は遅れていることがあり、その上に init を重ねると古い版に合わせた config ができる。typecheck と build が通るのを確かめ、別コミットにする — 混ぜると、赤くなったときに上げた依存と足したものの切り分けがつかない
 - C3 は **フラグを足すほど候補が減る。** `--lang` は言語バリアントを持たないテンプレートを候補から落とし、`-y` はカテゴリの既定(Hello World)で作って成功として終わる。生成物の `package.json` に `hono` と `@cloudflare/vite-plugin` があるかで確かめる
 - **公式の構成を保つ**(`src/react-app/` に画面、`src/worker/` に Worker、tsconfig の分割、`wrangler.json`)。寄せ替えると差分が全ファイルの書き換えになり、起点を公式にした意味が消える
 
-手元に `kjfsm/cf-workers-free-template`(非公開)があれば、それが同じ起点から差分を層ごとに積んだ履歴である。`git diff 334726e..main` の層を順に写してよい。
+手元に `kjfsm/cf-workers-free-template`(非公開)があれば、それが同じ起点から差分を層ごとに積んだ履歴である。最初のコミット(C3 の生成物そのまま)から `main` までの層を順に写してよい。ただし認証は kjfsm-auth、DB は共有 D1 に固定されているので、手順 1 で別の答えなら、同リポジトリの README の「フォークしたら」「新規 D1 に切り替える」に沿って差し替える。
 
 ## 3. 差分を積む(層ごとにコミット)
 
@@ -65,9 +65,9 @@ description: 新規の Cloudflare Workers フルスタックアプリを、Free 
 
 ### 画面
 
-- データの取得は1エンドポイント = 1 `queryOptions`。loader は値を返さず `queryClient.query({ ...options, staleTime: "static" })` で待ち、コンポーネントは `useSuspenseQuery` で読む
+- データの取得は1エンドポイント = 1 `queryOptions`。loader は値を返さず `queryClient.query({ ...options, staleTime: "static" })` で待ち、コンポーネントは `useSuspenseQuery` で読む。loader の戻り値を `useLoaderData` で読む形にしないのは、戻り値が Query のキャッシュの外にあり、書き込みのあとの invalidate で取り直されないから。`ensureQueryData` / `prefetchQuery` は非推奨で、`queryClient.query` に置き換わった
 - ログインが要るルートは `beforeLoad` で振り分ける。**表示の振り分けで、認可ではない** — 認可は API の middleware が強制する
-- 画面が Worker から import するのは `AppType` の型だけにする
+- 画面が Worker から import するのは `AppType` の型だけにする(`import type`)。値を import すると、Worker 側の依存(Drizzle・better-auth)がクライアントのバンドルに入る
 
 ### init の落とし穴
 

@@ -9,19 +9,19 @@ description: 新規の Cloudflare Workers フルスタックアプリを、Free 
 
 ## 標準構成
 
-| 分類           | 採用                                                                                 |
-| -------------- | ------------------------------------------------------------------------------------ |
-| 起点           | C3 で生成する公式 `cloudflare/templates` の `vite-react-template`                     |
-| パッケージ管理 | pnpm                                                                                 |
-| 画面           | React + Vite の SPA + TanStack Router(ファイルベース)+ TanStack Query                |
-| 配信           | Workers Static Assets(画面の要求は Worker を起こさない)                              |
-| API            | Hono + Hono RPC(`hc<AppType>`)+ zod                                                  |
-| DB             | Cloudflare D1 + Drizzle ORM                                                          |
-| 認証           | better-auth(認証先はその都度聞く)                                                    |
-| UI             | Tailwind CSS + shadcn/ui                                                             |
-| Lint / Format  | oxlint + oxfmt                                                                       |
-| テスト         | Vitest + `@cloudflare/vitest-plugin`(Worker の API)。E2E は `setup-playwright`       |
-| 型             | `wrangler types` + `tsr generate` + `tsc -b`                                         |
+| 分類           | 採用                                                                           |
+| -------------- | ------------------------------------------------------------------------------ |
+| 起点           | C3 で生成する公式 `cloudflare/templates` の `vite-react-template`              |
+| パッケージ管理 | pnpm                                                                           |
+| 画面           | React + Vite の SPA + TanStack Router(ファイルベース)+ TanStack Query          |
+| 配信           | Workers Static Assets(画面の要求は Worker を起こさない)                        |
+| API            | Hono + Hono RPC(`hc<AppType>`)+ zod                                            |
+| DB             | Cloudflare D1 + Drizzle ORM                                                    |
+| 認証           | better-auth(認証先はその都度聞く)                                              |
+| UI             | Tailwind CSS + shadcn/ui                                                       |
+| Lint / Format  | oxlint + oxfmt                                                                 |
+| テスト         | Vitest + `@cloudflare/vitest-plugin`(Worker の API)。E2E は `setup-playwright` |
+| 型             | `wrangler types` + `tsr generate` + `tsc -b`                                   |
 
 **React Router と TanStack Start は使わない。** どちらも Worker の中で React を動かす。React Router の SSR は HTML の生成だけで 22〜57ms、冷えた isolate でのバンドル評価に 13〜37ms かかり、10ms に収まらなかった。React Router の SPA Mode は SSR を前提にした概念を切って使う形で、Worker 側に React Router が残る。TanStack Start は SPA mode でも `react-dom/server` がサーバーバンドルに残り、Worker が起きるたびに約 13ms の固定費を払う。Vite の SPA + Hono なら起動は 0〜4ms で済む(2026-10 の実測)。
 

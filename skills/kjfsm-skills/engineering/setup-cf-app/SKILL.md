@@ -68,6 +68,9 @@ description: 新規の Cloudflare Workers フルスタックアプリを、Free 
 - データの取得は1エンドポイント = 1 `queryOptions`。loader は値を返さず `queryClient.query({ ...options, staleTime: "static" })` で待ち、コンポーネントは `useSuspenseQuery` で読む。loader の戻り値を `useLoaderData` で読む形にしないのは、戻り値が Query のキャッシュの外にあり、書き込みのあとの invalidate で取り直されないから。`ensureQueryData` / `prefetchQuery` は非推奨で、`queryClient.query` に置き換わった
 - ログインが要るルートは `beforeLoad` で振り分ける。**表示の振り分けで、認可ではない** — 認可は API の middleware が強制する
 - 画面が Worker から import するのは `AppType` の型だけにする(`import type`)。値を import すると、Worker 側の依存(Drizzle・better-auth)がクライアントのバンドルに入る
+- TanStack Router は公式のエージェント向けスキルを依存に同梱している。`@tanstack/intent` を dev 依存に入れて読ませる — `intent install` が書く案内は、入っている `intent` を使い、無ければ取りに行かずに報告するよう指示する。**`intent install` より先に `package.json` の `intent.skills` を書く** — 無いと許可するパッケージを対話で訊き、TTY が無いところでは進まない。許可は `@tanstack/*` に絞り、`"*"` にしない。許可するのはパッケージで中身ではなく、範囲内の依存を上げるたびに読ませる内容は黙って変わる。`"*"` だと、構成が選んでいない依存(dotenv など)が同梱したスキルまでその対象になる
+- `intent install` は `AGENTS.md`(無ければ作る)に `intent-skills` の区画を書く。Claude Code へは `CLAUDE.md` の `@AGENTS.md` を通して届く(その形を敷くのは `/kjfsm-skills:setup-repo`)。区画は書き直しても次の `intent install` で元の形に戻るので、生成物として扱う
+- 区画の外に「公式のスキルとリポジトリの rules・ADR・`/kjfsm-skills:setup-cf-app` が食い違ったら、リポジトリに従う」と添える。公式は先読み(`defaultPreload`)を勧めるが、Worker の要求数を抑えるために意図して切っている。公式の記述が実装と合わない所もある(`from` 無しの `to="."` の解決。2026-10)
 
 ### init の落とし穴
 
@@ -81,6 +84,7 @@ description: 新規の Cloudflare Workers フルスタックアプリを、Free 
 - `typecheck` は `wrangler types && tsr generate && tsc -b`。`routeTree.gen.ts` は Vite のプラグインが dev で作るので、dev を立てない CI では `tsr generate` が無いと型が古いまま通る
 - シークレットは `wrangler.json` の `secrets.required` に並べる。**並べたキーしか `.dev.vars` から読まれない** — 秘密でない開発用のフラグも、ここに置くなら並べる。漏れると警告も出ずに `undefined` になる
 - 生成物(`worker-configuration.d.ts`・`routeTree.gen.ts`・better-auth のスキーマ・`migrations/`・`dist/`)と shadcn の `components/ui/` は、oxlint と oxfmt の **両方** で除外する。設定ファイルが別々なので、片方にだけ足すと、もう片方が生成物を直そうとする
+- `AGENTS.md` は区画だけでなくファイルごと oxfmt で除外する(oxlint は Markdown を見ない)。整形すると `intent-skills` の区画が崩れ、次の `intent install` で書き戻されて差分が往復する
 
 ## ほかのスキルが持つもの
 
@@ -97,5 +101,6 @@ description: 新規の Cloudflare Workers フルスタックアプリを、Free 
 - [ ] 起点が C3 の生成物そのままのコミットで、その上に層ごとのコミットが積まれている
 - [ ] `/api/auth/*` 以外から better-auth が静的 import されていない(ビルド成果物の Worker の入口を辿って確かめる)
 - [ ] 本物の better-auth の Cookie を軽い検証が受け入れるテストがあり、型チェック・lint・テスト・ビルドが green
+- [ ] `package.json` の `intent.skills` が `@tanstack/*` で、`AGENTS.md` に `intent-skills` の区画と「リポジトリに従う」の添え書きがある
 - [ ] `pnpm dev` でログインから1つの機能までを画面で通した。叩く前にポートの空きを確かめる — 別のプロジェクトの dev サーバーが同じポートに居ると、自分は `Port already in use` で落ちたまま、**応答は他人のアプリから返り、書き込みも他人の DB に入る**
 - [ ] `/kjfsm-skills:setup-repo` へ進んだ

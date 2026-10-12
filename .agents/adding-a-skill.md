@@ -49,7 +49,7 @@ scripts/check-invariants.sh
 
 落ちた項目を潰す。**クリーンになるまで、配線は済んでいない。**
 
-`claude plugin validate .` も走らせてよいが、2点で当てにならない。リポジトリルートを渡すと `marketplace.json` しか検証せず、`plugin.json` の壊れたパスを見逃す。そして `--strict` は `version` 不在を error に格上げする — このリポジトリではそれが意図した状態である(→ `CLAUDE.md`)。
+`claude plugin validate .` も走らせてよいが、2点で当てにならない。リポジトリルートを渡すと `marketplace.json` しか検証せず、`plugin.json` の壊れたパスを見逃す。そして `--strict` は `version` 不在を error に格上げする — このリポジトリではそれが意図した状態である(→ `AGENTS.md`)。
 
 ## 5. 検査に出ない後始末
 

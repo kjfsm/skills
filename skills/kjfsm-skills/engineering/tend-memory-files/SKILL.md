@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # メモリファイルの手入れ
 
-対象は、セッション開始時にロードされる指示ファイル一式 — 本体の `AGENTS.md` と、それを `@AGENTS.md` で取り込む `CLAUDE.md`、`CLAUDE.local.md`、`.claude/rules/` — で、`/context` が **Memory files** として並べるものである。
+対象は、セッション開始時にロードされる指示ファイル一式 — 本体の `AGENTS.md`、残してあれば `@AGENTS.md` の1行の `CLAUDE.md`、`CLAUDE.local.md`、`.claude/rules/`、ユーザーの `~/.claude/CLAUDE.md` — で、`/context` が **Memory files** として並べるものである。
 
 本体はセッション開始のたびに丸ごとコンテキストへ読み込まれる。長くなるほど指示への従いやすさ(adherence)は下がる — 公式ドキュメント([code.claude.com/docs/en/memory](https://code.claude.com/docs/en/memory))は1ファイル200行未満を目安に挙げている。このスキルは新規作成と既存ファイルの手入れの両方を、この一線を守りながら進める。
 
@@ -14,7 +14,7 @@ disable-model-invocation: true
 
 ## 分岐
 
-- **本体がまだない** → 作成(手順1〜4)。本体は `AGENTS.md` にし、`CLAUDE.md` は `@AGENTS.md` の1行だけにする(`/kjfsm-skills:setup-skills` の手順4と同じ形。`CLAUDE.md` だけがあるなら、移すかをユーザーに訊く)
+- **本体がまだない** → 作成(手順1〜4)。本体は `AGENTS.md` にし、`CLAUDE.md` は置かない(`/kjfsm-skills:setup-skills` の手順4と同じ形。1行の `CLAUDE.md` を残す例外もそこにある。`CLAUDE.md` だけがあるなら、`git mv` で移すかをユーザーに訊く)
 - **すでにあり、肥大化・陳腐化・矛盾を疑っている** → 監査(手順5〜8)
 
 ## 作成
@@ -70,7 +70,9 @@ disable-model-invocation: true
 
 ### 5. 対象を集める
 
-ルートと各サブディレクトリの `AGENTS.md` と `CLAUDE.md`、`CLAUDE.local.md`、`.claude/rules/` 配下のファイルをすべて読む。ルート直下だけを見て終わらせない — 矛盾はたいてい階層をまたいで生まれる。
+ルートと各サブディレクトリの `AGENTS.md` と `CLAUDE.md`、`CLAUDE.local.md`、`.claude/rules/` 配下のファイルをすべて読む。ユーザーの `~/.claude/CLAUDE.md` も読む。ルート直下だけを見て終わらせない — 矛盾はたいてい階層をまたいで生まれる。
+
+ルートに `CLAUDE.md` があるなら、まずそれが `AGENTS.md` を読ませなくしていないか確かめる。`@AGENTS.md` の1行だけで、`setup-skills` 手順4の例外に当たらないなら、消す案を出す。
 
 ### 6. 行ごとに関連性を問う
 
@@ -81,7 +83,7 @@ disable-model-invocation: true
 - コードから導出できる内容や、個数・一覧のようなスナップショットになっていないか?
 - 検査スクリプト・lint・型が弾くルールになっていないか?(決定的に弾けるものを散文で頼むと、コンテキストを払ったうえに「守られたか」を読む側が確認できない。散文が持つのは、機械が弾いた後に残る判断だけである)
 
-満たさない行は削る。多手順の手続きになっている行はスキルへ、一部のファイルにしか関わらない行は `.claude/rules/` へ移す。
+満たさない行は削る。多手順の手続きになっている行はスキルへ、一部のファイルにしか関わらない行は `.claude/rules/` へ移す。ユーザーの `~/.claude/CLAUDE.md` と同じ一般則はリポジトリから削り、そのリポジトリの具体値だけを残す(クラウドセッションや他人のクローンでも効かせたいリポジトリを除く — ADR 0007)。
 
 ### 7. 矛盾を探す
 

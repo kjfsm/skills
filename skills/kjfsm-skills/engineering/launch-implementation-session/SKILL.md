@@ -105,6 +105,17 @@ jq -r 'select(.type=="user") | .message.content | if type=="string" then . else 
 - **マージされずにクローズされた** → 閉じずに、ユーザーに伝える。クローズは取り下げとは限らない — 相手が出し直した PR があれば、その番号に置き換えてマージを待つ。ユーザーがこのチケットを捨てると言ったときだけ、マージを待たずに閉じる
 - **権限の判定やユーザーへの質問で止まった** → そのままユーザーに伝える。ユーザーが相手のセッションで「待つ」と言って質問を止めていたら、こちらが `SendMessage` で伝えるユーザーの許可を相手は受け付けない — 本人の言葉かを確かめられないので、それが正しい。ユーザーに相手のセッション(agent view で行を選んで入る、または `claude attach <id>`)で直接言ってもらう
 
+閉じる前に、ローカルの既定ブランチを origin に追いつかせる。マージは origin にしか入らないので、そのままだと立てた側が読んでいる本体チェックアウトは古いまま、次のチケットの判断も 3. の worktree もそこから始まる:
+
+```bash
+base=$(git rev-parse --abbrev-ref origin/HEAD); base=${base#origin/}
+git fetch origin "$base"
+wt=$(git worktree list --porcelain | awk -v b="branch refs/heads/$base" '/^worktree /{p=substr($0,10)} $0==b{print p}')
+if [ -n "$wt" ]; then git -C "$wt" merge --ff-only "origin/$base"; else git fetch origin "$base:$base"; fi
+```
+
+既定ブランチがどこかの worktree で checkout されていると `git fetch origin main:main` は拒否されるので、その worktree の中で進める。`--ff-only` で落ちたら(ローカルに未 push のコミットがある、未コミットの変更とぶつかる)、直さずにユーザーに伝える — それはユーザーか他のセッションの作業である。落ちても相手は閉じてよい。
+
 **相手を閉じる**のは `claude rm <id>` である。相手が `run_in_background` で立てた開発サーバーも一緒に止まる — `claude stop` では止まらずポートを握ったまま残り、プロセスを `kill` しても supervisor が立て直す。worktree に未 push のものがあると `rm` は worktree を残してそう言うので、`--discard-unpushed` を付けずにユーザーに伝える。3. で自分で作った worktree が残っていれば `git worktree remove` で片付ける。会話は `claude --resume` で戻せる。
 
-完了基準: 報告ごとに上のどれかで扱い、マージを確かめた(またはユーザーが捨てると言った)セッションだけを `claude rm` で閉じ、残しているセッションとその PR 番号をユーザーに伝えた。
+完了基準: 報告ごとに上のどれかで扱い、マージを確かめた(またはユーザーが捨てると言った)セッションだけを、既定ブランチを進めて(または落ちた理由をユーザーに伝えて)から `claude rm` で閉じ、残しているセッションとその PR 番号をユーザーに伝えた。

@@ -74,6 +74,8 @@ description: このリポジトリをエンジニアリング系スキル向け�
 
 「いいえ」なら応答言語だけ差し替える。宛先の規律は差し替えない。`where-to-write-what` が無い場合は、スキルを指す最後の 1 段落だけを落とす — 4本の柱とコメントの判定はこのブロックが単体で持っている。
 
+**ユーザーの `~/.claude/CLAUDE.md` に4本の柱とコメントの判定が本文で載っていれば、リポジトリには書かない**(サブエージェントにも届く。写すとずれる)。応答言語もそこにあれば `### Conventions` ごと省く(ADR 0007)。
+
 このセクションだけは **ブロックの中に本文を置く** — 規約は毎セッション読まれなければ効かず、スキルへの参照ではコメントを書く場面で呼ばれない。8 行に収める。
 
 置き場所は、本体がどちらかで分かれる(手順4):
@@ -89,20 +91,21 @@ description: このリポジトリをエンジニアリング系スキル向け�
 
 ユーザーに次の下書きを見せる:
 
-- 本体(手順4)に追加する `## Agent skills` ブロックと、`AGENTS.md` / `CLAUDE.md` を作る・移すならその変更
+- 本体(手順4)に追加する `## Agent skills` ブロックと、`AGENTS.md` へ移す・`CLAUDE.md` を消すならその変更
 - `.claude/rules/writing-conventions.md` の内容(本体が `CLAUDE.md` のままの場合のみ)
+- グローバルにあるので省く規約(Section E)。`~` の無いクラウドでも効かせるなら書く
 - `docs/agents/issue-tracker.md`、`docs/agents/domain.md`、`docs/agents/verification.md`、`docs/agents/triage-labels.md` の内容(最後のものは `triage` がインストールされている場合のみ)
 
 書く前に、ユーザーに編集させる。
 
 ### 4. 書く
 
-**本体は `AGENTS.md`、`CLAUDE.md` は先頭の `@AGENTS.md` 1 行で本体を取り込む。** Claude Code 専用の追記だけを import の下に置く。Claude Code は `CLAUDE.md` があると `AGENTS.md` を直接読まず、直接読めないセッション(v2.1.277 未満、フィーチャーフラグを取得しないセッション、インストール直後の初回)もあるので、import で1部を両方に届ける。symlink は Windows のクローンで1行のテキストになるので使わない。
+**本体は `AGENTS.md` で、`CLAUDE.md` は置かない。** Claude Code は、作業ディレクトリとその上に `CLAUDE.md` も `CLAUDE.local.md` も無いときだけ `AGENTS.md` を直接読む。1行の `CLAUDE.md`(`@AGENTS.md`)は、`CLAUDE.local.md` を使う人か v2.1.277 未満の人がいるリポジトリにだけ残す。symlink は使わない(Windows のクローンで1行のテキストになる)。根拠は ADR 0007。
 
-- **どちらも無い** → `AGENTS.md` を作って編集し、`CLAUDE.md` を `@AGENTS.md` の1行で作る
-- **`AGENTS.md` だけ** → `AGENTS.md` を編集し、`CLAUDE.md` を同じ1行で作る。Claude Code を使わないリポジトリなら作らない
-- **`CLAUDE.md` が `@AGENTS.md` を取り込む、または `AGENTS.md` への symlink** → `AGENTS.md` を編集する
-- **`CLAUDE.md` だけ、または `AGENTS.md` が `CLAUDE.md` への symlink** → 中身を `AGENTS.md` へ移して `CLAUDE.md` を import にする案を手順3で見せ、同意を得てから移す。断られたら `CLAUDE.md` を本体として編集する
+- **どちらも無い** → `AGENTS.md` を作って編集する
+- **`AGENTS.md` だけ** → `AGENTS.md` を編集する
+- **`CLAUDE.md` が `@AGENTS.md`(と Claude Code 専用の追記)だけ、または `AGENTS.md` への symlink** → 追記を `AGENTS.md` か `.claude/rules/` へ移し、`CLAUDE.md` を消す案を手順3で見せる(例外なら1行で残す)
+- **`CLAUDE.md` だけ、または `AGENTS.md` が `CLAUDE.md` への symlink** → `git mv CLAUDE.md AGENTS.md` の案を手順3で見せ、同意を得て移す。断られたら `CLAUDE.md` を本体として編集する
 - **両方が別々の中身を持つ** → どちらにも書き足さず、`AGENTS.md` へ統合するかをユーザーに訊く
 
 選んだファイルにすでに `## Agent skills` ブロックが存在する場合は、重複を追記するのではなく、その場で内容を更新する。周囲のセクションへのユーザーによる編集を上書きしない。

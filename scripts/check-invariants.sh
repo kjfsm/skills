@@ -406,12 +406,12 @@ grep -q 'モックの自己検証' agents/test-auditor.md ||
 grep -q 'モックの自己検証' skills/kjfsm-skills/engineering/prune-tests/SKILL.md &&
   err "skills/kjfsm-skills/engineering/prune-tests/SKILL.md copies the categories that agents/test-auditor.md owns"
 
-# 19. 本文は AGENTS.md にあり、CLAUDE.md はそれを取り込む1行だけである。CLAUDE.md に
-#     書き足した行は Claude Code でだけ効き Codex には届かないので、食い違っても気づけない。
-#     see AGENTS.md
+# 19. 本文は AGENTS.md にあり、CLAUDE.md は無い。CLAUDE.md が1つでもあると Claude Code は
+#     AGENTS.md を直接読まなくなり、書き足した行は Claude Code でだけ効いて Codex には届かない。
+#     see AGENTS.md, .agents/adr/0007-agents-md-only-and-global-conventions.md
 [ -f AGENTS.md ] && [ ! -L AGENTS.md ] || err "AGENTS.md must be a regular file holding the instructions"
-[ "$(cat CLAUDE.md 2>/dev/null)" = "@AGENTS.md" ] ||
-  err "CLAUDE.md must contain only '@AGENTS.md'; put instructions in AGENTS.md"
+[ ! -e CLAUDE.md ] && [ ! -e .claude/CLAUDE.md ] ||
+  err "CLAUDE.md must not exist; Claude Code reads AGENTS.md directly only when there is no CLAUDE.md"
 
 if [ "$fail" -eq 0 ]; then
   echo "OK: all invariants hold ($(find skills -name SKILL.md | wc -l | tr -d ' ') skills, $(find agents -name '*.md' | wc -l | tr -d ' ') agents)"

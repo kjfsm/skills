@@ -75,7 +75,7 @@ cd .claude/worktrees/<名前>
 
 ```bash
 cd <3. の worktree のパス、無ければ本体チェックアウト>
-claude --bg --name <名前> "$(cat <<'EOF'
+claude --bg --name <名前> --model sonnet --advisor opus "$(cat <<'EOF'
 <最初の入力>
 EOF
 )"
@@ -83,6 +83,7 @@ EOF
 
 最初の入力はクォートした heredoc で渡す。`"<最初の入力>"` に直接埋めると、中の `` `git switch --detach` `` のようなバッククォートを立てる側のシェルがコマンドとして走らせ、相手にはコマンド名の抜けた文面が届く。
 
+- `--model sonnet --advisor opus` は、設計を詰め終えた実装の大半が定型の手番で、計画の要所だけ Opus が要るからである。advisor が使えない環境では、背景セッションは advisor なしで立つ
 - `-w` は付けない。本体チェックアウトで立てたセッションは、ファイルを書く前に自分で `.claude/worktrees/` へ移る。3. の worktree の中で立てたなら、そこで書く
 - 名前はチケットから短く付け、**自分のセッション名と同じにしない** — agent view で見分けられず、`SendMessage` の宛先も取り違える
 - 出力の `backgrounded · <id> · <名前>` の `<id>` を控える。5. で止めるのに使う

@@ -246,7 +246,7 @@ done
 
 # 11. `version` はどこにも無い — plugin.json と marketplace.json の両方。
 #     コミット SHA をバージョンとして扱わせる条件が「両方から省く」ことで、片方だけ
-#     書いても更新は止まる。see AGENTS.md
+#     書いても更新は止まる。see .agents/design-notes.md
 for manifest in "$PLUGIN" plugins/*/.claude-plugin/plugin.json; do
   ! grep -q '^[[:space:]]*"version"' "$manifest" ||
     err "$manifest has a \"version\" field; it pins the cache key and stops updates from reaching installed users"
@@ -293,7 +293,7 @@ while IFS= read -r style; do
   want="../../output-styles/$name.md"
 
   # 出力スタイルは既定でハーネス組み込みのエンジニアリング指示を **外す**。付け忘れ
-  # ると、コメントの規律を足すつもりで既存の規律を消すことになる。see AGENTS.md
+  # ると、コメントの規律を足すつもりで既存の規律を消すことになる。see .agents/design-notes.md
   [ "$(field "$style" "keep-coding-instructions")" = "true" ] ||
     err "$style does not set keep-coding-instructions: true; it would drop the harness's built-in engineering instructions"
 
@@ -339,7 +339,7 @@ grep -q 'コメントの密度ではない' AGENTS.md ||
 # 17. コメントのフックが、出荷側(プラグイン)と自家用(このリポジトリ)の両方から
 #     実在する実行可能スクリプトを指している。そして 4本の柱を復唱していない —
 #     復唱した瞬間にこれは常駐 3か所(源は検査 16.、写しは 4.)の同期先 4つ目になり、フックが
-#     黙って壊れた日に、揃っていない本文だけが残る。see AGENTS.md
+#     黙って壊れた日に、揃っていない本文だけが残る。see .agents/design-notes.md
 hook_script="hooks/nudge-comment-check.sh"
 comment_lib="skills/kjfsm-skills/engineering/prune-comments/scripts/comment-lines.sh"
 [ -x "$comment_lib" ] ||
@@ -360,7 +360,7 @@ done
 #     このディレクトリを自動で拾う(`plugin.json` に列挙しない — 列挙すると既定の走査が
 #     止まり、列挙し忘れたものが黙って消える)。壊れたときの症状は「そんな subagent_type は
 #     無い」で静かに汎用エージェントへ落ちるか、そもそも起動しないかであり、どちらも
-#     レビューや検証が**通ったように見える**。see AGENTS.md
+#     レビューや検証が**通ったように見える**。see .agents/design-notes.md
 while IFS= read -r agent; do
   base="$(basename "$agent" .md)"
   [ "$(field "$agent" "name")" = "$base" ] ||
@@ -373,7 +373,7 @@ while IFS= read -r agent; do
   [ -n "$(field "$agent" "model")" ] ||
     err "$agent does not pin a model; it would silently inherit the parent tier"
 
-  # researcher と worker はスキルではなくメインのモデルが description で振り分ける。see AGENTS.md
+  # researcher と worker はスキルではなくメインのモデルが description で振り分ける。see .agents/design-notes.md
   case "$base" in researcher | worker) continue ;; esac
   grep -rq "\`$base\`" --include='*.md' skills ||
     err "$agent is named by no skill; nothing routes work to it"
@@ -408,7 +408,7 @@ grep -q 'モックの自己検証' skills/kjfsm-skills/engineering/prune-tests/S
 
 # 19. 本文は AGENTS.md にあり、CLAUDE.md は無い。CLAUDE.md が1つでもあると Claude Code は
 #     AGENTS.md を直接読まなくなり、書き足した行は Claude Code でだけ効いて Codex には届かない。
-#     see AGENTS.md, .agents/adr/0007-agents-md-only-and-global-conventions.md
+#     see .agents/design-notes.md, .agents/adr/0007-agents-md-only-and-global-conventions.md
 [ -f AGENTS.md ] && [ ! -L AGENTS.md ] || err "AGENTS.md must be a regular file holding the instructions"
 [ ! -e CLAUDE.md ] && [ ! -e .claude/CLAUDE.md ] ||
   err "CLAUDE.md must not exist; Claude Code reads AGENTS.md directly only when there is no CLAUDE.md"

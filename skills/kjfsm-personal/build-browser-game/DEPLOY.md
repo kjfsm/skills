@@ -24,6 +24,8 @@ PR をマージしたあと、ダッシュボードで Workers Builds を繋ぐ�
 
 non-production branches を入れると、PR ごとに `npx wrangler preview` が走り、PR のチェックになる。`wrangler.jsonc` に `previews` ブロックが無いと落ちて赤くなる。入れるなら、コードが `env.<名前>` で引く Durable Objects のバインディングを `previews` にも宣言する(プレビューごとに別の DO の名前空間が立つ)。以後 DO を足すたびに両方へ足すことを、`wrangler.jsonc` を `paths:` に持つ rule に書く。宣言しないなら切る。
 
+プレビューが secret を要るなら、共通設定に `wrangler preview base-config secret put` で入れる。共通設定に足した secret は **既にあるプレビューには入らない** — 作り直す(`wrangler preview delete --name X` → `wrangler preview --name X`)か、`wrangler preview secret put --name X` で個別に入れる。
+
 連携を人間の手順にしているのは、本番へ確認なしに流れる設定だからである。エージェントが Builds API でトリガーを作ろうとしても、auto mode の判定に止められる。GitHub App は kjfsm のアカウントに入っていて、新しいリポジトリも読める。Builds API の `config_autofill` が通れば、読めている。
 
 続けて、Settings → Domains & Routes で `<app>.kjfsm.net` を付ける。ドメインを `wrangler.jsonc` の `routes` に書かないのは、ログインを入れた日に手元の dev で better-auth が 403 を返すからである(→ `/kjfsm-personal:connect-kjfsm-auth`)。

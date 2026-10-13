@@ -2,12 +2,14 @@
 
 - **昇格済み**(`skills/kjfsm-skills/{engineering,productivity}/`)だけがトップの `README.md` と `plugin.json` の `skills` に載る。`kjfsm-emdash/`・`kjfsm-personal/` は `plugins/<バケット>/skills/` へのシンボリックリンクで別プラグインとして配り、`in-progress/` は配らない(検査 4. / 4b.、[ADR 0005](./.agents/adr/0005-ship-buckets-as-side-plugins.md))。
 - `version` は `plugin.json`(`plugins/*/` を含む)にも `marketplace.json` にも置かない(検査 11.)。
-- サブエージェントは `agents/` に置き、`plugin.json` に列挙しない。下書きは `.claude/agents/`。`agents/`(配るエージェント)と `.agents/`(設計文書)を混ぜない。組み込みの `Explore` を上書きするエージェントはここに置けない(プラグイン経由だと別名になる)。
+- サブエージェントは `agents/` に置き、`plugin.json` に列挙しない。下書きは `.claude/agents/`。`agents/`(配るエージェント)と `.agents/`(設計文書)を混ぜない。組み込みの `Explore` を上書きするエージェントはここに置けない(プラグイン経由だと別名になる) — 置くなら `~/.claude/agents/`。
 - エージェントの依頼内容(何を報告するか・形・モデル階層)をスキル側に書き下さない。スキルが渡すのはその実行でしか決まらないもの(差分コマンド、ファイル一覧)だけ(検査 18.)。
 - 出力スタイルは `output-styles/` に置き、`force-for-plugin` は付けず、`keep-coding-instructions: true` は必須。自家用の `.claude/output-styles/` と `.claude/settings.json` の2本も要る(検査 15.)。
 - コメントの判定基準(下の4段落)は、この `AGENTS.md`・`output-styles/kjfsm.md`・`setup-skills` の `### Conventions` の3か所に本文で載せる。直すのはここだけで、残りは `scripts/render.py` が写す(検査 4. / 16.)。4か所目を常駐層(`SessionStart` フックなど)に足さない。コメント行が増えたときに鳴るフックに、4本の柱を復唱させず、判定もさせない(検査 17.、[ADR 0004](./.agents/adr/0004-enforce-comment-conventions-in-three-layers.md))。
+- 相談の規律(`## 同意ではなく立場を取る`)は出力スタイルだけに置き、上の3か所へ同期しない。
 - `SKILL.md` はユーザー呼び出し型かモデル呼び出し型のどちらか([.agents/invocation.md](./.agents/invocation.md))。書く・直す基準は [`writing-great-skills`](./skills/kjfsm-skills/productivity/writing-great-skills/SKILL.md)。
-- `CLAUDE.md` も `CLAUDE.local.md` も置かない — 1つでもあると `AGENTS.md` が読まれなくなる(検査 19.、[ADR 0007](./.agents/adr/0007-agents-md-only-and-global-conventions.md))。
+- `tend-memory-files` と `setup-rules` は [ADR 0003](./.agents/adr/0003-never-start-from-init-output.md)(メモリファイルに書くのは発見不可能 ∧ グローバルに有用なものだけ)に従っているので、片方だけ動かさない。
+- `CLAUDE.md` も `CLAUDE.local.md` も置かない — 1つでもあると `AGENTS.md` が読まれなくなる。`CLAUDE.local.md` が要るなら `/config` の **Project instructions** を `claude-md-and-agents-md` にする(検査 19.、[ADR 0007](./.agents/adr/0007-agents-md-only-and-global-conventions.md))。
 - 本家由来のスキルを直す前に [.agents/upstream-sync.md](./.agents/upstream-sync.md) を見る([ADR 0006](./.agents/adr/0006-depend-on-upstream-ship-translation-separately.md))。
 - `.claude/skills/` には `in-progress/` のスキルへのシンボリックリンクだけを張る。張り直しは `scripts/sync-project-skills.sh`(検査 14.)。退役したスキルは削除し、[.agents/retired-skills.md](./.agents/retired-skills.md) に1行残す。
 

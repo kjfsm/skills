@@ -32,6 +32,7 @@
     "./skills/kjfsm-skills/engineering/partyserver-on-durable-objects",
     "./skills/kjfsm-skills/engineering/prune-comments",
     "./skills/kjfsm-skills/engineering/prune-tests",
+    "./skills/kjfsm-skills/engineering/scaffold-cf-app",
     "./skills/kjfsm-skills/engineering/setup-cf-access",
     "./skills/kjfsm-skills/engineering/setup-cf-app",
     "./skills/kjfsm-skills/engineering/setup-ci",

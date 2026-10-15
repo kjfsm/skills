@@ -52,7 +52,7 @@ disable-model-invocation: true
 
 ## 前提条件
 
-**`/kjfsm-skills:setup-cf-app`** — リポジトリがまだ無いときの出発点。Cloudflare Workers のフルスタックアプリを Free プランに収まる標準構成(Vite の React SPA + Hono の API Worker)で立ち上げ、`/kjfsm-skills:setup-repo` へ続く。
+**`/kjfsm-skills:setup-cf-app`** — リポジトリがまだ無いときの出発点。Free プランに収まる標準構成(Vite の React SPA + Hono の API Worker)の手元のテンプレートを写して名前を替え、`/kjfsm-skills:setup-repo` へ続く。テンプレートが無ければ `/kjfsm-skills:scaffold-cf-app` が公式テンプレートから組む。
 
 **`/kjfsm-skills:setup-repo`** — 最初のエンジニアリングフローの前に実行する、setup 系の **唯一の入口**。順序と依存はこれが持つ。**再実行してよい** — 済んだ工程は飛ばし、ずれだけを直す。
 

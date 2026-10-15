@@ -15,7 +15,7 @@
 - **setup-pre-commit** — husky + lint-staged の pre-commit を敷く。git hook の層は `/kjfsm-skills:setup-hooks` が持ち、lefthook を既定に pre-commit を1秒未満に保つ — このスキルはどちらの判断とも逆を敷いていた。
 - **ubiquitous-language** — 会話から DDD のユビキタス言語の用語集を抽出する。本家の `domain-modeling` が `CONTEXT.md` を保守する。
 - **create-tests / rebuild-tests / react-router-worker-tests** — 冒頭が互いの違いの説明で、呼ぶ側はクラスタ全体を知らないと1本を選べず、「壊して確かめる」などが重複していた。`/kjfsm-skills:workers-tests` に統合し、状況ごとの参照ファイル(START / REBUILD / SSR)に分けた。
-- **react-router-route-module** — React Router(framework mode)の route module に、認可・レイアウトの値・Worker の `env` をどの export へ置くかの規律。標準構成から React Router をやめた(Free プランの CPU 10ms に SSR が収まらない)ので、配る理由が無くなった。新規は `/kjfsm-skills:setup-cf-app` の TanStack Router + Hono の構成で、認可は API の middleware、画面の `beforeLoad` は表示の振り分けに置く。
+- **react-router-route-module** — React Router(framework mode)の route module に、認可・レイアウトの値・Worker の `env` をどの export へ置くかの規律。標準構成から React Router をやめた(Free プランの CPU 10ms に SSR が収まらない)ので、配る理由が無くなった。新規は `/kjfsm-skills:scaffold-cf-app` の TanStack Router + Hono の構成で、認可は API の middleware、画面の `beforeLoad` は表示の振り分けに置く。
 - **help-skills** — README の一覧の URL を1行返すだけで、interface と中身が同じ大きさだった。`/kjfsm-skills:ask-kjfsm` の冒頭が URL を持つ。
 
 ## 本家の写しだったもの(2026-09-23)

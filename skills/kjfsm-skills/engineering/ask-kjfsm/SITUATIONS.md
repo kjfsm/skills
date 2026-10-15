@@ -37,7 +37,7 @@
 
 ## Worker を公開したが、経路が守られていない
 
-**`/kjfsm-skills:setup-cf-access`**。カスタムドメイン・routes・`workers.dev`・プレビュー URL を洗い出し、3層ルール(人間=指定メール / 機械=サービストークン / アプリ側に認証があるパス=bypass)で塞ぐ。`/kjfsm-skills:setup-cf-app` で立てたアプリを外に出したあと、デプロイのたびに素通りが増えていないかを確かめる地点でもある。
+**`/kjfsm-skills:setup-cf-access`**。カスタムドメイン・routes・`workers.dev`・プレビュー URL を洗い出し、3層ルール(人間=指定メール / 機械=サービストークン / アプリ側に認証があるパス=bypass)で塞ぐ。`/kjfsm-skills:scaffold-cf-app` などで立てたアプリを外に出したあと、デプロイのたびに素通りが増えていないかを確かめる地点でもある。
 
 ## マージやリベースがコンフリクトで止まった
 

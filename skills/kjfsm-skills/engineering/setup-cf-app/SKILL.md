@@ -5,7 +5,7 @@ description: 新規の Cloudflare Workers フルスタックアプリを、Free 
 
 # setup-cf-app(Cloudflare フルスタックアプリの標準構成)
 
-新規プロジェクトで **いつも使う構成** を宣言する。前提は Workers の **Free プラン**(1 回の実行ごとに CPU 10ms)。**準備手順と各 config は、記憶やこのファイルの固定値ではなく、その都度、各ツールの公式ドキュメントで最新を確認して組む。** バージョン・フラグは陳腐化が速いので、ここには固定しない。
+前提は Workers の **Free プラン**(1 回の実行ごとに CPU 10ms)。**準備手順と各 config は、その都度各ツールの公式ドキュメントで最新を確かめて組む。** バージョンとフラグは陳腐化が速いので、ここには固定しない。
 
 ## 標準構成
 
@@ -23,11 +23,11 @@ description: 新規の Cloudflare Workers フルスタックアプリを、Free 
 | テスト         | Vitest + `@cloudflare/vitest-plugin`(Worker の API)。E2E は `setup-playwright` |
 | 型             | `wrangler types` + `tsr generate` + `tsc -b`                                   |
 
-**React Router と TanStack Start は使わない。** どちらも Worker の中で React を動かす。React Router の SSR は HTML の生成だけで 22〜57ms、冷えた isolate でのバンドル評価に 13〜37ms かかり、10ms に収まらなかった。React Router の SPA Mode は SSR を前提にした概念を切って使う形で、Worker 側に React Router が残る。TanStack Start は SPA mode でも `react-dom/server` がサーバーバンドルに残り、Worker が起きるたびに約 13ms の固定費を払う。Vite の SPA + Hono なら起動は 0〜4ms で済む(2026-10 の実測)。
+**React Router と TanStack Start は使わない。** どちらも Worker の中で React を動かし、10ms に収まらない — React Router の SSR は HTML の生成だけで 22〜57ms(SPA Mode でも Worker 側に React Router が残る)、TanStack Start は SPA mode でも `react-dom/server` が残って起動ごとに約 13ms。Vite の SPA + Hono は起動 0〜4ms(2026-10 の実測)。
 
 ## 1. 決める
 
-組み始める前に、ユーザーに2つだけ聞く。推測で埋めない — どちらもあとから替えると、スキーマとマイグレーションを作り直す。
+組み始める前に2つだけ聞く。推測で埋めない — あとから替えると、スキーマとマイグレーションを作り直す。
 
 - **認証先** — Google などの social、email/password、`kjfsm-personal` プラグインが入っていれば kjfsm の共通 IdP(→ `/kjfsm-personal:connect-kjfsm-auth`)。**email/password は CPU を食う。** パスワードのハッシュ化(scrypt)が予算ぎりぎりで動く(better-auth#8860)ので、選んだら登録とログインの経路を本番で別に測る
 - **DB** — このアプリだけの D1 を作るか、`kjfsm-personal` プラグインが入っていれば共有 D1 に相乗りするか(→ `/kjfsm-personal:kjfsm-shared-db`)
@@ -52,25 +52,9 @@ description: 新規の Cloudflare Workers フルスタックアプリを、Free 
 - `wrangler.json` の `assets` は `not_found_handling: "single-page-application"`、`run_worker_first: ["/api/*"]`。**OAuth のコールバックは画面遷移の要求**なので、これが無いと SPA のフォールバックに吸われて `index.html` が返り、ログインが終わらない。開発用の入口(`/kjfsm-skills:dev-bypass-sign-in`)も `/api/` の下に置く
 - `run_worker_first` を配列で書くと、アセットに無い要求は JS の要求でも `index.html` の 200 になる。デプロイの前に開いていたタブが消えた分割 JS を読みに行くと壊れるので、`vite:preloadError` を受けて1回だけ読み直す
 
-### API(Worker)
+### API と画面
 
-- **better-auth は `/api/auth/*` のハンドラの中でだけ動的 import する**(`await import("./auth")`)。静的 import が1本でも入ると、全要求の起動時評価に better-auth(数百 KB)が乗る。`better-auth/minimal` から import し、adapter は `better-auth/adapters/drizzle` — 素の `better-auth` は drizzle を使っていても kysely(約 430KB)を取り込む
-- **ほかの `/api/*` は better-auth を import しない。** session Cookie の HMAC 署名を Web Crypto で検証し、D1 の session 表を token で1回引く。Cookie の名前と署名方式は推測せず、入っている better-auth / better-call の実装を読んで合わせ、**本物の better-auth が発行した Cookie を軽い検証が受け入れるテスト**で固定する(版を上げたらここが落ちる)。`cookieCache` は使わない — 復号に zod が走る
-- 軽い検証は期限を延ばさない。画面が、ログイン済みのルートに入った文書ごとに1回だけ `/api/auth/get-session` を呼び、延長を better-auth に任せる。遷移ごとに呼ぶと、そのたびに better-auth を評価する Worker を起こす
-- better-auth はリクエストごとに組み、`baseURL` にはリクエストのオリジンを渡す。`BETTER_AUTH_URL` を env に置くと、dev・テスト・E2E でホストやポートが変わるたびに揃え直す。Cookie の接頭辞(`advanced.cookiePrefix`)はアプリごとに変える — 手元では IdP や他のアプリと同じ localhost に同居し、Cookie はポートを区別しないので互いに上書きする
-- スキーマ生成の CLI(`auth generate`)はオプションを読むだけで、DB にもシークレットにも触れない。アプリと同じオプションを組む関数に空の値を渡すファイルを置き、`--config` で読ませる。オプションを CLI 用に書き写すと、プラグインを足した日に片方だけ古くなり、テーブルが欠ける
-- **`drizzle(env.DB)` に schema を渡さない**(relational query を使わない)。渡すと `extractTablesRelationalConfig` が要求ごとに走る。本番の CPU プロファイルでは Drizzle が約 46% を占め、better-auth(約 13%)より重かった
-- **Worker では日付ライブラリを使わない。** API は ISO 文字列か epoch で話し、整形とタイムゾーンは画面で扱う。冷えた isolate での初回評価だけで数 ms かかる
-- Worker が import するものはすべて起動に乗る。依存を足したら `wrangler check startup` で測る(zod と `@hono/zod-validator` だけで約 2ms)
-
-### 画面
-
-- データの取得は1エンドポイント = 1 `queryOptions`。loader は値を返さず `queryClient.query({ ...options, staleTime: "static" })` で待ち、コンポーネントは `useSuspenseQuery` で読む。loader の戻り値を `useLoaderData` で読む形にしないのは、戻り値が Query のキャッシュの外にあり、書き込みのあとの invalidate で取り直されないから。`ensureQueryData` / `prefetchQuery` は非推奨で、`queryClient.query` に置き換わった
-- ログインが要るルートは `beforeLoad` で振り分ける。**表示の振り分けで、認可ではない** — 認可は API の middleware が強制する
-- 画面が Worker から import するのは `AppType` の型だけにする(`import type`)。値を import すると、Worker 側の依存(Drizzle・better-auth)がクライアントのバンドルに入る
-- TanStack Router は公式のエージェント向けスキルを依存に同梱している。`@tanstack/intent` を dev 依存に入れて読ませる — `intent install` が書く案内は、入っている `intent` を使い、無ければ取りに行かずに報告するよう指示する。**`intent install` より先に `package.json` の `intent.skills` を書く** — 無いと許可するパッケージを対話で訊き、TTY が無いところでは進まない。許可は `@tanstack/*` に絞り、`"*"` にしない。許可するのはパッケージで中身ではなく、範囲内の依存を上げるたびに読ませる内容は黙って変わる。`"*"` だと、構成が選んでいない依存(dotenv など)が同梱したスキルまでその対象になる
-- `intent install` は `AGENTS.md`(無ければ作る)に `intent-skills` の区画を書く。Claude Code は `AGENTS.md` を直接読む(`CLAUDE.md` を置かない形を敷くのは `/kjfsm-skills:setup-repo`)。区画は書き直しても次の `intent install` で元の形に戻るので、生成物として扱う
-- 区画の外に「公式のスキルとリポジトリの rules・ADR・`/kjfsm-skills:setup-cf-app` が食い違ったら、リポジトリに従う」と添える。公式は先読み(`defaultPreload`)を勧めるが、Worker の要求数を抑えるために意図して切っている。公式の記述が実装と合わない所もある(`from` 無しの `to="."` の解決。2026-10)
+D1 + Drizzle・better-auth・Hono の層に入ったら [api.md](./api.md)、画面の層に入ったら [screen.md](./screen.md) を読む。**入れた時点では動き、CPU 予算やバンドルだけを黙って食う**書き方(better-auth の静的 import、Drizzle への schema 渡し、画面からの値の import)がそこにある。
 
 ### init の落とし穴
 

@@ -34,7 +34,6 @@
     "./skills/kjfsm-skills/engineering/prune-tests",
     "./skills/kjfsm-skills/engineering/scaffold-cf-app",
     "./skills/kjfsm-skills/engineering/setup-cf-access",
-    "./skills/kjfsm-skills/engineering/setup-cf-app",
     "./skills/kjfsm-skills/engineering/setup-ci",
     "./skills/kjfsm-skills/engineering/setup-hooks",
     "./skills/kjfsm-skills/engineering/setup-playwright",

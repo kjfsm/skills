@@ -1,6 +1,6 @@
 ---
 name: scaffold-cf-app
-description: 公式の `vite-react-template` を C3 で生成し、その上に差分を層ごとに積んで、Free プランに収まる標準構成(Vite の React SPA + Hono の API Worker)の Cloudflare Workers アプリを組む。`/kjfsm-skills:setup-cf-app` が写す元のテンプレートを見つけられなかったとき、テンプレートを使わず公式から組みたいとき、テンプレート自体を公式の更新に合わせて作り直すときに使う。
+description: 新規の Cloudflare Workers フルスタックアプリを、公式の `vite-react-template` から Free プランに収まる標準構成(Vite の React SPA + Hono の API Worker)へ層ごとに積んで組む。「環境構築」「新規プロジェクト」「新しいアプリを作る」「スキャフォールド」、`/kjfsm-personal:setup-cf-app` が写す元のテンプレートを見つけられなかったとき、テンプレート自体を公式の更新に合わせて作り直すときに使う。`/kjfsm-personal:setup-cf-app` が入っていれば、新規作成はそちらが先である。
 ---
 
 # 公式テンプレートから標準構成を組む
@@ -27,7 +27,7 @@ description: 公式の `vite-react-template` を C3 で生成し、その上に�
 
 ## 1. 決める
 
-`/kjfsm-skills:setup-cf-app` から来たなら、答えはもう出ているので飛ばす。そうでなければ、組み始める前に2つだけ聞く。推測で埋めない — あとから替えると、スキーマとマイグレーションを作り直す。
+`/kjfsm-personal:setup-cf-app` から来たなら、答えはもう出ているので飛ばす。そうでなければ、組み始める前に2つだけ聞く。推測で埋めない — あとから替えると、スキーマとマイグレーションを作り直す。
 
 - **認証先** — Google などの social、email/password、`kjfsm-personal` プラグインが入っていれば kjfsm の共通 IdP(→ `/kjfsm-personal:connect-kjfsm-auth`)。**email/password は CPU を食う。** パスワードのハッシュ化(scrypt)が予算ぎりぎりで動く(better-auth#8860)ので、選んだら登録とログインの経路を本番で別に測る
 - **DB** — このアプリだけの D1 を作るか、`kjfsm-personal` プラグインが入っていれば共有 D1 に相乗りするか(→ `/kjfsm-personal:kjfsm-shared-db`)
@@ -71,7 +71,7 @@ D1 + Drizzle・better-auth・Hono の層に入ったら [api.md](./api.md)、画
 ## ほかのスキルが持つもの
 
 - 規約・rules・フック・worktree の設定 → `/kjfsm-skills:setup-repo`(このスキルの次に呼ぶ)
-- テンプレートが手元にあるときの新規作成 → `/kjfsm-skills:setup-cf-app`
+- テンプレートが手元にあるときの新規作成 → `/kjfsm-personal:setup-cf-app`
 - マイグレーションの書き直しと安全検査 → `/kjfsm-skills:migrate-d1`
 - テストの組み方 → `/kjfsm-skills:workers-tests`、E2E → `/kjfsm-skills:setup-playwright`
 - ログイン無しで座る入口 → `/kjfsm-skills:dev-bypass-sign-in`

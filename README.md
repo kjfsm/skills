@@ -14,10 +14,10 @@ Claude Code のプラグインとして配るエージェントスキル(スラ�
 
 ### 初回だけ: リポジトリを整える
 
-| 状況                     | コマンド                                                  |
-| ------------------------ | --------------------------------------------------------- |
-| リポジトリがまだ無い     | `/kjfsm-skills:setup-cf-app` → `/kjfsm-skills:setup-repo` |
-| 既存のリポジトリに入れる | `/kjfsm-skills:setup-repo`                                |
+| 状況                     | コマンド                                                     |
+| ------------------------ | ------------------------------------------------------------ |
+| リポジトリがまだ無い     | `/kjfsm-skills:scaffold-cf-app` → `/kjfsm-skills:setup-repo` |
+| 既存のリポジトリに入れる | `/kjfsm-skills:setup-repo`                                   |
 
 `/kjfsm-skills:setup-repo` は setup 系の **唯一の入口** で、順序と依存はこれが持つ。**何度でも再実行してよい** — 済んだ工程は飛ばし、ずれだけを直す。
 
@@ -162,9 +162,8 @@ claude plugin install kjfsm-skills@kjfsm --scope project
 - **[partyserver-on-durable-objects](./skills/kjfsm-skills/engineering/partyserver-on-durable-objects/SKILL.md)** — partyserver(`Server`)を Durable Object の上に載せるときの、公式ドキュメントに載っていない挙動。stub の取り方でリクエスト数が2倍になるとき、`onStart` に初期化や移行を置くとき、WebSocket のハイバネーションと keepalive を組むとき、RPC メソッドを足すか `onRequest` のままにするか決めるときに使う。素の Durable Objects の API は公式の `durable-objects` スキルが持つ。
 - **[prune-comments](./skills/kjfsm-skills/engineering/prune-comments/SKILL.md)** — 書かれてしまったコメントを1パスで削る。コミットや PR を出す直前、コメントが冗長・AI が書いたように見える・整理したいとき、他のスキルがコメントの掃除を必要とするときに使う。順序の決まった6段のルールと非対称の残す基準を当て、実行ごとのばらつきを潰す。
 - **[prune-tests](./skills/kjfsm-skills/engineering/prune-tests/SKILL.md)** — 既存のテストを全部読み、削除・統合できるものを「消すと、どんな現実的な不具合を見逃すか」で洗い出す。テストが多すぎる・遅い・振る舞いを変えない変更のたびに大量に落ちるとき、テストを整理したい・減らしたいとき、他のスキルが削れるテストの判定を必要とするときに使う。
-- **[scaffold-cf-app](./skills/kjfsm-skills/engineering/scaffold-cf-app/SKILL.md)** — 公式の `vite-react-template` を C3 で生成し、その上に差分を層ごとに積んで、Free プランに収まる標準構成(Vite の React SPA + Hono の API Worker)の Cloudflare Workers アプリを組む。`/kjfsm-skills:setup-cf-app` が写す元のテンプレートを見つけられなかったとき、テンプレートを使わず公式から組みたいとき、テンプレート自体を公式の更新に合わせて作り直すときに使う。
+- **[scaffold-cf-app](./skills/kjfsm-skills/engineering/scaffold-cf-app/SKILL.md)** — 新規の Cloudflare Workers フルスタックアプリを、公式の `vite-react-template` から Free プランに収まる標準構成(Vite の React SPA + Hono の API Worker)へ層ごとに積んで組む。「環境構築」「新規プロジェクト」「新しいアプリを作る」「スキャフォールド」、`/kjfsm-personal:setup-cf-app` が写す元のテンプレートを見つけられなかったとき、テンプレート自体を公式の更新に合わせて作り直すときに使う。`/kjfsm-personal:setup-cf-app` が入っていれば、新規作成はそちらが先である。
 - **[setup-cf-access](./skills/kjfsm-skills/engineering/setup-cf-access/SKILL.md)** — Cloudflare Access を Worker・ホスト名・パスに、いつもの3層ルール(人間=指定メール / 機械=サービストークン / アプリ側に認証があるパス=bypass)で掛ける。「Access を掛ける」「認証を必要にする」「workers.dev が素通り」「Zero Trust のアプリを作る」で参照する。
-- **[setup-cf-app](./skills/kjfsm-skills/engineering/setup-cf-app/SKILL.md)** — 新規の Cloudflare Workers フルスタックアプリを、Free プランに収まる標準構成(Vite の React SPA + Hono の API Worker)で立ち上げる。手元のテンプレートを写して名前を替え、無ければ公式テンプレートから組む。「環境構築」「新規プロジェクト」「新しいアプリを作る」「セットアップ」「スキャフォールド」などで参照する。
 - **[setup-ci](./skills/kjfsm-skills/engineering/setup-ci/SKILL.md)** — 記録された検証ゲートを CI に敷き、ローカルの規律を機構に変える。ゲートを強制する仕組みがまだ無いとき（CI が無い、あるいは誰も走らせていない）、CI が `docs/agents/verification.md` とずれてきたとき、`/kjfsm-skills:setup-repo` の工程 C として使う。
 - **[setup-hooks](./skills/kjfsm-skills/engineering/setup-hooks/SKILL.md)** — 散文のルールでは守られないものを機構へ落とし、決定的に弾く — `permissions.deny`、git hook と CI が同じ述語を呼ぶ検査スクリプト、Claude Code のフックの3層。書いてある規約が実際には破られ続けているとき（生成物の手編集、シークレットのコミット）、フックにだけ存在する検査が CI やクローンをすり抜けているとき、セッション開始時に環境を用意させたいとき、`/kjfsm-skills:setup-repo` の工程 D として使う。
 - **[setup-playwright](./skills/kjfsm-skills/engineering/setup-playwright/SKILL.md)** — Playwright の E2E を入れ、ブラウザをどの層で用意するか決める。E2E をこれから入れるとき、`Executable doesn't exist` や `Missing system dependencies` が出たとき、コンテナやクラウドのサンドボックスに置いてあるブラウザと Playwright が要求するビルド番号がずれたとき、CI でだけブラウザの取得に失敗するとき、`playwright install` をセットアップスクリプト・SessionStart フック・CI のどこに置くか決めるときに使う。

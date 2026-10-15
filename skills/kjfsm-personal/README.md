@@ -12,6 +12,6 @@ claude plugin install kjfsm-personal@kjfsm
 - **[build-browser-game](./build-browser-game/SKILL.md)** — スマホでも遊べるブラウザゲームを、kjfsm の構成(Workers・Durable Objects。要るならログインと共有 D1)で新しく作って本番に出すまでの手順。「ゲームを作って」と頼まれたとき、リアルタイム対戦を Durable Objects で組むとき、放置や売り買いのように画面を閉じても進むゲームを DO に組むとき、ゲームの数(強さ・勝負の長さ)を調整するとき、対戦で幽霊の人・遅れて鳴る演出・誤った引き分けが出たときに使う。
 - **[connect-kjfsm-auth](./connect-kjfsm-auth/SKILL.md)** — kjfsm のアプリに、共通の IdP kjfsm-auth(`auth.kjfsm.net`)の RP としてログインを付ける。kjfsm の新しいサービスに認証が要るとき(better-auth に email/password や Google を直接組む前)、`genericOAuth` で kjfsm-auth に繋ぐとき、RP のクライアントを `auth-kjfsm-cli` で作る・作り直すとき、RP のログインが `invalid_client`・404・`unable_to_get_user_info` で落ちるときに使う。
 - **[kjfsm-shared-db](./kjfsm-shared-db/SKILL.md)** — kjfsm のアプリが相乗りする共有 D1(`kjfsm-shared-db`)に入る・その中でスキーマを変える規律。kjfsm の新しいサービスに D1 が要るとき(`wrangler d1 create` を叩く前)、`wrangler.jsonc` が `kjfsm-shared-db` を bind しているリポジトリでマイグレーションを生成・適用するとき、共有 D1 からサービスを抜くときに使う。
-- **[setup-cf-app](./setup-cf-app/SKILL.md)** — 新規の Cloudflare Workers フルスタックアプリを、手元のテンプレート `kjfsm/cf-workers-free-template`(Free プランに収まる Vite の React SPA + Hono の API Worker)を写して立ち上げる。依存を上げ、認証先と DB を替え、名前を付け替える。テンプレートが無ければ公式テンプレートから組む。「環境構築」「新規プロジェクト」「新しいアプリを作る」「セットアップ」「スキャフォールド」などで参照する。
+- **[setup-cf-app](./setup-cf-app/SKILL.md)** — 新規の Cloudflare Workers フルスタックアプリを、GitHub のテンプレート `kjfsm/cf-workers-free-template`(Free プランに収まる Vite の React SPA + Hono の API Worker)を写して立ち上げる。テンプレートが見えなければ公式テンプレートから組む。「環境構築」「新規プロジェクト」「新しいアプリを作る」「セットアップ」「スキャフォールド」などで参照する。
 
 <!-- catalog:end -->

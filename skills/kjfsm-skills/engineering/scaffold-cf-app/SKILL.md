@@ -71,7 +71,7 @@ D1 + Drizzle・better-auth・Hono の層に入ったら [api.md](./api.md)、画
 ## ほかのスキルが持つもの
 
 - 規約・rules・フック・worktree の設定 → `/kjfsm-skills:setup-repo`(このスキルの次に呼ぶ)
-- テンプレートが手元にあるときの新規作成 → `/kjfsm-personal:setup-cf-app`
+- テンプレート `kjfsm/cf-workers-free-template` が見えるときの新規作成 → `/kjfsm-personal:setup-cf-app`
 - マイグレーションの書き直しと安全検査 → `/kjfsm-skills:migrate-d1`
 - テストの組み方 → `/kjfsm-skills:workers-tests`、E2E → `/kjfsm-skills:setup-playwright`
 - ログイン無しで座る入口 → `/kjfsm-skills:dev-bypass-sign-in`

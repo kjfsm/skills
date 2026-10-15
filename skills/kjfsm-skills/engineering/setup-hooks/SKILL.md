@@ -5,7 +5,7 @@ description: 散文のルールでは守られないものを機構へ落とし�
 
 # 弾く層を敷く
 
-`AGENTS.md` と `.claude/rules/` は読まれれば効くが、読まれたかは観測できない。機構はハーネスや git が実行するので、**モデルが何を読んだかと無関係に効く**。`/kjfsm-skills:setup-rules` の自己更新ルールの3段目(1. パス固有の事実は rules、2. 手順は skills、**3. 決定的に弾きたい挙動はここ**)に当たる。
+`AGENTS.md`(や `CLAUDE.md`)と `.claude/rules/` は読まれれば効くが、読まれたかは観測できない。機構はハーネスや git が実行するので、**モデルが何を読んだかと無関係に効く**。`/kjfsm-skills:setup-rules` の自己更新ルールの3段目(1. パス固有の事実は rules、2. 手順は skills、**3. 決定的に弾きたい挙動はここ**)に当たる。
 
 探索し、提示し、確認してから書く。**機構は Claude Code のフックのことではない。3層ある。**
 
@@ -44,7 +44,7 @@ description: 散文のルールでは守られないものを機構へ落とし�
 
 ### 1. 探索する
 
-- `AGENTS.md` / `.claude/rules/` — **すでに書いてある**禁止事項。ここに無いものはまだ候補ではない
+- `AGENTS.md`(無ければ `CLAUDE.md`)/ `.claude/rules/` — **すでに書いてある**禁止事項。ここに無いものはまだ候補ではない
 - `git log` — 実際に破られた痕跡と条件4の数。生成物の手編集を戻すコミット、revert
 - `.gitignore` と生成物の実パス、それぞれの再生成コマンド
 - `lefthook.yml` / `.husky/` / `package.json` の `simple-git-hooks` — git hook の層がすでにあるか
@@ -82,7 +82,7 @@ description: 散文のルールでは守られないものを機構へ落とし�
 
 ### 6. 散文側を追随させる
 
-**層を移したら、その検査を名指ししている散文を全部辿る** — `AGENTS.md`、`.claude/rules/`、`docs/agents/verification.md`、`docs/`、各スキル。
+**層を移したら、その検査を名指ししている散文を全部辿る** — `AGENTS.md` か `CLAUDE.md`、`.claude/rules/`、`docs/agents/verification.md`、`docs/`、各スキル。
 
 ⚠️ **名前を置換するだけにしない。** 「フックが弾く」を「`permissions.deny` が弾く」に置き換えると、旧フックの時代から嘘だった主張が生き残る(`permissions.deny` はパスを名指ししない書き込みを見ないが、置換された散文はそこまで守られると書いていた)。書き直すのは名前ではなく、**その層で本当に何が止まるか**である。
 

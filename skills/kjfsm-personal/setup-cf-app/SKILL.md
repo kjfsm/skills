@@ -16,18 +16,18 @@ description: 新規の Cloudflare Workers フルスタックアプリを、手�
 
 ## 2. テンプレートを探す
 
-`~/github/kjfsm/cf-workers-free-template` を見る。**無ければ写さず、`/kjfsm-skills:scaffold-cf-app` を呼び、手順1の2つの答えを渡す。**
+`gh repo view kjfsm/cf-workers-free-template` で見えるかを確かめる(非公開なので、見えるのは権限のあるアカウントだけ)。**見えなければ写さず、`/kjfsm-skills:scaffold-cf-app` を呼び、手順1の2つの答えを渡す。**
 
-あれば `git -C <テンプレート> fetch` し、`main` が `origin/main` より遅れていたら pull してから写す。手元の古い版を写すと、テンプレートで直した不具合が戻る。
+手元にテンプレートのチェックアウトがあっても、そこからは写さない。手元が `origin` より遅れていると、テンプレートで直した不具合が戻る。
 
 ## 3. 写す
 
 ```bash
-git clone ~/github/kjfsm/cf-workers-free-template <名前>
+gh repo clone kjfsm/cf-workers-free-template <名前>
 git -C <名前> remote remove origin
 ```
 
-`cp -r` ではなく clone にする。履歴を持ち込むので、起点(C3 の生成物そのまま)からの差分を `git diff <起点>` で読め、公式の更新を取り込むときの比較元が残る。gitignore 済みの `node_modules`・`dist`・`.dev.vars` も持ち込まない。
+GitHub の「Use this template」やファイルのコピーではなく clone にする。履歴を持ち込むので、起点(C3 の生成物そのまま)からの差分を `git diff <起点>` で読め、公式の更新を取り込むときの比較元が残る。
 
 ## 4. 依存を上げる
 
@@ -35,7 +35,7 @@ git -C <名前> remote remove origin
 
 **`pnpm up --latest` は peer の範囲を見ない。** プラグインが peer で上限を持つと(`@cloudflare/vitest-plugin` と `vitest` など)、最新が範囲外になる。落ちたら peer を読み、範囲に揃える。
 
-ゲートが通ったら、**テンプレートも同じく上げるセッションを立てるかをユーザーに訊く。** 上げたのがこのアプリだけだと、次に写すアプリがまた古い版から始まる。立てるなら `/kjfsm-skills:launch-implementation-session` の手順4の形で、テンプレートの本体チェックアウトから立てる。最初の入力は次のとおり:
+ゲートが通ったら、**テンプレートも同じく上げるセッションを立てるかをユーザーに訊く。** 上げたのがこのアプリだけだと、次に写すアプリがまた古い版から始まる。立てるなら `/kjfsm-skills:launch-implementation-session` の手順4の形で、テンプレートのチェックアウトから立てる(手元に無ければ clone してから)。最初の入力は次のとおり:
 
 ```
 依存を `pnpm up --latest` で上げ、docs/agents/verification.md のゲートを通して PR を出してください。<peer を揃えた依存があれば、その版>。終わったら <自分のセッション名> に SendMessage で PR の番号を知らせてください。マージはしないでください。

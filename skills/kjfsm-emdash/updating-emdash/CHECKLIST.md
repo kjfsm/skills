@@ -29,6 +29,7 @@
 - [0.42](#042)
 - [1.0](#10)
 - [1.1](#11)
+- [1.3](#13)
 
 ## blog-cloudflare で当たる項目
 
@@ -280,3 +281,15 @@
 
 - **判定:** `grep -rn "htmlBlock:" src`
 - **対応:** 1.1.0 から、管理画面で作る HTML ブロックは `isolated: true` が付き、CSS・JS を sandbox の iframe で動かす前提になった。自前の描画が `html` を sanitize してインラインに出していると、CSS・JS が黙って落ちる。`node.isolated` が真のときだけ `emdash/ui` の `HtmlBlock` に `node` を渡し、それ以外は今までどおり描く。差し替えていなければ上流の描画が両方を扱うので要らない。
+
+## 1.3
+
+### メニュー項目の `cssClasses` を描画に渡す
+
+- **判定:** `grep -rL cssClasses $(grep -rl "items.map" src)`
+- **対応:** 1.3.0 から管理画面のメニュー編集で項目ごとに CSS クラスを入れられるようになった。描画がメニュー項目の `class` に `item.cssClasses` を渡していないと、入れても何も起きない。渡すなら固定のクラスと連結する。Tailwind はソースに現れないクラスを生成しないので、管理画面から効くのは CSS に定義済みのクラスだけである — 使う予定が無ければ対応しないと決めてよい。
+
+### `public/robots.txt` を置いているなら、AI 学習の拒否を自分で書く
+
+- **判定:** `ls public/robots.txt`
+- **対応:** 1.3.0 の **Settings > SEO > Disallow AI training** は EmDash が動的に返す `/robots.txt` にだけ規則を足す。Cloudflare では `public/` の静的ファイルが Worker より前に配信されるので、置いていると設定を入れても変わらない。拒否するなら、上流が足すのと同じ User-agent(`Amazonbot`・`Applebot-Extended`・`Bytespider`・`CCBot`・`ClaudeBot`・`Google-Extended`・`GPTBot`・`meta-externalagent`)への `Disallow: /` と `Content-Signal: search=yes, ai-train=no` を静的ファイルへ書く。

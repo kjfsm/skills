@@ -147,6 +147,7 @@ claude plugin install kjfsm-skills@kjfsm --scope project
 
 - **[ask-kjfsm](./skills/kjfsm-skills/engineering/ask-kjfsm/SKILL.md)** — どのスキルやフローが自分の状況に合うかを尋ねる。このリポジトリのスキルを案内するルーター。
 - **[implement-and-review](./skills/kjfsm-skills/engineering/implement-and-review/SKILL.md)** — スペックやチケットが記述する作業を、既定ブランチへの追従からビルド・検証・コメント削り・二軸レビュー・PR まで1本で進める。
+- **[propose-features](./skills/kjfsm-skills/engineering/propose-features/SKILL.md)** — 既存のアプリに足すと便利な機能を、アプリの目的・コードから読める欠け・利用ログを根拠に洗い出し、レポートにして、選んだ1件を grill で詰める。
 - **[setup-repo](./skills/kjfsm-skills/engineering/setup-repo/SKILL.md)** — このリポジトリのエージェント向け設定を一括で敷く — 規約とドキュメント配置、パス別ルール、CI、弾く機構。再実行すると現況を読み、足りない工程とずれた箇所だけを当てる。
 - **[squash-d1-migrations](./skills/kjfsm-skills/engineering/squash-d1-migrations/SKILL.md)** — 積み上がった D1 のマイグレーションを1本に畳み、適用済みの各環境と突き合わせる。
 - **[tend-memory-files](./skills/kjfsm-skills/engineering/tend-memory-files/SKILL.md)** — AGENTS.md・CLAUDE.md と .claude/rules/ を新規に書く、または既存のものを監査してトリムする — 行数の目安に収め、具体的で矛盾のない指示だけを残す。

@@ -82,9 +82,9 @@ argument-hint: "[見てほしい画面・機能・利用者]"
 
 ### 5. レポートで見せる
 
-レポートは Markdown で書き、Artifact として公開して URL を伝える。リポジトリには何も置かない。Artifact を公開できないハーネスでは、OS の一時ディレクトリ(`$TMPDIR`、無ければ `/tmp`)に `feature-proposals-<timestamp>.md` を書き、絶対パスを伝える。
+レポートはチャットの返答として Markdown で書く。ファイルは作らず、リポジトリにも何も置かない。
 
-HTML は、ユーザーが HTML や図を求めたときだけ作る。図が無ければ Markdown で足りる。出し先は Markdown のときと同じで、作法は Artifact のものに従う。
+ユーザーが HTML で作ってと言ったときだけ HTML にし、Artifact として公開して URL を伝える。Artifact を公開できないハーネスでは、OS の一時ディレクトリ(`$TMPDIR`、無ければ `/tmp`)に `feature-proposals-<timestamp>.html` を書き、絶対パスを伝える。
 
 中身の形は [REPORT.md](REPORT.md) にある。
 

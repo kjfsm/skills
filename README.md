@@ -1,42 +1,5 @@
 # kjfsm's Skills
 
-Claude Code のプラグインとして配るエージェントスキル(スラッシュコマンドと振る舞い) — 雰囲気で書くコーディングではなく、実務のエンジニアリングのために使う。
-
-[mattpocock/skills](https://github.com/mattpocock/skills) を日本語訳し、kjfsm 向けに調整した独立フォークから出発した。**本家由来のスキル(`/mattpocock-skills:tdd`、`/mattpocock-skills:grill-with-docs`、`/mattpocock-skills:to-spec` など)は、依存先の本家 `mattpocock-skills` がそのまま配る。** このリポジトリの `kjfsm-skills` が持つのは自作のスキルと、本家から離れて自作の流れの中心になったもの(`/kjfsm-skills:implement-and-review`、`/kjfsm-skills:ask-kjfsm`、`/kjfsm-skills:setup-skills`、`/kjfsm-skills:writing-great-skills`)である。
-
-これらのスキルは小さく、手を加えやすく、組み合わせやすいように設計されている。どのモデルでも動作する。
-
-## Quickstart
-
-スキルは **スラッシュコマンド** として呼ぶ。名前を全部覚える必要はない — 迷ったら `/kjfsm-skills:ask-kjfsm` が、いまの状況に合うフローを教える。
-
-以下は[インストール](#インストール)を済ませた後の話。
-
-### 初回だけ: リポジトリを整える
-
-| 状況                     | コマンド                                                                                                                          |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| リポジトリがまだ無い     | `/kjfsm-skills:scaffold-cf-app` → `/kjfsm-skills:setup-repo`(`kjfsm-personal` を入れていれば `/kjfsm-personal:setup-cf-app` から) |
-| 既存のリポジトリに入れる | `/kjfsm-skills:setup-repo`                                                                                                        |
-
-`/kjfsm-skills:setup-repo` は setup 系の **唯一の入口** で、順序と依存はこれが持つ。**何度でも再実行してよい** — 済んだ工程は飛ばし、ずれだけを直す。
-
-敷かれるのは届き方の違う4層(検証ゲートの定義、パス別ルール、CI、フック)で、以降のスキルはこれを前提にする。特に `/kjfsm-skills:verification-loop` は「記録されたゲート」を読むので、ここを飛ばすと空回りする。
-
-### 毎回の開発
-
-| やりたいこと           | コマンド                                                                                          |
-| ---------------------- | ------------------------------------------------------------------------------------------------- |
-| 新機能をつくる         | `/mattpocock-skills:grill-with-docs` で設計を詰める → `/kjfsm-skills:implement-and-review` で作る |
-| 何かが壊れている       | `/mattpocock-skills:diagnosing-bugs`                                                              |
-| イシューが積み上がった | `/mattpocock-skills:triage`                                                                       |
-| 大きすぎて見通せない   | `/mattpocock-skills:wayfinder`                                                                    |
-| どれを使うか分からない | **`/kjfsm-skills:ask-kjfsm`**                                                                     |
-
-締めまで持つのは `/kjfsm-skills:implement-and-review` である: `/mattpocock-skills:tdd` でビルドし、`/kjfsm-skills:verification-loop` でクリーンランを取り、`/kjfsm-skills:prune-comments` でコメントを削り、`/kjfsm-skills:two-axis-review` でレビューしてからコミットし、PR を出す。**`/kjfsm-skills:implement-and-review` はユーザーからしか呼べない** ので、打たなければこの並びは丸ごと走らない。
-
-複数セッションにまたがる規模なら、`/mattpocock-skills:grill-with-docs` と `/kjfsm-skills:implement-and-review` の間に `/mattpocock-skills:to-spec` → `/mattpocock-skills:to-tickets` を挟んでチケットへ割る。規模の判定とフロー全体は `/kjfsm-skills:ask-kjfsm` が持つ。
-
 ## インストール
 
 Claude Code のプラグインとしてだけ配っている。
@@ -70,15 +33,36 @@ claude plugin marketplace add kjfsm/skills --scope project
 claude plugin install kjfsm-skills@kjfsm --scope project
 ```
 
-これは `.claude/settings.json` に `extraKnownMarketplaces` と `enabledPlugins` を書き込む。コミットすれば、そのリポジトリで作業する人は何も入れなくてもスキルが有効になる。
+## Quickstart
 
-入るのは昇格済みのスキル(`engineering/` + `productivity/`)、[出力スタイル](#出力スタイル)、[サブエージェント](#サブエージェント)である。`in-progress/` の下書きと、別プラグインのバケット(`kjfsm-emdash`、`kjfsm-personal`)は入らない。`version` を持たないので、push のたびに更新が届く。
+スキルは **スラッシュコマンド** として呼ぶ。名前を全部覚える必要はない — 迷ったら `/kjfsm-skills:ask-kjfsm` が、いまの状況に合うフローを教える。
 
-`kjfsm-skills` は本家の `mattpocock-skills@mattpocock` に依存しており、インストール時に本家も自動で入る(このマーケットプレイスは `allowCrossMarketplaceDependenciesOn` で `mattpocock` を許可している)。実装からレビュー・PR までの流れは kjfsm の `/kjfsm-skills:implement-and-review` が持つ(本家の `/mattpocock-skills:implement` は経由しない)。
+以下は[インストール](#インストール)を済ませた後の話。
 
-以前 `npx skills` やシンボリックリンクで入れていたなら、そのコピーやリンクは消す。同じスキルが2系統で入ると、スラッシュコマンドが重複し、常時読み込まれる description も二重に数えられる。
+### 初回だけ: リポジトリを整える
 
-**このリポジトリを clone した場合、下書きのスキルは何も入れなくても使える。** `.claude/skills/` に、どのプラグインも配らない `in-progress/` のスキルへのシンボリックリンクをコミットするので(下書きが無い時期はディレクトリごと無い)、この clone の中で作業するかぎりそのまま呼べる。**プラグインで配るスキルはここに張らない** — 両方から見えると同じスキルがセッション開始時に2度並ぶ。リンクの張り直しは `scripts/sync-project-skills.sh` で、ずれは `scripts/check-invariants.sh` が落とす。
+| 状況                     | コマンド                                                                                                                          |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| リポジトリがまだ無い     | `/kjfsm-skills:scaffold-cf-app` → `/kjfsm-skills:setup-repo`(`kjfsm-personal` を入れていれば `/kjfsm-personal:setup-cf-app` から) |
+| 既存のリポジトリに入れる | `/kjfsm-skills:setup-repo`                                                                                                        |
+
+`/kjfsm-skills:setup-repo` は setup 系の **唯一の入口** で、順序と依存はこれが持つ。**何度でも再実行してよい** — 済んだ工程は飛ばし、ずれだけを直す。
+
+敷かれるのは届き方の違う4層(検証ゲートの定義、パス別ルール、CI、フック)で、以降のスキルはこれを前提にする。特に `/kjfsm-skills:verification-loop` は「記録されたゲート」を読むので、ここを飛ばすと空回りする。
+
+### 毎回の開発
+
+| やりたいこと           | コマンド                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------- |
+| 新機能をつくる         | `/mattpocock-skills:grill-with-docs` で設計を詰める → `/kjfsm-skills:implement-and-review` で作る |
+| 何かが壊れている       | `/mattpocock-skills:diagnosing-bugs`                                                              |
+| イシューが積み上がった | `/mattpocock-skills:triage`                                                                       |
+| 大きすぎて見通せない   | `/mattpocock-skills:wayfinder`                                                                    |
+| どれを使うか分からない | **`/kjfsm-skills:ask-kjfsm`**                                                                     |
+
+締めまで持つのは `/kjfsm-skills:implement-and-review` である: `/mattpocock-skills:tdd` でビルドし、`/kjfsm-skills:verification-loop` でクリーンランを取り、`/kjfsm-skills:prune-comments` でコメントを削り、`/kjfsm-skills:two-axis-review` でレビューしてからコミットし、PR を出す。**`/kjfsm-skills:implement-and-review` はユーザーからしか呼べない** ので、打たなければこの並びは丸ごと走らない。
+
+複数セッションにまたがる規模なら、`/mattpocock-skills:grill-with-docs` と `/kjfsm-skills:implement-and-review` の間に `/mattpocock-skills:to-spec` → `/mattpocock-skills:to-tickets` を挟んでチケットへ割る。規模の判定とフロー全体は `/kjfsm-skills:ask-kjfsm` が持つ。
 
 他のエンジニアリング系スキルを使う前にリポジトリごとに一度 **`/kjfsm-skills:setup-repo`** を実行すること。setup 系4工程の入口であり、届き方の違う4つの層を順に敷く:
 
@@ -92,6 +76,13 @@ claude plugin install kjfsm-skills@kjfsm --scope project
 **再実行してよい。** 2回目は済んだ工程を飛ばし、設定と実態のずれ — verification.md に無いコマンドを CI が走らせている、`paths:` がもう存在しないディレクトリを指している — だけを直す。
 
 `AGENTS.md` しか無いリポジトリでは、`.claude/` を読まないハーネスが対象なので `/kjfsm-skills:setup-rules` と `/kjfsm-skills:setup-hooks` は飛ばされる。
+
+
+Claude Code のプラグインとして配るエージェントスキル(スラッシュコマンドと振る舞い) — 雰囲気で書くコーディングではなく、実務のエンジニアリングのために使う。
+
+[mattpocock/skills](https://github.com/mattpocock/skills) を日本語訳し、kjfsm 向けに調整した独立フォークから出発した。**本家由来のスキル(`/mattpocock-skills:tdd`、`/mattpocock-skills:grill-with-docs`、`/mattpocock-skills:to-spec` など)は、依存先の本家 `mattpocock-skills` がそのまま配る。** このリポジトリの `kjfsm-skills` が持つのは自作のスキルと、本家から離れて自作の流れの中心になったもの(`/kjfsm-skills:implement-and-review`、`/kjfsm-skills:ask-kjfsm`、`/kjfsm-skills:setup-skills`、`/kjfsm-skills:writing-great-skills`)である。
+
+これらのスキルは小さく、手を加えやすく、組み合わせやすいように設計されている。どのモデルでも動作する。
 
 ### 出力スタイル
 

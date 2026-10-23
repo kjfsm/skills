@@ -43,6 +43,7 @@ disable-model-invocation: true
 
 ## スタンドアロン
 
+- **`/kjfsm-skills:propose-features`** — 既存のアプリに「次に足すと便利な機能」を探したいときに。目的のファイル(`docs/product.md`)・コードから読める欠け・利用ログを根拠に候補を出し、1つ選んだら grill で詰めて `/mattpocock-skills:to-spec` でメインフローに持ち込む。直す・整える側の候補は `/mattpocock-skills:improve-codebase-architecture`。
 - **`/mattpocock-skills:grill-me`** — `/mattpocock-skills:grill-with-docs` と同じ容赦ないインタビューを、**コードベースがない** ときに。ステートレスで、ローカルには何も保存せず `CONTEXT.md` も作らない。
 - **`/mattpocock-skills:prototype`** — デザイン上の問い1つに答える、小さく使い捨てのプログラム。答えだけ残してコードは消す。メインフロー手順2の寄り道だが、そこに限らない。
 - **`/mattpocock-skills:research`** — 調べ物の力仕事を **バックグラウンドエージェント** に委ね、**一次情報源** に当たった引用付きのマークダウンを残す。読んでいる間も作業を続けられる。成果は `/mattpocock-skills:grill-with-docs` でメインフローに **持ち込む** — リサーチは思考の材料であって、代わりにはならない。

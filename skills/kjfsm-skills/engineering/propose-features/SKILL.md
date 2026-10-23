@@ -7,7 +7,7 @@ argument-hint: "[見てほしい画面・機能・利用者]"
 
 # 機能を提案する
 
-既存のアプリに **足すと便利な機能** の候補を出す。直す・整える提案は他が持っている — 構造は `/mattpocock-skills:improve-codebase-architecture`、見た目と操作感は `web-design-guidelines` と `baseline-ui`、不具合は `diagnosing-bugs`。ここでは、今はできないことをできるようにする提案だけを扱う。
+既存のアプリに **足すと便利な機能** の候補を出す。直す・整える提案は他が持っている — 構造は `/mattpocock-skills:improve-codebase-architecture`、見た目と操作感は UI レビューのスキル(入っていれば `web-design-guidelines` や `baseline-ui`)、不具合は `diagnosing-bugs`。ここでは、今はできないことをできるようにする提案だけを扱う。
 
 提案の価値は根拠で決まる。根拠のない提案は「どのアプリにも言える提案」になる — 検索・通知・エクスポート・ダークモード。根拠は3つで、1つ目が欠けたら先へ進まない:
 

@@ -6,6 +6,6 @@
 
 <!-- catalog:begin -->
 
-(いまは無い)
+- **[propose-features](./propose-features/SKILL.md)** — 既存のアプリに足すと便利な機能を、アプリの目的・コードから読める欠け・利用ログを根拠に洗い出し、HTML レポートにして、選んだ1件を grill で詰める。
 
 <!-- catalog:end -->

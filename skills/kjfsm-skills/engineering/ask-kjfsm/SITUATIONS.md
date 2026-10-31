@@ -31,6 +31,10 @@
 
 **`/kjfsm-skills:dev-bypass-sign-in`**。E2E もブラウザを持つエージェントも `curl` も、外部 IdP のリダイレクトの向こうで止まる。叩くだけでサインイン済みになる入口を1本足し、その戸をビルド時に畳んで成果物から検査する。better-auth なら `testUtils` でサインイン方式に依存しない形になる。
 
+## ホーム画面へインストールできるようにしたい
+
+**`/kjfsm-skills:make-installable-pwa`**。manifest・アイコン・iOS 向けの meta を足し、Service Worker は既定で入れない — オフラインや Web Push が要ると決めたときだけ入れる。確かめは本番ビルドを Cookie なしで叩き、Worker の締め出しが manifest とアイコンに掛かっていないかまで見る。
+
 ## ロジックを変えない機械的な変更
 
 ディレクトリ再編、大量リネーム、import の一括付け替え → **`/kjfsm-skills:ai-efficiency`**。1ファイルずつ Read/Edit せず、シェルで一括処理して、抜けは typecheck で拾う。

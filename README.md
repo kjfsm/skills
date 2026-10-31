@@ -77,7 +77,6 @@ claude plugin install kjfsm-skills@kjfsm --scope project
 
 `AGENTS.md` しか無いリポジトリでは、`.claude/` を読まないハーネスが対象なので `/kjfsm-skills:setup-rules` と `/kjfsm-skills:setup-hooks` は飛ばされる。
 
-
 Claude Code のプラグインとして配るエージェントスキル(スラッシュコマンドと振る舞い) — 雰囲気で書くコーディングではなく、実務のエンジニアリングのために使う。
 
 [mattpocock/skills](https://github.com/mattpocock/skills) を日本語訳し、kjfsm 向けに調整した独立フォークから出発した。**本家由来のスキル(`/mattpocock-skills:tdd`、`/mattpocock-skills:grill-with-docs`、`/mattpocock-skills:to-spec` など)は、依存先の本家 `mattpocock-skills` がそのまま配る。** このリポジトリの `kjfsm-skills` が持つのは自作のスキルと、本家から離れて自作の流れの中心になったもの(`/kjfsm-skills:implement-and-review`、`/kjfsm-skills:ask-kjfsm`、`/kjfsm-skills:setup-skills`、`/kjfsm-skills:writing-great-skills`)である。
@@ -150,6 +149,7 @@ Claude Code のプラグインとして配るエージェントスキル(スラ�
 - **[dev-bypass-sign-in](./skills/kjfsm-skills/engineering/dev-bypass-sign-in/SKILL.md)** — 叩くだけでサインイン済みになる開発・E2E 用の入口(dev bypass)を作る。ログインの要る画面を E2E やエージェントから駆動したいとき、dev サーバーでソーシャルログインやパスワード登録を踏まずに座りたいとき、better-auth の `testUtils` の使いどころを決めるとき、既存の bypass の戸が本番の成果物に残っていないか確かめたいとき、他のスキルが認証済みのセッションを必要とするときに使う。
 - **[drizzle-generate-non-interactive](./skills/kjfsm-skills/engineering/drizzle-generate-non-interactive/SKILL.md)** — TTY の無いところで `drizzle-kit generate` を完走させる。エージェント・フック・CI から generate を回すとき、`Interactive prompts require a TTY terminal` で落ちたとき、`missing_hints` で exit 2 したとき、rename を含むスキーマ変更のマイグレーションを生成するときに使う。
 - **[launch-implementation-session](./skills/kjfsm-skills/engineering/launch-implementation-session/SKILL.md)** — 設計を詰め終えたあとの実装を、別のセッションで `/kjfsm-skills:implement-and-review` に走らせ、終わったら立てた側へ知らせるよう最初の入力で伝える。grill や to-spec・to-tickets を終えて作業を始めるとき、「別セッションで実装して」と言われたとき、gh stack の層を別セッションで積むとき、他のスキルがチケットの実装セッションを立てる必要があるときに使う。
+- **[make-installable-pwa](./skills/kjfsm-skills/engineering/make-installable-pwa/SKILL.md)** — Web アプリ(主に Cloudflare Workers の Vite React SPA)を、ホーム画面へインストールできる PWA にする — manifest・アイコン・iOS 向けの meta を足し、Service Worker は既定で入れない。「PWA にして」「ホーム画面に追加できるように」「アプリとしてインストールできるように」と頼まれたとき、manifest やアプリのアイコンを作るとき、Service Worker を入れるか決めるとき、インストールできない・`Page.getInstallabilityErrors` が空にならないときに使う。standalone での見た目(safe area・100vh・ステータスバー)は `mobile-native` が持つ。
 - **[migrate-d1](./skills/kjfsm-skills/engineering/migrate-d1/SKILL.md)** — Cloudflare D1 のスキーマを変えるときの規律。drizzle-kit などが `PRAGMA foreign_keys=OFF` と `DROP TABLE` を含むマイグレーションを生成したとき、列を NOT NULL にしたいとき、CHECK 制約や複合ユニークを足したいとき、本番に `--remote` でマイグレーションを当てる前に使う。**D1 では `PRAGMA foreign_keys=OFF` が効かないので、生成物をそのまま流すと参照している側のテーブルが空になる。**
 - **[partyserver-on-durable-objects](./skills/kjfsm-skills/engineering/partyserver-on-durable-objects/SKILL.md)** — partyserver(`Server`)を Durable Object の上に載せるときの、公式ドキュメントに載っていない挙動。stub の取り方でリクエスト数が2倍になるとき、`onStart` に初期化や移行を置くとき、WebSocket のハイバネーションと keepalive を組むとき、RPC メソッドを足すか `onRequest` のままにするか決めるときに使う。素の Durable Objects の API は公式の `durable-objects` スキルが持つ。
 - **[prune-comments](./skills/kjfsm-skills/engineering/prune-comments/SKILL.md)** — 書かれてしまったコメントを1パスで削る。コミットや PR を出す直前、コメントが冗長・AI が書いたように見える・整理したいとき、他のスキルがコメントの掃除を必要とするときに使う。順序の決まった6段のルールと非対称の残す基準を当て、実行ごとのばらつきを潰す。

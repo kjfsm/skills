@@ -15,11 +15,14 @@ description: Web アプリ(主に Cloudflare Workers の Vite React SPA)を、�
 - ただし同じ記事は「インストールのプロンプト(`beforeinstallprompt`)の判定はまだ fetch ハンドラを要する」と書く。新しい [web.dev の条件一覧(2024-09-19)](https://web.dev/articles/install-criteria) には SW が無く、どちらが今の挙動かは確定していない
 - iOS は `beforeinstallprompt` に対応せず、ホーム画面への追加に SW は要らない(MDN)。iOS 16.4 以降は Safari 以外のブラウザの共有メニューからも追加できる
 
-| アプリが要るもの                               | SW                                                                               |
-| ---------------------------------------------- | -------------------------------------------------------------------------------- |
-| 入れるだけ(ブラウザのメニュー・iOS の共有から) | **入れない**                                                                     |
-| 自前の「インストール」ボタン                   | fetch ハンドラだけの最小の SW を検討する(上の未確定のため。入れる前に実機で試す) |
-| オフラインの1枚・Web Push・バッジ              | 入れる → [`SERVICE-WORKER.md`](SERVICE-WORKER.md) を開いてから書く               |
+| アプリが要るもの                               | SW                                                                                                          |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| 入れるだけ(ブラウザのメニュー・iOS の共有から) | **入れない**                                                                                                |
+| 自前の「インストール」ボタン                   | fetch ハンドラだけの最小の SW を検討する(上の未確定のため。入れる前に実機で試す)                            |
+| Web Push だけ                                  | **push だけの SW**(fetch もキャッシュも持たない) → [`SERVICE-WORKER.md`](SERVICE-WORKER.md) の「push だけ」 |
+| オフラインの1枚                                | キャッシュを持つ SW → [`SERVICE-WORKER.md`](SERVICE-WORKER.md) の「キャッシュも持つ」                       |
+
+**メニューからのインストールのためだけに、何もしない fetch ハンドラを足さない。** 上の Chromium の版以降、その条件に入っていない。
 
 **同期やサーバー側の生成物(PDF・検索結果)が無いと何もできないアプリは、オフライン対応を求められても一度押し返す** — 圏外で出せるのは「圏外です」の1枚だけで、そのために SW の壊れ方を全部引き受けることになる。
 
@@ -47,7 +50,9 @@ description: Web アプリ(主に Cloudflare Workers の Vite React SPA)を、�
    外側の `<svg>` を剥がし、中の `<path>` などだけを貼る(`stroke` などの属性はひな形の `<g>` が持つ)
 3. `package.json` に `"icons:generate": "node scripts/generate-icons.mjs"` を足して走らせる
 
-出るのは4枚。**形が2系統ある** — `any` は角丸の地にグリフ、`maskable` と `apple-touch-icon` は端末がマスクを掛けるので**全面を塗り**、グリフをセーフゾーン(中央 80% の円)の内側に収める(`fraction` 0.5〜0.6)。ひな形の表がその割り当てを持つ。
+出るのは4枚。**形が2系統ある** — `any` は角丸の地にグリフ、`maskable` と `apple-touch-icon` は端末がマスクを掛けるので**全面を塗り**、グリフをセーフゾーン(中央 80% の円)の内側に収める(`fraction` 0.5〜0.6)。ひな形の表がその割り当てを持つ。**`"purpose": "any maskable"` の1枚で兼ねない** — どちらに描いても、片方では欠けるか余白が出る。
+
+アイコンは端末がインストールした時点で写しを持つので、差し替えがいつ届くかはブラウザ次第である。差し替えを確実に拾わせたいなら、ファイル名に版を付けて URL ごと変える(`icon-512-v2.png`)。
 
 **完了基準: `public/icons/` に4枚ができ、4枚とも Read で開いて、グリフが欠けず中央にあるのを目で確かめた。**
 
@@ -92,9 +97,11 @@ Chromium がインストールに要るのは: `name` か `short_name`、192 と
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 ```
 
+**React Router の framework mode では `index.html` が無い。** `app/root.tsx` の `links` に manifest と `apple-touch-icon` を、`Layout` の `<head>` に meta を書く。vite-plugin-pwa の HTML への差し込みもここには効かないので、SW を入れる場合も manifest のリンクは自分で書く。
+
 `apple-touch-icon` を置くのは、iOS 15.3 以前が manifest のアイコンを読まずこれだけを見るからである。**`theme-color` は明暗2本**(`mobile-native` §10)。standalone ではブラウザの枠が消えてノッチの下まで画面になるので、固定ヘッダや下部バーがあるなら `viewport-fit=cover` と safe area(同 §7)も合わせて見る。
 
-**完了基準: manifest に上の必須項目がすべてあり、`index.html` に4行と theme-color 2本がある。**
+**完了基準: manifest に上の必須項目がすべてあり、`index.html`(または `root.tsx`)に4行と theme-color 2本がある。**
 
 ## 5. 本番ビルドで確かめる
 
@@ -109,6 +116,8 @@ node ${CLAUDE_SKILL_DIR}/scripts/check-installable.mjs http://localhost:4173/
 `check-installable.mjs` は対象リポジトリで走らせる(Playwright をそこから解決する)。Chromium の CDP で `Page.getAppManifest` と `Page.getInstallabilityErrors` を読み、manifest・manifest のアイコン・`apple-touch-icon` を **Cookie なしで** 取り直す。失敗があれば1行ずつ出して exit 1。Playwright が無ければ `/kjfsm-skills:setup-playwright`。**CDP を手で叩いて代えない** — Playwright の既定の headless shell は、`display: "browser"` の manifest にも `Page.getInstallabilityErrors` が空を返す(スクリプトは `channel: "chromium"` の永続プロファイルで開いてこれを避けている。`playwright install chromium` が要る)。
 
 **Cookie なしで取り直すのは、Worker の締め出しを見るためである。** `wrangler.jsonc` の `assets.run_worker_first` が `/*` や HTML を Worker に回している構成では、manifest とアイコンも Worker を通る。そこにサインインの締め出しがあると、サインインしていない端末には `/signin` への 302 が返り、**開発者の手元(サインイン済み)では再現しない形で** インストールできなくなる。`run_worker_first` に当たるなら、`!/manifest.webmanifest` と `!/icons/*` を名指しで外す。
+
+リポジトリに Playwright の E2E があるなら、manifest とアイコンが Cookie なしで 200 を返すことはそこに固定してよい — 締め出しの経路を後から変えたときに落ちる。
 
 **完了基準: `check-installable.mjs` が exit 0 で、`run_worker_first` の有無とその扱いを1行で言える。**
 

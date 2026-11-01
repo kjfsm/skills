@@ -72,7 +72,10 @@ docs のページは予告なく改訂されるので、行ごとに突き合わ
 [pv]: https://code.claude.com/docs/en/plugin-evals
 [p55]: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5
 [o5]: https://claude.dev/blog/getting-the-most-out-of-opus-5-5/
-[tc]: https://claude.com/blog/what-a-task-costs-on-opus-5-5
+[tc]: https://claude.dev/blog/what-a-task-costs-on-opus-5-5/
+[ef]: https://claude.dev/blog/spending-your-effort/
+[hb]: https://claude.dev/blog/automating-eval-design-and-hillclimbing/
+[cr]: https://claude.dev/blog/solving-code-review-at-anthropic/
 [rc]: https://claude.com/blog/reducing-cost-and-improving-performance-with-claude-platform
 [c5]: https://claude.dev/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models/
 [st]: https://claude.com/blog/steering-claude-code-skills-hooks-rules-subagents-and-more
@@ -96,6 +99,7 @@ docs のページは予告なく改訂されるので、行ごとに突き合わ
 [sc]: https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills
 [sg]: https://claude.com/blog/subagents-in-claude-code
 [ma]: https://claude.com/blog/building-multi-agent-systems-when-and-how-to-use-them
+[fs]: https://claude.com/blog/building-agents-when-to-fold-subagents-into-your-main-agent-loop
 [hw]: https://claude.dev/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code/
 [ap]: https://www.anthropic.com/engineering/april-23-postmortem
 [hd]: https://www.anthropic.com/engineering/harness-design-long-running-apps
@@ -146,7 +150,7 @@ Claude Code のシステムプロンプトは Opus 5 / Fable 5 向けに **80%�
 
 ### 思考を指示しない、推論を返信に書かせない
 
-Opus 5.5 は毎回の返信の前に必ず考え、考える量を自分で決める。「think carefully」「think step by step」はプロンプトからも保存した指示からも外す — チャット製品での試験で、外すと返信の出だしが速くなり、品質の明確な低下は無かった。考える量を変えたいなら文言ではなく **effort** を変える(文言より確実に効く)。**effort の名前はモデル間で同じ思考量を指さない** — Opus 5.5 の既定は `medium` で、`medium` が Opus 5 の `high` と同等以上、同じ段なら Opus 5 より多く考える。前のモデルの設定を持ち越さず、`xhigh` / `max` は効きを測ったときだけ使う。**内部の推論を返信に再現させる依頼は、`reasoning_extraction` として拒否されうる。** 理由が欲しいなら「このやり方を選んだ理由を3文で」のように結論として求める。 — [o5] / [p55]
+Opus 5.5 は毎回の返信の前に必ず考え、考える量を自分で決める。「think carefully」「think step by step」はプロンプトからも保存した指示からも外す — チャット製品での試験で、外すと返信の出だしが速くなり、品質の明確な低下は無かった。考える量を変えたいなら文言ではなく **effort** を変える(文言より確実に効く)。**effort の名前はモデル間で同じ思考量を指さない** — Opus 5.5 の既定は `medium` で、`medium` が Opus 5 の `high` と同等以上、同じ段なら Opus 5 より多く考える。前のモデルの設定を持ち越さず、`xhigh` / `max` は効きを測ったときだけ使う。**effort を上げて減るのは、隠れたエッジケースの見落としによる失敗であり、やり方の選び違いは直らない** — 後者は effort ではなく依頼文で直す — [ef]。**内部の推論を返信に再現させる依頼は、`reasoning_extraction` として拒否されうる。** 理由が欲しいなら「このやり方を選んだ理由を3文で」のように結論として求める。 — [o5] / [p55]
 
 ### 当たり前を書かず、モデルの通常の思考から押し出すものを書く
 
@@ -529,6 +533,17 @@ grader は6種類(`regex` / `tool_used` / `tool_order` / `file_exists` は無料
 
 2版の出力を、どちらがどちらか伏せて判定させる。assertion では拾えない全体の質を、どちらが新しいかの先入観なしに測れる。 — [ev]
 
+### eval に合わせて直すなら、過学習を見張る
+
+失敗を見て指示を1つずつ直していく反復では、eval だけが上がって本番では上がらない、が起きやすい。
+
+- **直す側が読む train と、一度も見せない test に分ける。** train が上がって test が横ばいなら過学習を疑って戻す。回帰しても戻す。両方上がったときだけ残す
+- **失敗した出力の中身を指示へ貼らない。** 失敗の書き起こしを読んで直すのはよいが、その内容をそのまま写すと、その例にだけ効く指示になる
+- **回す前に、偶然で動く幅が、採用する最小の改善より小さいことを確かめる。** 小さくなければ実行回数かケースを増やす。1行の言い換えのような、揺らぎに埋もれる変更に周回を使わない
+- **ベースラインがすでに約95%以上なら、品質ではなくコストかレイテンシを狙う**
+
+— [hb]
+
 ### ばらつきと頭打ちは、それぞれ別の問題を指す
 
 同じ eval が通ったり落ちたりするなら、eval 自体がモデルの揺らぎに敏感か、指示が複数の解釈を許している — 後者なら例を足すか具体化する。ルールを足しても合格率が頭打ちなら、**過剰に縛りすぎている** — 指示を減らして結果が保たれるか見る。 — [ev]
@@ -598,6 +613,8 @@ MCP がデータに繋ぎ、Skill がその使い方を教える。両者は補�
 - **description はトリガー条件で書く。** 委譲するかは description で決まる。能力ではなく発火の条件を書く — 「コミット前にコードのセキュリティ問題をレビューする」は「セキュリティの専門家」より正しく振り分けられる。定義を増やすほど自動委譲は当てにならなくなるので、範囲のはっきりした少数に留める — [sg]
 - **依頼文に4つを入れる。** 目的、出力形式、使うツールと情報源の指針、タスクの境界。「半導体不足を調べて」程度の短い依頼では、子がタスクを取り違えたり、他の子とまったく同じ検索をしたりした — [mr]
 - **分けるのは文脈の境界で、役割ではない。** 機能を担当する子はそのテストも担当する(必要な文脈をすでに持っている)。planner / implementer / tester / reviewer と役割で分けた実験では、子は実作業より調整に多くのトークンを使った。マルチエージェントは同じタスクで単一エージェントの3〜10倍のトークンを使う — [ma]
+- **分けるのは、次のどれかが起きたときだけ。** (1) 1つのループで、文脈の膨張による性能の低下が測れる。(2) 使い捨ての新しいコンテキストで並列に解くべきタスクが複数ある。(3) 1つのエージェントが適切なツールを選べない、あるいはシステムプロンプトに矛盾する指示がある。チームや問題の種類ごとに子を作ると、構成が組織図の写しになる — [fs]。ツールの数の目安は公式どうしで違う: ツールが多すぎる(しばしば20以上)と適切な1つを選べなくなり、専門の子に分ける合図になる — [ma]。システムプロンプトのツール定義が30〜50を超えると選択が落ち始める(1 API に1ツールではなく利用者の意図でまとめ、deferred loading を使う) — [fs]
+- **レビューを頼む依頼文は短く、5つを書く。** その場所で何が失敗か(docs なら「嘘をつく」、設定なら「誤配送する」)、nit の上限、飛ばすパス、根拠は名前からの推測でなくファイルと行で示すこと、要約は件数から始め、直すものが無いときはそう明言すること — [cr]
 - **時間の信号。** Opus 5.5 は経過時間に敏感で、親が子に委譲する構成では、時間の予算(「経過 340s / 1200s」を毎メッセージ末尾に)を渡すと並列を増やして早く終える。予算を決められないなら経過時間だけを見せ、「時間が重要: 避けられる時間は使わない。正しい結果は早いほど良い」を1文足す。effort を下げると仕事そのものが減るが、予算は主に並列の数を増やす。予算は助言で止めはしないので、ハードな停止はハーネス側のタイムアウトで持つ — [p55]
 - **行動の前に探索させる。** 複数のコネクタ(メール・文書・表・CRM)をまたぐ作業では、Opus 5.5 はすぐ手を動かしがちで、依頼が名指ししていない場所(古いスレッドの方針、別タブの規則)を見落とす。「行動する前に、依頼が触れていないものも含めて関係しうるものを広く開き、見つけたものを使う」を1文足す。見つけたものに従わせる指示なので、信頼できない内容を探索範囲に置かない — [p55]
 

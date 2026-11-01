@@ -8,12 +8,14 @@ AI に読ませる文書の書き方に関わる記事だけを載せる。**仕
 
 ## claude.com/blog
 
-URL は `https://claude.com/blog/<slug>`(`hc` `se` `cm` `pe` は `OFFICIAL.md` が日本語版 `/ja/blog/` を引いている)。仕分け済み: **2026-09-23 公開分まで全件**
+URL は `https://claude.com/blog/<slug>`(`hc` `se` `cm` `pe` は `OFFICIAL.md` が日本語版 `/ja/blog/` を引いている)。仕分け済み: **2026-10-28 公開分まで全件**
 
 | 公開日     | slug                                                                             | キー | 何が書いてあるか                                                                                                                  |
 | ---------- | -------------------------------------------------------------------------------- | ---- | --------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-10-22 | building-agents-when-to-fold-subagents-into-your-main-agent-loop                 | fs   | サブエージェントを main loop に畳む判断、子を残す3条件、ツール定義30〜50で選択が落ちる                                            |
+| 2026-10-08 | how-block-orchestrates-claude-fable-across-thousands-of-pull-requests            | —    | 上位モデルで計画し小さいモデルに作業を回す、数千 PR の移行の運用                                                                  |
+| 2026-09-29 | agents-you-can-coach-how-asana-builds-human-agent-teams-with-claude              | —    | エージェントを作る前に目的・指示・担当する仕事を書く、共有メモリの編集権限                                                        |
 | 2026-09-23 | how-to-prepare-for-ai-driven-code-modernization-projects                         | md   | 完了条件(certificate)の各項目を人間抜きで判定できる形にし、満たすまで反復させる。問題が出たら個々の変更ではなくワークフローを直す |
-| 2026-09-22 | what-a-task-costs-on-opus-5-5                                                    | tc   | effort の選び方、サブエージェントのモデル、prompt-audit の実測                                                                    |
 | 2026-09-08 | reducing-cost-and-improving-performance-with-claude-platform                     | rc   | フロンティアモデルで逆効果になる指示の6類型と、外したときの実測(Opus 5.5 で再測定)                                                |
 | 2026-08-26 | how-warp-builds-self-improving-agents-on-claude                                  | wp   | 規則より理由を渡す、スキルは手続きで安定・メモリは自動で変わり続ける                                                              |
 | 2026-08-21 | the-ai-native-sdlc-playbook                                                      | sd   | CLAUDE.md は1ページ未満、2度間違えたら書く、組織の知識はスキルに                                                                  |
@@ -29,17 +31,24 @@ URL は `https://claude.com/blog/<slug>`(`hc` `se` `cm` `pe` は `OFFICIAL.md` �
 | 2026-04-02 | harnessing-claudes-intelligence                                                  |      | プロンプトは静的を先・動的を後(キャッシュ)、専用ツールにするかは可逆性で決める                                                    |
 | 2026-03-05 | skills-explained                                                                 | se   | どの手段に載せるかの使い分け                                                                                                      |
 | 2026-03-03 | improving-skill-creator-test-measure-and-refine-agent-skills                     | sc   | スキルを capability uplift と encoded preference に分ける、eval で description の誤発火と不発火を直す、A/B 比較                   |
-| 2026-01-23 | building-multi-agent-systems-when-and-how-to-use-them                            | ma   | 依頼文に目的・出力形式・境界を渡す、問題の種類でなく文脈の境界で分ける、ツールが15〜20を超えたら分割を検討                        |
+| 2026-01-23 | building-multi-agent-systems-when-and-how-to-use-them                            | ma   | 依頼文に目的・出力形式・境界を渡す、問題の種類でなく文脈の境界で分ける、ツールが多すぎる(しばしば20以上)と選択を誤る              |
 | 2026-01-22 | building-agents-with-skills-equipping-agents-for-specialized-work                | ba   | 3層開示の実測トークン(メタデータ約50 / SKILL.md 約500 / 参照2,000超)                                                              |
 
 2026年より前: extending-claude-capabilities-with-skills-mcp-servers, using-claude-md-files `cm`, how-to-create-skills-key-steps-limitations-and-examples `hc`, improving-frontend-design-through-skills, best-practices-for-prompt-engineering `pe`, scaling-agentic-coding, claude-2-1-prompting
 
 ## claude.dev/blog
 
-URL は `https://claude.dev/blog/<slug>/`。仕分け済み: **2026-09-23 公開分まで全件**
+URL は `https://claude.dev/blog/<slug>/`。仕分け済み: **2026-10-15 公開分まで全件**
 
 | 公開日     | slug                                                                | キー | 何が書いてあるか                                                                              |
 | ---------- | ------------------------------------------------------------------- | ---- | --------------------------------------------------------------------------------------------- |
+| 2026-10-15 | solving-code-review-at-anthropic                                    | cr   | コードオーナーが書くレビュー指示(REVIEW.md)の良い形、人間の承認を最大1人に抑える運用          |
+| 2026-10-08 | building-effective-agent-automations                                | —    | 定期実行エージェントの参照実装。読めなかったソースの明示、投稿前の再確認                      |
+| 2026-10-06 | claude-code-in-the-cloud                                            | —    | クラウドセッションに渡すタスクを、問題・完了の姿・証明方法を書いた自己完結のチケットにする    |
+| 2026-09-28 | automating-eval-design-and-hillclimbing                             | hb   | eval の設計原則と hillclimb。train / test 分割、失敗を指示に貼らない、ノイズと改善幅          |
+| 2026-09-28 | building-with-claude-sonnet-5-5                                     | —    | Sonnet 5.5 の選び方・API 移行・effort の再調整(モデル固有)                                    |
+| 2026-09-25 | spending-your-effort                                                | ef   | effort の意味と段の選び方。effort で減るのはエッジケースの見落としで、方針の誤りは直らない    |
+| 2026-09-25 | what-a-task-costs-on-opus-5-5                                       | tc   | effort の選び方、サブエージェントのモデル、prompt-audit の実測                                |
 | 2026-09-22 | getting-the-most-out-of-opus-5-5                                    | o5   | 思考の指示を外す、完了の定義、停止と継続のルール、タスク一覧のファイル化                      |
 | 2026-07-24 | the-new-rules-of-context-engineering-for-claude-5-generation-models | c5   | 過剰な制約を外す、例より interface 設計、progressive disclosure、CLAUDE.md は gotcha に使う   |
 | 2026-06-03 | lessons-from-building-claude-code-how-we-use-skills                 | lc   | Gotchas、トリガーとしての description、最小から育てる、スキルの類型                           |

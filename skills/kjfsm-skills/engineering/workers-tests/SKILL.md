@@ -12,6 +12,7 @@ description: Cloudflare Workers のプロジェクトでテストスイートを
 - **テストが1本も無い** → [START.md](START.md) — 何から書くか、置き場、書かないもの
 - **既存のスイートが重い・複雑・信用できない、版を上げて壊れた** → [REBUILD.md](REBUILD.md) — `vi.mock` の本数を減らす方向、棚卸し、履歴からの復元、版移行、実 D1 の足場
 - **`main` が SSR アプリ(`virtual:react-router/server-build` を import するエントリ)** → [SSR.md](SSR.md) — 費用の測り方、3層への割り方、`createTestHarness` の実務。上の2つと併せて読む
+- **SSR でなくても `createTestHarness` で HTTP の層を作る** → [SSR.md](SSR.md) の「`createTestHarness` の実務」だけを読む — ビルドの作り方、外部 API と保存先の差し替え
 
 以下は、どの状況でも当てる。
 

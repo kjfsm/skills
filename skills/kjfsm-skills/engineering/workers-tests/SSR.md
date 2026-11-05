@@ -82,9 +82,10 @@ fetch/queue/scheduled の実体を、SSR ディスパッチャを引数で受け
 
 ## `createTestHarness` の実務
 
-公式の入門に書かれていない、実際にぶつかる7つ。
+公式の入門に書かれていない、実際にぶつかる8つ。
 
 - **ビルドは globalSetup で毎回作り直す。** ハーネスが叩くのはビルド成果物で、`build/` は前に何を走らせたかで中身が変わる。古いものが残ると、直したはずの経路を検査しないまま緑になる
+- **globalSetup から起こす `vite build` には `NODE_ENV=production` を明示する。** vitest の中では `NODE_ENV=test` が立っていて、子プロセスの `vite build` がそれを継ぐ。Vite はそれで `import.meta.env.PROD` を偽にするので、`PROD` で畳んだ開発用の分岐が**本番と同じはずの成果物に残る**。成果物を grep する検査は、その `dist/` を叩けば赤になる
 - **ハーネスはテストファイルごとに1つ。** ストレージもそこで閉じるので、どのファイルも空の DB から始まり、同じ handle を同時に使える。公式の入門は `afterEach(server.reset)` を見せるが、`beforeAll` で状態を積むテストではその `beforeAll` をテストの数だけ繰り返すことになる
 - **応答は本体まで読んでから返す。** 読み残した応答が接続を掴んだままになり、続けて投げたリクエストが `Network connection lost` で 500 になる。応答コードしか見ないテストが必ずこれを踏む
 - **`FormData` をそのまま渡さない。** ハーネスの `fetch` は境界を含む `Content-Type` を組み立てないので、Worker 側の `request.formData()` が「知らない MIME だ」と投げて 500 になる。`new Response(formData)` に一度通し、ヘッダとバイト列の両方を自分で取り出す
@@ -93,6 +94,17 @@ fetch/queue/scheduled の実体を、SSR ディスパッチャを引数で受け
 - **落ちたテストには `server.debug()` を添える**(`afterEach` で `task.result?.state === "fail"` を見る)。これが無いと応答の 500 だけが残り、サーバー側で何が投げられたのかが消える
 
 **一度に投げすぎない。** 100本同時の POST は次のリクエストの接続ごと落とす(60本までは通る)。20本ずつの束に割る。同時に投げること自体が主題のテストは、まず無い。
+
+### テストのために Worker へ口を足さない
+
+ハーネスは周りの環境を差し替える手段を持っている。テストの都合で Worker に分岐やルート(署名を確かめない分岐、種を撒く口、宛先を localhost に開く分岐)を足す前に、次で足りないかを見る。足した口は、畳む式と、畳めているかを成果物で見る検査の2つを連れてくる。
+
+| したいこと                                                     | ハーネスの手段                                                                                                                                                                                                                                                                                                                |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 外部 API(IdP の JWKS・token・userinfo、プッシュサービス)を偽る | **Worker の外向き `fetch()` はテストの Node の `globalThis.fetch()` を通る**ので、MSW(`msw/node` の `setupServer`、`onUnhandledRequest: "error"`)か `vi.spyOn(globalThis, "fetch")` で受ける([Prepare test state](https://developers.cloudflare.com/workers/testing/test-harness/prepare-test-state/#mock-outbound-requests)) |
+| D1・R2・KV に種を置く                                          | `worker.getEnv()` のバインディングへ Node から直に書く。D1 は drizzle の `batch` まで通り、`transaction` は D1 が `BEGIN` を受けないので落ちる                                                                                                                                                                                |
+| Durable Object に種を置く・中を見る                            | `worker.getDurableObjectStorage(binding, { name }).exec(sql, …)`。SQLite で裏付けた DO だけ                                                                                                                                                                                                                                   |
+| サインイン済みの Cookie を得る                                 | テストの Node に本番と同じ設定の better-auth を立てて `testUtils` で `login()` する(→ `dev-bypass-sign-in` の `TESTUTILS.md`)                                                                                                                                                                                                 |
 
 ## アプリ側に1つだけ手が要る
 

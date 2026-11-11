@@ -39,6 +39,8 @@ disable-model-invocation: true
 ## コードベースの健全性
 
 - **`/mattpocock-skills:improve-codebase-architecture`** — 手が空いたらいつでも実行し、エージェントが操作しやすいコードベースを保つ。**深化の機会** を洗い出し、1つ選ぶと _アイデアが生まれる_ ので、`/mattpocock-skills:grill-with-docs` でメインフローに持ち込む。これは候補を見つける調査であり、選んだものを設計する作業台が **`/mattpocock-skills:codebase-design`** である。
+- **`/kjfsm-skills:review-codebase`** — 差分ではなく、既にあるプロダクションコードの全部を読んで、バグ・改善案・イマイチな実装・簡素化できる箇所を洗い出したいときに。領域に切って1ファイルも飛ばさずに読ませ、裏を取り、ID 付きの一覧にして止まる。構造の深化だけを探すなら `/mattpocock-skills:improve-codebase-architecture`、差分のレビューなら `/kjfsm-skills:two-axis-review`。
+- **`/kjfsm-skills:fix-on-integration-branch`** — その一覧(や別のレビューの結果)の多数の項目を、まとめて直したいときに。統合ブランチへ向けた PR に割って実装役に並列で直させ、1本ずつ検証して入れ、既定ブランチ向けの PR を1本出して止まる — 自分で決めたこととテストで確かめられない変更は、その PR の本文に載る。数件ならその場で直し、設計から決め直すものは `/mattpocock-skills:grill-with-docs` へ。
 - **`/kjfsm-skills:tend-memory-files`** — セッション開始時にロードされる指示ファイル(`AGENTS.md`、`CLAUDE.md`、`CLAUDE.local.md`、`.claude/rules/`)を新規に書く、あるいは肥大化・陳腐化・矛盾を疑うたびに監査してトリムする。
 
 ## スタンドアロン

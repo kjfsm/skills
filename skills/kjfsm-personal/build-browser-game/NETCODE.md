@@ -6,12 +6,12 @@ partyserver そのものの挙動は `/kjfsm-skills:partyserver-on-durable-objec
 
 - **部屋の DO はハイバネーションさせない**(`static options = { hibernate: false }`)。`setInterval` の時計が回っている間はどのみち眠れず、眠らせる設定は起き直したときの組み直しを増やすだけである。人がいなくなったら `clearInterval` して状態を捨てる
 - **何も届かないまま 10 秒たった接続は閉じる。** StrictMode や開発サーバーの読み込み直しで張りかけのまま捨てられた WebSocket は、close が DO に届かず、部屋に幽霊として残る。入力の無い放置の人は、これとは別に 150 秒で閉じる
-- **Free の DO は、受けたメッセージ 20 通を1要求に数える**(送るのは無料)。入力は量子化して変わったときだけ送り(最大 20Hz)、1秒あたりの受信数に上限を置く。状態は 30Hz で全員へ配ってよい
+- **DO は、受けたメッセージ 20 通を1要求に数える**(送るのは無料)。入力は量子化して変わったときだけ送り(最大 20Hz)、1秒あたりの受信数に上限を置く。状態は 30Hz で全員へ配ってよい
 - **公開の部屋は `getByName(name, { locationHint: "apac" })` で取る。** DO は最初に入った人の近くに作られて以後動かないので、日本の近くに固定する。本番の往復は十数 ms に収まる
-- **WebSocket の経路は、`workers/app.ts` の「本体を読み捨てる行」より前で返る。** GET 以外の要求は、本体を読み捨ててから 405 を返す(テンプレートの `routes.md` の ⚠️)
-- **入力の検証(zod)は `.server.ts` に置く。** 共有の protocol に置くと画面の束に入る。外すだけで、束が 34KB から 14KB(gzip)に減った例がある
+- **WebSocket の経路は `/api/*` の下に置き、`src/worker/index.ts` の Hono から DO へ渡す。** テンプレートの `wrangler.json` は `assets.run_worker_first` で `/api/*` だけを Worker へ向けていて、それ以外の経路にはアセットに無い要求でも画面の `index.html` が返る。partyserver の既定の経路(`/parties/…`)を `run_worker_first` に足さないのは、画面の要求で Worker を起こさないためにそれを `/api/*` だけに保っているからである(テンプレートの `docs/adr/0001`)。partyserver の側は `prefix` で経路を合わせる
+- **入力の検証(zod)は `src/worker/` の側に置く。** 画面と共有する protocol のファイルに置くと画面の束に入る。外すだけで、束が 34KB から 14KB(gzip)に減った例がある
 - **welcome に配線の版(`PROTOCOL_VERSION`)を載せ、版が違えば画面に読み込み直しを促す。** デプロイで DO が置き直されると、開いたままのタブが古い JS のまま自動で繋ぎ直してくる
-- **bindings 層のテストでは、`tests/bindings/worker.ts` から DO のクラスを export する。** テストの Worker は `wrangler.jsonc` の DO 束縛を読むので、クラスが無いと起動しない
+- **DO のクラスは Worker の入口(`src/worker/index.ts`)から export する。** テストの Worker(`vitest.config.ts` の `main`)も `wrangler.json` の DO 束縛を読むので、入口にクラスが無いと起動しない
 
 ## 画面
 

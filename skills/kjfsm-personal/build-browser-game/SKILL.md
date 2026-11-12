@@ -35,16 +35,20 @@ description: スマホでも遊べるブラウザゲームを、kjfsm の構成(
 
 ## 2. 土台を起こす
 
-`cf-workers-full-stack-template` から起こす。手順はテンプレートの README「フォークしたら」にある。`/kjfsm-skills:setup-repo` が敷くもの(検証ゲート・rules・CI・lefthook・イシュートラッカー)と、kjfsm-auth の RP と D1 がそろっている。README に無いことは次のとおり。
+`kjfsm/cf-workers-free-template` から起こす。写し方は `setup-cf-app` スキルが持つので、それを呼ぶ。認証先は kjfsm-auth のままにする。
 
-- 写す前に `git fetch` し、`git archive origin/main | tar -x -C <新しいリポジトリ>` で写す。手元の clone は古いことがある
-- テンプレートが `kjfsm/cf-workers-full-stack-template#11` より前の版なら、README の置き換えは `git grep` ではなく `grep -r --exclude-dir=node_modules` で探し、`check:migrations` を #11 の `existsAt` の形に直す。写した直後のファイルは未追跡で `git grep` に拾われず、origin/main に無い `wrangler.jsonc` で `git show` が落ちる
-- テンプレートの D1 は共有 D1(`kjfsm-shared-db`)を bind している。共有 D1 には入らないので、「フォークしたら」の slug の空きの確認は飛ばす。ログインを入れるなら、本番の前に専用の D1 へ替える([ACCOUNT.md](ACCOUNT.md) の「本番」の 1)
-- 手元のポートは `grep -rhoE 'port: ?[0-9]{4}' ~/github/kjfsm/*/vite.config.ts` で空きを探す
-- `.gitignore` に `.claude/worktrees/` を足す。テンプレートには無く、本体のチェックアウトで worktree が未追跡に出る
-- ログインを入れないなら、RP・D1・開発用の入口をここで外す。残すと、使わない secret と D1 が、本番に出す前提として残る。外し方は [ACCOUNT.md](ACCOUNT.md) の「外す」の 1〜4
+ゲームに要るもののうち、次の3つはテンプレートに無い。写したあと、最初のチケットより前にここで足す — チケットごとのセッションは、検証ゲートと E2E がそろっている前提で `implement-and-review` を回す。
 
-完了基準: 名前・slug・ポートを置き換え、テンプレートの検証ゲートが緑のままコミットした。
+- **Durable Objects** — 部屋の DO を partyserver で載せる → `partyserver-on-durable-objects` スキル。経路の置き場所とテストでの export は [NETCODE.md](NETCODE.md) にある
+- **E2E** — 手順 3 のシームの「画面は Playwright で3台を駆動する」に要る → `setup-playwright` スキル。`webServer` のポートは環境変数(`E2E_PORT`)で替えられるようにする(手順 5 で並べるセッションが使う)
+- **CI と pre-push** — テンプレートはどちらも持たない(lefthook は pre-commit で整形するだけ)。検証ゲートを強制する仕組みが無いので敷く → `setup-ci` スキル。private のリポジトリでは CI がマージ前に回らないので、pre-push も敷く → `setup-hooks` スキル
+
+README に無いことは次のとおり。
+
+- 開発サーバーのポートはテンプレートで 8808 に固定してある(`vite.config.ts` の `strictPort`)。「フォークしたら」に沿って替える前に、`grep -rhoE 'port: ?[0-9]{4}' ~/github/kjfsm/*/vite.config.ts` で空きを探す
+- ログインを入れないなら、`setup-cf-app` の D1 と認証先の切り替えは飛ばし、RP・D1・開発用の入口をここで外す。残すと、使わない secret と D1 が、本番に出す前提として残る。外し方は [ACCOUNT.md](ACCOUNT.md) の「外す」の 1〜4
+
+完了基準: 名前・slug・ポートを置き換え、DO・E2E・CI を足して、検証ゲートが緑のままコミットした。
 
 ## 3. 仕様にする — `/mattpocock-skills:to-spec`
 
@@ -56,7 +60,7 @@ description: スマホでも遊べるブラウザゲームを、kjfsm の構成(
 - 合言葉の部屋では、CPU を外せる
 - 本番は、main にマージしたあと人間が繋ぐ Workers Builds が出す
 
-テストのシームは4つある。勝負の計算は node 層、部屋の DO は bindings 層で WebSocket を張り、ページは http 層、画面は E2E と Playwright で3台を駆動する観測で撃つ。
+テストのシームは4つある。勝負の計算は純粋関数のテスト、部屋の DO は `@cloudflare/vitest-plugin` の上で WebSocket を張るテスト、API は Worker の入口を叩くテスト、画面は E2E と Playwright で3台を駆動する観測で撃つ。
 
 チケットは新しいセッションで作るので、式と数の初期値(強さ・体力・値段の元値)も仕様に載せる。載せないと、チケットごとに別の数を作る。載せる前に、1勝負の長さを暗算で当てる。
 
@@ -74,7 +78,7 @@ description: スマホでも遊べるブラウザゲームを、kjfsm の構成(
 
 同じブロッカーを持つチケットは、そのマージのあと並べて立てる。
 
-- **並べて立てるセッションには、別々の `E2E_PORT` を最初の入力で渡す。** テンプレートの Playwright は手元で `reuseExistingServer` なので、同じポートだと相手のセッションのサーバーを相手にテストが走る。開発サーバーのポートは固定なので、相手が使っていることも伝える
+- **並べて立てるセッションには、別々の `E2E_PORT` を最初の入力で渡す。** 手元の Playwright が `reuseExistingServer` なら、同じポートだと相手のセッションのサーバーを相手にテストが走る(`setup-playwright`)。開発サーバーのポートは固定なので、相手が使っていることも伝える
 - **並べた PR の後ろ側は、main を取り込んで検証ゲートを通してからマージする。** 文面で衝突しなくても、片方が変えた数で、もう片方が足したテストが落ちることがある。取り込みと直しは、その PR のセッションに `SendMessage` で頼む。終わりは `notify_when_idle` で待ち、画面を覗いて回らない
 - **Workers Builds が繋がったら、以後のマージは本番に出る。** 人間は手順 7 より前に繋ぐことがある。PR のチェック(プレビューのビルド)が通ってからマージし、人が遊び始めたら、保存データの版を上げるときは作り直さずに移行を書く
 - マージされたチケットのセッションは閉じ、worktree に未コミットの変更が無く中身が既定ブランチに入っていることを確かめてから、worktree とブランチを消す

@@ -8,7 +8,7 @@ SKILL.md の手順 1 で入れると決めたときだけ読み、各手順に�
 - 同じアカウントが入り直したら、古い接続を閉じる。閉じないと、自分のキャラを2つ並べて自分で自分を倒し、点を積める
 - ランキングは通算の成績で並べ、同点は同じ順位にする
 
-テストのシームに、名前を聞く関所(http 層)が加わる。
+テストのシームに、名前を聞く関所(API のテスト)が加わる。
 
 ## 作る(SLICES.md のチケット 5)
 
@@ -16,18 +16,16 @@ SKILL.md の手順 1 で入れると決めたときだけ読み、各手順に�
 
 ログインした人の名前は、アプリ側のテーブル(`<slug>_profile`)にアカウントごと1つ持つ。ゲストの名前は、ログインを入れない場合と同じく端末に持つ。設定画面(`/settings`)では、ログインした人はアカウントの名前を、ゲストは端末の名前を変える。
 
-関所は root の middleware の1か所に置く。middleware はアカウントを要求ごとに1回だけ引いて context に置き、名前の無いアカウントを、どのページからでも `/welcome?redirectTo=<元のパス>` へ送る。
+関所は画面と API に1か所ずつ置く。画面では root の route の `beforeLoad` がアカウントを1回だけ引き、名前の無いアカウントを、どのページからでも `/welcome?redirectTo=<元のパス>` へ送る。これは表示の振り分けで、名前の要る API は Hono の middleware が同じ判定で断る — テンプレートの `src/react-app/routes/_authed.tsx` と同じ分け方である。
 
-- **`/welcome`・`/login`・`/api/*` は通す。** `/api/` まで止めると、ログアウトもできなくなる
-- **パスは `.data` を落としてから見る。** 画面の中の遷移とフォームの送信は、データ要求(`/path.data?_routes=…`、トップは `/_.data`)として middleware に届く。落とさないと、名前を決める送信そのものを関所が `/welcome` へ送り返す
-- **loader ごとに判定を書かない。** 写し忘れたページが、ビルドもテストも通ったまま素通りになる。`/login` も含め、どのページもセッションを引き直さず context から読む
-- **アカウントを引けなかったら、ゲストとして通す。** middleware が投げると全ページが 500 になる。テーブルより先にコードが出たときに、ログインした人の全ページが落ちる
-- **ログインの戻り先(`callbackURL`)は元のページのままでよい。** 戻った直後の要求を middleware が捕まえる
-- **`/welcome` は、ページ自身の middleware でログインを要求する。** loader と action に同じ判定を2回書かない
+- **画面では `/welcome` と `/login` を、API では `/api/auth/*` と名前を決める API を通す。** `/api/auth/*` まで止めると、ログアウトもできなくなる
+- **route ごとに判定を書かない。** 写し忘れたページが、ビルドもテストも通ったまま素通りになる
+- **アカウントを引けなかったら、ゲストとして通す。** 関所が投げると全ページが落ちる。テーブルより先にコードが出たときに、ログインした人の全ページが開けなくなる
+- **ログインの戻り先(`callbackURL`)は元のページのままでよい。** 戻った直後の画面遷移を関所が捕まえる
 
 ### 部屋へ誰かを渡す
 
-対戦の WebSocket は React Router の外にあり、関所を通らない。
+対戦の WebSocket は画面の関所を通らない。
 
 - **Worker がセッションを確かめ、userId と名前をヘッダで DO へ渡す。** ブラウザから届いた同名のヘッダは消す。日本語はヘッダにそのまま載らないので `encodeURIComponent` する。手元から送られた名前は、ゲストのときだけ使う
 - **名前の無いアカウントはゲストとして扱い、userId を渡さない。** 渡すと、端末の名前のままランキングに積まれる
@@ -41,29 +39,29 @@ SKILL.md の手順 1 で入れると決めたときだけ読み、各手順に�
 
 ### テスト
 
-- **名前の無いアカウントで、全ページぶん「送られる」を撃つ。** `/api/auth` と `/login` が通ることも撃つ
-- **開発用の入口の種の人を、名前を決めないまま使う人と、決める人に分ける。** http 層は D1 をファイルの中で共有するので、分けないとテストの順序に乗る
+- **名前の無いアカウントで、名前の要る API が断ることを API のテストで、画面が `/welcome` へ送ることを E2E で撃つ。** `/api/auth` と `/login` が通ることも撃つ
+- **開発用の入口の種の人を、名前を決めないまま使う人と、決める人に分ける。** API のテストが D1 をファイルの中で共有するなら、分けないとテストの順序に乗る
 - **E2E は、種の人の名前を毎回まっさらに戻してから始める。** 開発用の入口で戻せるようにする。戻さないと1回目しか通らず、手元の2回目も CI のリトライも落ちる
 
-完了: 初回のログインで名前を聞かれ、設定で変えるとトップにもランキングにも新しい名前が出る。上のテストが通り、同点の人が一覧でも自分の欄でも同じ順位になる。同じアカウントの入り直しで古い接続が閉じることを、bindings 層でテストした。
+完了: 初回のログインで名前を聞かれ、設定で変えるとトップにもランキングにも新しい名前が出る。上のテストが通り、同点の人が一覧でも自分の欄でも同じ順位になる。同じアカウントの入り直しで古い接続が閉じることを、DO のテストで撃った。
 
 ## 本番(DEPLOY.md に足す)
 
 どれも本番(D1・本番の IdP・Cloudflare)に触る。始める前に、この節の一覧をユーザーに見せ、まとめて確認を取る。
 
-1. **PR を出す前に、このゲームだけの D1 を作り、secret を3本入れる。** `CLOUDFLARE_ACCOUNT_ID` を付けて `pnpm exec wrangler d1 create <app>` を叩き、`wrangler.jsonc` の `d1_databases` の `database_name` と `database_id`、`package.json` の `db:migrate:*` の DB 名を新しい D1 に替える。共有 D1(`kjfsm-shared-db`)には入れない。続けて `openssl rand -base64 32 | pnpm exec wrangler secret put BETTER_AUTH_SECRET --name <app>` を入れる。Worker がまだ無ければ、これが作る。残り2本は、本番の IdP にクライアントを作って入れる(`connect-kjfsm-auth` の手順 2。`redirect_uri` は `https://<app>.kjfsm.net/api/auth/callback/kjfsm`)
+1. **PR を出す前に、secret を3本入れる。** D1 は手順 2 の `setup-cf-app` で、このゲームだけのものに替えてある(共有 D1 `kjfsm-shared-db` には入れない)。`openssl rand -base64 32 | pnpm exec wrangler secret put BETTER_AUTH_SECRET --name <app>` を入れる。Worker がまだ無ければ、これが作る。残り2本は、本番の IdP にクライアントを作って入れる(`connect-kjfsm-auth` の手順 2。`redirect_uri` は `https://<app>.kjfsm.net/api/auth/callback/kjfsm`)
 2. **PR の本文に、最初のビルドが流すマイグレーションの SQL を載せる。** マージのあとは、確認なしに流れる
 3. **2回目からのマイグレーションは、流れる前に戻り先を控える。** `pnpm exec wrangler d1 time-travel info <app>` の bookmark である。Workers Builds を繋いだあとなら、マージの前に控える。最初の1回は空の D1 に当たるので要らない。auto mode ではこのコマンドが止められることがある。そのときは別の手で読みに行かず、コマンドを人間に渡す
 4. **Workers Builds のコマンドを、ログインの分だけ足す。** Build command は `pnpm run build && pnpm run check:door`(開発用の入口が本番の成果物に残っていないことの検査)、Deploy command は `pnpm db:migrate:remote && npx wrangler deploy` にする。マイグレーションは必ずデプロイより先に置く
-5. **確かめる。** ビルドのログでマイグレーションが流れたことを見る。本番で `/dev/bypass` が 404 を返すこと、`/login` への POST が `auth.kjfsm.net/api/auth/oauth2/authorize` へ正しい `client_id`・`redirect_uri`・`S256` で送ることも見る。その URL を叩くと、IdP のサインイン画面へ 302 で送られる(`invalid_client` にならない)
+5. **確かめる。** ビルドのログでマイグレーションが流れたことを見る。本番で `/api/dev/bypass` が 404 を返すこと、`/login` のボタンが叩く `/api/auth/sign-in/social` が `auth.kjfsm.net/api/auth/oauth2/authorize` へ正しい `client_id`・`redirect_uri`・`S256` で送ることも見る。その URL を叩くと、IdP のサインイン画面へ 302 で送られる(`invalid_client` にならない)
 6. **人間に渡す。** IdP を通したログインの一巡は、Google と同意画面があるので人間にしか通れない。iOS のホーム画面(standalone)から開いたときのログインは、未確認であることを伝える
 
 ## 外す
 
 遊んでみて要らないと分かったら、コードとドキュメントから外す PR と、本番に残ったものの片付けを分ける。手順 2 で最初から入れない場合も、1〜4 は同じである。
 
-1. **`wrangler.jsonc` の `secrets.required` は、空の配列で残す。** 消すと `wrangler types` が手元の `.dev.vars` から古い secret を型に拾う。手元の型チェックは通り、`.dev.vars` の無い CI で `cf-typegen:check` が落ちる。`wrangler types --check --env-file /dev/null` で確かめる
-2. **`.claude/rules/db.md` は、生成物の一覧として残す。** 「自動生成ファイルを手編集しない」の具体パスはこのファイルが持つ。`worker-configuration.d.ts` と `.react-router/` は D1 を外しても生成物のまま
+1. **`wrangler.json` の `secrets.required` は、空の配列で残す。** 消すと `wrangler types` が手元の `.dev.vars` から古い secret を型に拾う。手元の型チェックは通り、`.dev.vars` の無い CI で `cf-typegen:check` が落ちる。`wrangler types --check --env-file /dev/null` で確かめる
+2. **`.claude/rules/d1.md` は消し、`.claude/rules/generated-files.md` は消したファイル(`src/worker/db/auth-schema.ts`、`migrations/**`)の行だけを外して残す。** 後者をファイルごと消すと、`worker-configuration.d.ts` と `src/react-app/routeTree.gen.ts` を手編集しない決まりも消える
 3. **`.worktreeinclude` から `.dev.vars` を外す。** 読む側がいないのに、新しい worktree へ古い secret を写し続ける
 4. **ログインのテストファイルを消す前に、ログインと無関係なテストを移す。** ゲストが設定で名前を変えるテストのように、残す画面を守るものが混ざっている
 5. **マージの前に、人間が Workers Builds のコマンドを `pnpm run build` と `npx wrangler deploy` に戻す。** `check:door` と `db:migrate:remote` を消したまま古いコマンドで走ると、ビルドが落ちてデプロイされない

@@ -1,6 +1,6 @@
 ---
 name: setup-cf-app
-description: 新規の Cloudflare Workers フルスタックアプリを、GitHub のテンプレート `kjfsm/cf-workers-free-template`(Free プランに収まる Vite の React SPA + Hono の API Worker)を写して立ち上げる。テンプレートが見えなければ公式テンプレートから組む。「環境構築」「新規プロジェクト」「新しいアプリを作る」「セットアップ」「スキャフォールド」などで参照する。
+description: 新規の Cloudflare Workers フルスタックアプリを、GitHub のテンプレート `kjfsm/cf-workers-free-template`(アクセスの速い Vite の React SPA + Hono の API Worker)を写して立ち上げる。テンプレートが見えなければ公式テンプレートから組む。「環境構築」「新規プロジェクト」「新しいアプリを作る」「セットアップ」「スキャフォールド」などで参照する。
 ---
 
 # テンプレートを写してアプリを立ち上げる

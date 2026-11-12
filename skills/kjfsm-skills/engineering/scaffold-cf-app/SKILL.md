@@ -1,11 +1,11 @@
 ---
 name: scaffold-cf-app
-description: 新規の Cloudflare Workers フルスタックアプリを、公式の `vite-react-template` から Free プランに収まる標準構成(Vite の React SPA + Hono の API Worker)へ層ごとに積んで組む。「環境構築」「新規プロジェクト」「新しいアプリを作る」「スキャフォールド」、`/kjfsm-personal:setup-cf-app` が写す元のテンプレートを見つけられなかったとき、テンプレート自体を公式の更新に合わせて作り直すときに使う。`/kjfsm-personal:setup-cf-app` が入っていれば、新規作成はそちらが先である。
+description: 新規の Cloudflare Workers フルスタックアプリを、公式の `vite-react-template` からアクセスの速い標準構成(Vite の React SPA + Hono の API Worker)へ層ごとに積んで組む。「環境構築」「新規プロジェクト」「新しいアプリを作る」「スキャフォールド」、`/kjfsm-personal:setup-cf-app` が写す元のテンプレートを見つけられなかったとき、テンプレート自体を公式の更新に合わせて作り直すときに使う。`/kjfsm-personal:setup-cf-app` が入っていれば、新規作成はそちらが先である。
 ---
 
 # 公式テンプレートから標準構成を組む
 
-前提は Workers の **Free プラン**(1 回の実行ごとに CPU 10ms)。**準備手順と各 config は、その都度各ツールの公式ドキュメントで最新を確かめて組む。** バージョンとフラグは陳腐化が速いので、ここには固定しない。
+標準構成は **アクセス速度**(利用者が感じる応答の速さ)で選ぶ。画面は静的アセットとしてエッジから返し、Worker が受けるのは API だけにする。**準備手順と各 config は、その都度各ツールの公式ドキュメントで最新を確かめて組む。** バージョンとフラグは陳腐化が速いので、ここには固定しない。
 
 ## 標準構成
 
@@ -23,13 +23,13 @@ description: 新規の Cloudflare Workers フルスタックアプリを、公�
 | テスト         | Vitest + `@cloudflare/vitest-plugin`(Worker の API)。E2E は `setup-playwright` |
 | 型             | `wrangler types` + `tsr generate` + `tsc -b`                                   |
 
-**React Router と TanStack Start は使わない。** どちらも Worker の中で React を動かし、10ms に収まらない — React Router の SSR は HTML の生成だけで 22〜57ms(SPA Mode でも Worker 側に React Router が残る)、TanStack Start は SPA mode でも `react-dom/server` が残って起動ごとに約 13ms。Vite の SPA + Hono は起動 0〜4ms(2026-10 の実測)。
+**React Router と TanStack Start は使わない。** どちらも Worker の中で React を動かし、描く CPU 時間は毎回の応答に、バンドルの評価は冷えた起動のたびに乗って遅い。動きはするが、速さのために標準構成では採らない — React Router の SSR は HTML の生成だけで 22〜57ms(本番の `cpuTimeMs`。SPA Mode でも Worker 側に React Router が残る)、TanStack Start は SPA mode でも `react-dom/server` が残って起動ごとに約 13ms。Vite の SPA + Hono は起動 0〜4ms(2026-10 の実測)で、画面の HTML は Worker を起こさず静的アセットとして返る([Static Assets の Routing behavior](https://developers.cloudflare.com/workers/static-assets/#routing-behavior))。
 
 ## 1. 決める
 
 `/kjfsm-personal:setup-cf-app` から来たなら、答えはもう出ているので飛ばす。そうでなければ、組み始める前に2つだけ聞く。推測で埋めない — あとから替えると、スキーマとマイグレーションを作り直す。
 
-- **認証先** — Google などの social、email/password、`kjfsm-personal` プラグインが入っていれば kjfsm の共通 IdP(→ `/kjfsm-personal:connect-kjfsm-auth`)。**email/password は CPU を食う。** パスワードのハッシュ化(scrypt)が予算ぎりぎりで動く(better-auth#8860)ので、選んだら登録とログインの経路を本番で別に測る
+- **認証先** — Google などの social、email/password、`kjfsm-personal` プラグインが入っていれば kjfsm の共通 IdP(→ `/kjfsm-personal:connect-kjfsm-auth`)。**email/password は CPU を食う。** パスワードのハッシュ化(scrypt)が CPU 時間を大きく使い、上限を超えると遅くなるのではなくエラーになる(better-auth#8860)ので、選んだら登録とログインの経路を本番で別に測る
 - **DB** — このアプリだけの D1 を作るか、`kjfsm-personal` プラグインが入っていれば共有 D1 に相乗りするか(→ `/kjfsm-personal:kjfsm-shared-db`)
 
 完了基準: 2つの答えが出ている。
@@ -52,7 +52,7 @@ description: 新規の Cloudflare Workers フルスタックアプリを、公�
 
 ### API と画面
 
-D1 + Drizzle・better-auth・Hono の層に入ったら [api.md](./api.md)、画面の層に入ったら [screen.md](./screen.md) を読む。**入れた時点では動き、CPU 予算やバンドルだけを黙って食う**書き方(better-auth の静的 import、Drizzle への schema 渡し、画面からの値の import)がそこにある。
+D1 + Drizzle・better-auth・Hono の層に入ったら [api.md](./api.md)、画面の層に入ったら [screen.md](./screen.md) を読む。**入れた時点では動き、CPU 時間やバンドルだけを黙って食う**書き方(better-auth の静的 import、Drizzle への schema 渡し、画面からの値の import)がそこにある。
 
 ### init の落とし穴
 

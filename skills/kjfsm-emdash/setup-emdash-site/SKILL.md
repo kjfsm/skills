@@ -31,7 +31,7 @@ cd <名前> && git init && git add -A && git commit -m "create emdash の雛形"
 ```
 
 - **`--yes` を外すと、フラグで渡していない項目を対話で聞き、TTY の無いところでは止まる。** 逆に `--yes` 付きでは、省いた項目が黙って既定値(`cloudflare`・`blog`)で埋まる — 手順 1 で決めた値は全部フラグで渡す。`--template` は `cloudflare:<テンプレート>` の形で、プラットフォームも一緒に決める。
-- **サンドボックスのプラグインは既定で無効にする(`--no-sandboxed-plugins`)。** 有効にするには Worker Loader の binding が要り、これは Workers の有料プランでしか使えない。`--yes` だけでも無効になるが、あとから読んで意図が分かるように明示する。無効にしても `astro.config.mjs` の `sandboxed: [...]` は残り、そこに並んだプラグインは読み込まれない — 片付けは手順 5 のやることリストが扱う。有料プランで使うと決めたら、あとから [Plugin Sandbox](https://docs.emdashcms.com/deployment/plugin-sandbox/) の手順で有効にする。
+- **サンドボックスのプラグインは既定で無効にする(`--no-sandboxed-plugins`)。** 有効にするには Worker Loader の binding が要り、これは Workers Paid でしか使えない。`--yes` だけでも無効になるが、あとから読んで意図が分かるように明示する。無効にしても `astro.config.mjs` の `sandboxed: [...]` は残り、そこに並んだプラグインは読み込まれない — 片付けは手順 5 のやることリストが扱う。使うと決めたら、あとから [Plugin Sandbox](https://docs.emdashcms.com/deployment/plugin-sandbox/) の手順で有効にする。
 - **git は初期化されない。** 手を入れる前の雛形だけのコミットを作っておくと、あとで `git diff <そのコミット>` がそのまま「テンプレートからどこを変えたか」になる — `updating-emdash` がテンプレート由来のコードを直すときの足場になる。
 - `.env` に `EMDASH_ENCRYPTION_KEY` が書かれる(gitignore 済み)。**パスワードマネージャーへ控えるようユーザーに伝える。** 失うと、暗号化して保存された設定値が読めなくなる。
 
@@ -80,7 +80,7 @@ pnpm dev   # http://localhost:4321/
 
 公式の [Cloudflare へのデプロイ](https://docs.emdashcms.com/deployment/cloudflare/) に沿う(`pnpm build` → `pnpm wrangler deploy`。D1 と R2 は初回デプロイで作られ、マイグレーションは最初のリクエストで当たる)。公式に無い注意:
 
-- **デプロイ手順のページの `wrangler.jsonc` の例は、`worker_loaders` が有効になっている。** 手順 2 で無効にしたので、この行は写さない(Worker Loader の binding は無料プランではデプロイできない)。
+- **デプロイ手順のページの `wrangler.jsonc` の例は、`worker_loaders` が有効になっている。** 手順 2 で無効にしたので、この行は写さない。
 
 - **本番の管理画面は、ユーザーが1人もいないあいだ、URL に最初に来た人が管理者を作れる。** 管理者作成の API はユーザー数しか見ていない。デプロイしたら **すぐに** ユーザーに本番の `/_emdash/admin/` で初回セットアップを済ませてもらう。先に閉じたいなら、デプロイ前に `setup-cf-access` スキルで管理画面に Cloudflare Access を掛ける。
 - `EMDASH_ENCRYPTION_KEY` は `pnpm wrangler secret put EMDASH_ENCRYPTION_KEY` で入れる。値は手順 2 と同じく控えてもらう。

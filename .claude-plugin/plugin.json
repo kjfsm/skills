@@ -21,7 +21,6 @@
   "outputStyles": ["./output-styles/"],
   "dependencies": [{ "name": "mattpocock-skills", "marketplace": "mattpocock" }],
   "skills": [
-    "./skills/kjfsm-skills/engineering/ai-efficiency",
     "./skills/kjfsm-skills/engineering/ask-kjfsm",
     "./skills/kjfsm-skills/engineering/d1-bound-parameters",
     "./skills/kjfsm-skills/engineering/dev-bypass-sign-in",
@@ -30,6 +29,7 @@
     "./skills/kjfsm-skills/engineering/implement-and-review",
     "./skills/kjfsm-skills/engineering/launch-implementation-session",
     "./skills/kjfsm-skills/engineering/make-installable-pwa",
+    "./skills/kjfsm-skills/engineering/mechanical-rename",
     "./skills/kjfsm-skills/engineering/migrate-d1",
     "./skills/kjfsm-skills/engineering/partyserver-on-durable-objects",
     "./skills/kjfsm-skills/engineering/propose-features",

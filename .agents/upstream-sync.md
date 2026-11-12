@@ -15,7 +15,7 @@
 
 ## 起点の確認方法
 
-`ed37663` は推定ではない。フォーク初版(`2747d44`, 2026-07-25)のスキル集合が、本家 `ed37663` の集合と次の差だけで一致した — `ask-matt`→`ask-kjfsm`、`setup-matt-pocock-skills`→`setup-skills`、`personal/obsidian-vault` を落とし、`ai-efficiency` と `setup-cf-app` を足した。次の本家コミット `17f22a3` は `writing-great-skills` を `writing-for-agents` に改名しており、フォークは旧名を持っているので、起点はその手前である。
+`ed37663` は推定ではない。フォーク初版(`2747d44`, 2026-07-25)のスキル集合が、本家 `ed37663` の集合と次の差だけで一致した — `ask-matt`→`ask-kjfsm`、`setup-matt-pocock-skills`→`setup-skills`、`personal/obsidian-vault` を落とし、`ai-efficiency`(のちの `mechanical-rename`)と `setup-cf-app` を足した。次の本家コミット `17f22a3` は `writing-great-skills` を `writing-for-agents` に改名しており、フォークは旧名を持っているので、起点はその手前である。
 
 ## 差分の測り方 — 行単位で数えない
 

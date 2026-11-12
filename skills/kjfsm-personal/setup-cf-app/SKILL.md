@@ -9,14 +9,15 @@ description: 新規の Cloudflare Workers フルスタックアプリを、GitHu
 
 ## 1. 決める
 
-写す前に2つだけ聞く。推測で埋めない。
+写す前に1つだけ聞く。推測で埋めない。
 
 - **認証先** — kjfsm の共通 IdP(kjfsm-auth。テンプレートの既定)、Google などの social、email/password
-- **DB** — 共有 D1(`kjfsm-shared-db`。テンプレートの既定)に相乗りするか、このアプリだけの D1 を作るか
+
+DB は聞かない。テンプレートの既定はまだ共有 D1(`kjfsm-shared-db`)のままだが、新しいアプリは共有 D1 に入れず、手順5でこのアプリだけの D1 に切り替える。理由は `kjfsm-shared-db` スキルの冒頭にある。
 
 ## 2. テンプレートを探す
 
-`gh repo view kjfsm/cf-workers-free-template` で見えるかを確かめる(非公開なので、見えるのは権限のあるアカウントだけ)。**見えなければ写さず、`scaffold-cf-app` スキルを呼び、手順1の2つの答えを渡す。**
+`gh repo view kjfsm/cf-workers-free-template` で見えるかを確かめる(非公開なので、見えるのは権限のあるアカウントだけ)。**見えなければ写さず、`scaffold-cf-app` スキルを呼び、手順1の答えと「DB はこのアプリだけの D1」を渡す。**
 
 手元にテンプレートのチェックアウトがあっても、そこからは写さない。手元が `origin` より遅れていると、テンプレートで直した不具合が戻る。
 
@@ -42,8 +43,8 @@ GitHub の「Use this template」やファイルのコピーではなく clone �
 
 テンプレートの README に沿う。README の手順をここへ写さない — テンプレートと一緒に直るのは README だけである。
 
-- 名前 → 「フォークしたら」。slug の空きは `kjfsm-shared-db` スキルが持つ
-- このアプリだけの D1 → 続けて「新規 D1 に切り替える」
+- 名前 → 「フォークしたら」。共有 D1 で slug の空きを確かめる手順は飛ばす — 共有 D1 には入らない
+- DB → 続けて「新規 D1 に切り替える」。毎回やる
 - kjfsm-auth 以外 → 続けて「認証先を替える」。kjfsm-auth のままなら、IdP のクライアントは `connect-kjfsm-auth` スキルで作る
 
 ## 6. 確かめる

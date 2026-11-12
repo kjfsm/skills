@@ -27,12 +27,13 @@ description: 新規の Cloudflare Workers フルスタックアプリを、公�
 
 ## 1. 決める
 
-`/kjfsm-personal:setup-cf-app` から来たなら、答えはもう出ているので飛ばす。そうでなければ、組み始める前に2つだけ聞く。推測で埋めない — あとから替えると、スキーマとマイグレーションを作り直す。
+`/kjfsm-personal:setup-cf-app` から来たなら、答えはもう出ているので飛ばす。そうでなければ、組み始める前に1つだけ聞く。推測で埋めない — あとから替えると、スキーマとマイグレーションを作り直す。
 
 - **認証先** — Google などの social、email/password、`kjfsm-personal` プラグインが入っていれば kjfsm の共通 IdP(→ `/kjfsm-personal:connect-kjfsm-auth`)。**email/password は CPU を食う。** パスワードのハッシュ化(scrypt)が予算ぎりぎりで動く(better-auth#8860)ので、選んだら登録とログインの経路を本番で別に測る
-- **DB** — このアプリだけの D1 を作るか、`kjfsm-personal` プラグインが入っていれば共有 D1 に相乗りするか(→ `/kjfsm-personal:kjfsm-shared-db`)
 
-完了基準: 2つの答えが出ている。
+DB は聞かない。このアプリだけの D1 を作る — 1つの D1 を複数のアプリで分けると、bind したどのアプリからも他のアプリの全テーブルが読め、D1 は DB ごとにシングルスレッドなので重いクエリが他のアプリを道連れにする。
+
+完了基準: 認証先が決まっている。
 
 ## 2. 雛形を作る
 
@@ -80,7 +81,7 @@ D1 + Drizzle・better-auth・Hono の層に入ったら [api.md](./api.md)、画
 
 ## 完了
 
-- [ ] 手順 1 の2つの答えに沿って、認証先と DB が組まれている
+- [ ] 手順 1 の認証先と、このアプリだけの D1 で組まれている
 - [ ] 起点が C3 の生成物そのままのコミットで、その上に層ごとのコミットが積まれている
 - [ ] `/api/auth/*` 以外から better-auth が静的 import されていない(ビルド成果物の Worker の入口を辿って確かめる)
 - [ ] 本物の better-auth の Cookie を軽い検証が受け入れるテストがあり、型チェック・lint・テスト・ビルドが green

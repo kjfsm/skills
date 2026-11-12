@@ -1,6 +1,6 @@
 # ログインとランキング
 
-SKILL.md の手順 1 で入れると決めたときだけ読み、各手順にここの分を足す。入れないと決めたとき・あとで外すときは「外す」だけを読む。ログインそのもの(RP の組み方・ボタンの文言)は `/kjfsm-personal:connect-kjfsm-auth`、開発用の入口は `/kjfsm-skills:dev-bypass-sign-in`、共有 D1 は `/kjfsm-personal:kjfsm-shared-db` が持つ。
+SKILL.md の手順 1 で入れると決めたときだけ読み、各手順にここの分を足す。入れないと決めたとき・あとで外すときは「外す」だけを読む。ログインそのもの(RP の組み方・ボタンの文言)は `/kjfsm-personal:connect-kjfsm-auth`、開発用の入口は `/kjfsm-skills:dev-bypass-sign-in` が持つ。
 
 ## 仕様(手順 3 に足す)
 
@@ -49,13 +49,13 @@ SKILL.md の手順 1 で入れると決めたときだけ読み、各手順に�
 
 ## 本番(DEPLOY.md に足す)
 
-どれも本番(共有 D1・本番の IdP・Cloudflare)に触る。始める前に、この節の一覧をユーザーに見せ、まとめて確認を取る。
+どれも本番(D1・本番の IdP・Cloudflare)に触る。始める前に、この節の一覧をユーザーに見せ、まとめて確認を取る。
 
-1. **PR を出す前に、secret を3本入れる。** 共有 D1 で slug が空いているかを読み(`kjfsm-shared-db` の手順 1)、`openssl rand -base64 32 | pnpm exec wrangler secret put BETTER_AUTH_SECRET --name <app>` を入れる。Worker がまだ無ければ、これが作る。残り2本は、本番の IdP にクライアントを作って入れる(`connect-kjfsm-auth` の手順 2。`redirect_uri` は `https://<app>.kjfsm.net/api/auth/callback/kjfsm`)
-2. **PR の本文に、最初のビルドが共有 D1 へ流すマイグレーションの SQL を載せる。** マージのあとは、確認なしに流れる
-3. **マイグレーションが流れる前に、戻り先と比較の基準を控える。** 共有 D1 の Time Travel の bookmark と、`<slug>_` の外のスキーマである(`kjfsm-shared-db` の「スキーマを変える」)。Workers Builds を繋いだあとなら、マージの前に控える。auto mode ではスキーマを読む `wrangler d1 execute --remote` が止められることがある。そのときは別の手で読みに行かず、コマンドを人間に渡す。人間が控えないなら、流れる SQL の全文を読み、触れる名前が全部 `<slug>_` で始まることを確かめてから進める
+1. **PR を出す前に、このゲームだけの D1 を作り、secret を3本入れる。** `CLOUDFLARE_ACCOUNT_ID` を付けて `pnpm exec wrangler d1 create <app>` を叩き、`wrangler.jsonc` の `d1_databases` の `database_name` と `database_id`、`package.json` の `db:migrate:*` の DB 名を新しい D1 に替える。共有 D1(`kjfsm-shared-db`)には入れない。続けて `openssl rand -base64 32 | pnpm exec wrangler secret put BETTER_AUTH_SECRET --name <app>` を入れる。Worker がまだ無ければ、これが作る。残り2本は、本番の IdP にクライアントを作って入れる(`connect-kjfsm-auth` の手順 2。`redirect_uri` は `https://<app>.kjfsm.net/api/auth/callback/kjfsm`)
+2. **PR の本文に、最初のビルドが流すマイグレーションの SQL を載せる。** マージのあとは、確認なしに流れる
+3. **2回目からのマイグレーションは、流れる前に戻り先を控える。** `pnpm exec wrangler d1 time-travel info <app>` の bookmark である。Workers Builds を繋いだあとなら、マージの前に控える。最初の1回は空の D1 に当たるので要らない。auto mode ではこのコマンドが止められることがある。そのときは別の手で読みに行かず、コマンドを人間に渡す
 4. **Workers Builds のコマンドを、ログインの分だけ足す。** Build command は `pnpm run build && pnpm run check:door`(開発用の入口が本番の成果物に残っていないことの検査)、Deploy command は `pnpm db:migrate:remote && npx wrangler deploy` にする。マイグレーションは必ずデプロイより先に置く
-5. **確かめる。** ビルドのログでマイグレーションが流れたこと、控えたスキーマと比べ直して `<slug>_` の外が変わっていないことを見る。本番で `/dev/bypass` が 404 を返すこと、`/login` への POST が `auth.kjfsm.net/api/auth/oauth2/authorize` へ正しい `client_id`・`redirect_uri`・`S256` で送ることも見る。その URL を叩くと、IdP のサインイン画面へ 302 で送られる(`invalid_client` にならない)
+5. **確かめる。** ビルドのログでマイグレーションが流れたことを見る。本番で `/dev/bypass` が 404 を返すこと、`/login` への POST が `auth.kjfsm.net/api/auth/oauth2/authorize` へ正しい `client_id`・`redirect_uri`・`S256` で送ることも見る。その URL を叩くと、IdP のサインイン画面へ 302 で送られる(`invalid_client` にならない)
 6. **人間に渡す。** IdP を通したログインの一巡は、Google と同意画面があるので人間にしか通れない。iOS のホーム画面(standalone)から開いたときのログインは、未確認であることを伝える
 
 ## 外す
@@ -67,4 +67,4 @@ SKILL.md の手順 1 で入れると決めたときだけ読み、各手順に�
 3. **`.worktreeinclude` から `.dev.vars` を外す。** 読む側がいないのに、新しい worktree へ古い secret を写し続ける
 4. **ログインのテストファイルを消す前に、ログインと無関係なテストを移す。** ゲストが設定で名前を変えるテストのように、残す画面を守るものが混ざっている
 5. **マージの前に、人間が Workers Builds のコマンドを `pnpm run build` と `npx wrangler deploy` に戻す。** `check:door` と `db:migrate:remote` を消したまま古いコマンドで走ると、ビルドが落ちてデプロイされない
-6. **マージのあと、本番に残ったものを片付ける。** 共有 D1 の `<slug>_` の表と `d1_migrations_<slug>`、IdP のクライアント、Worker の secret 3本である。一覧を見せて確認を取ってから消す(`kjfsm-shared-db` の「抜ける」)。PR 本文に一覧を書いておく。リポジトリからは消えるので、控えないと辿れなくなる
+6. **マージのあと、本番に残ったものを片付ける。** このゲームの D1(`wrangler d1 delete <app>`)、IdP のクライアント、Worker の secret 3本である。一覧を見せて確認を取ってから消す。PR 本文に一覧を書いておく。リポジトリからは消えるので、控えないと辿れなくなる

@@ -19,7 +19,7 @@ kjfsm のアプリはパスワードも Google のクライアントも持たな
 
 ## 0. 前提を揃える
 
-- **RP は D1 を持つ。** better-auth の RP には `user` / `session` / `account` / `verification` が残る。kjfsm のサービスなら共有 D1 に置く → `/kjfsm-personal:kjfsm-shared-db`(prefix 付きの4テーブルを作るところまで)
+- **RP は D1 を持つ。** better-auth の RP には `user` / `session` / `account` / `verification` が残る。置き場所はそのサービスだけの D1 である。すでに共有 D1(`kjfsm-shared-db`)に相乗りしているサービスなら、4テーブルにも prefix を付ける → `/kjfsm-personal:kjfsm-shared-db`
 - **4テーブルの日付列は `integer(name, { mode: "timestamp_ms" })` で持つ。** better-auth 1.7 の drizzle アダプタは Date をそのまま渡すので、text の列だと D1 が `D1_TYPE_ERROR` で落とす(better-auth #10816)
 - **ログインが1周するかを試すだけの使い捨て RP** なら D1 は要らない。`memoryAdapter` で足りる(implementation-notes の「試すだけの RP」。本番では使えない)
 - **手元のポートを固定する。** IdP は 8801、その devtools は 9801。既存の kjfsm アプリと被らない番号を `grep -rn 'port' ~/github/kjfsm/*/vite.config.ts ~/github/kjfsm/*/wrangler.jsonc` で探し、`strictPort: true` で固定する — 登録する `redirect_uri` にポートが入り、変わるとログインが落ちる

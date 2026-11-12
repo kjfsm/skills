@@ -37,7 +37,7 @@
 
 ## ロジックを変えない機械的な変更
 
-概念の改名、用語の統一、ディレクトリやファイルの移動、import の付け替え → **`/kjfsm-skills:mechanical-rename`**。
+概念の改名、コードの中の呼び名の統一、ディレクトリやファイルの移動、import の付け替え → **`/kjfsm-skills:mechanical-rename`**。
 
 ## Worker を公開したが、経路が守られていない
 

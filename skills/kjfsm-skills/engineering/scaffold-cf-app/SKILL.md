@@ -23,13 +23,13 @@ description: 新規の Cloudflare Workers フルスタックアプリを、公�
 | テスト         | Vitest + `@cloudflare/vitest-plugin`(Worker の API)。E2E は `setup-playwright` |
 | 型             | `wrangler types` + `tsr generate` + `tsc -b`                                   |
 
-**React Router と TanStack Start は使わない。** どちらも Worker の中で React を動かし、その CPU 時間が毎回の応答に乗って遅い。動きはするが、速さのために標準構成では採らない — React Router の SSR は HTML の生成だけで 22〜57ms(本番の `cpuTimeMs`。SPA Mode でも Worker 側に React Router が残る)、TanStack Start は SPA mode でも `react-dom/server` が残って起動ごとに約 13ms。Vite の SPA + Hono は起動 0〜4ms(2026-10 の実測)で、画面の HTML は Worker を起こさず静的アセットとして返る([Static Assets の Routing behavior](https://developers.cloudflare.com/workers/static-assets/#routing-behavior))。
+**React Router と TanStack Start は使わない。** どちらも Worker の中で React を動かし、描く CPU 時間は毎回の応答に、バンドルの評価は冷えた起動のたびに乗って遅い。動きはするが、速さのために標準構成では採らない — React Router の SSR は HTML の生成だけで 22〜57ms(本番の `cpuTimeMs`。SPA Mode でも Worker 側に React Router が残る)、TanStack Start は SPA mode でも `react-dom/server` が残って起動ごとに約 13ms。Vite の SPA + Hono は起動 0〜4ms(2026-10 の実測)で、画面の HTML は Worker を起こさず静的アセットとして返る([Static Assets の Routing behavior](https://developers.cloudflare.com/workers/static-assets/#routing-behavior))。
 
 ## 1. 決める
 
 `/kjfsm-personal:setup-cf-app` から来たなら、答えはもう出ているので飛ばす。そうでなければ、組み始める前に2つだけ聞く。推測で埋めない — あとから替えると、スキーマとマイグレーションを作り直す。
 
-- **認証先** — Google などの social、email/password、`kjfsm-personal` プラグインが入っていれば kjfsm の共通 IdP(→ `/kjfsm-personal:connect-kjfsm-auth`)。**email/password は CPU を食う。** パスワードのハッシュ化(scrypt)が CPU 時間を大きく使う(better-auth#8860)ので、選んだら登録とログインの経路の応答時間を本番で別に測る
+- **認証先** — Google などの social、email/password、`kjfsm-personal` プラグインが入っていれば kjfsm の共通 IdP(→ `/kjfsm-personal:connect-kjfsm-auth`)。**email/password は CPU を食う。** パスワードのハッシュ化(scrypt)が CPU 時間を大きく使い、上限を超えると遅くなるのではなくエラーになる(better-auth#8860)ので、選んだら登録とログインの経路を本番で別に測る
 - **DB** — このアプリだけの D1 を作るか、`kjfsm-personal` プラグインが入っていれば共有 D1 に相乗りするか(→ `/kjfsm-personal:kjfsm-shared-db`)
 
 完了基準: 2つの答えが出ている。

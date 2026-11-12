@@ -49,7 +49,7 @@ SKILL.md の手順 1 で入れると決めたときだけ読み、各手順に�
 
 どれも本番(D1・本番の IdP・Cloudflare)に触る。始める前に、この節の一覧をユーザーに見せ、まとめて確認を取る。
 
-1. **PR を出す前に、secret を3本入れる。** D1 は手順 2 の `setup-cf-app` で、このゲームだけのものに替えてある(共有 D1 `kjfsm-shared-db` には入れない)。`openssl rand -base64 32 | pnpm exec wrangler secret put BETTER_AUTH_SECRET --name <app>` を入れる。Worker がまだ無ければ、これが作る。残り2本は、本番の IdP にクライアントを作って入れる(`connect-kjfsm-auth` の手順 2。`redirect_uri` は `https://<app>.kjfsm.net/api/auth/callback/kjfsm`)
+1. **PR を出す前に、secret を3本入れる。** D1 は手順 2 で、このゲームだけのものを作ってある(テンプレートの README「フォークしたら」。共有 D1 `kjfsm-shared-db` には入れない)。`openssl rand -base64 32 | pnpm exec wrangler secret put BETTER_AUTH_SECRET --name <app>` を入れる。Worker がまだ無ければ、これが作る。残り2本は、本番の IdP にクライアントを作って入れる(`connect-kjfsm-auth` の手順 2。`redirect_uri` は `https://<app>.kjfsm.net/api/auth/callback/kjfsm`)
 2. **PR の本文に、最初のビルドが流すマイグレーションの SQL を載せる。** マージのあとは、確認なしに流れる
 3. **2回目からのマイグレーションは、流れる前に戻り先を控える。** `pnpm exec wrangler d1 time-travel info <app>` の bookmark である。Workers Builds を繋いだあとなら、マージの前に控える。最初の1回は空の D1 に当たるので要らない。auto mode ではこのコマンドが止められることがある。そのときは別の手で読みに行かず、コマンドを人間に渡す
 4. **Workers Builds のコマンドを、ログインの分だけ足す。** Build command は `pnpm run build && pnpm run check:door`(開発用の入口が本番の成果物に残っていないことの検査)、Deploy command は `pnpm db:migrate:remote && npx wrangler deploy` にする。マイグレーションは必ずデプロイより先に置く

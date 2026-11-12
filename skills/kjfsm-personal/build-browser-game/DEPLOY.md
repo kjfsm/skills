@@ -6,7 +6,7 @@
 
 ## 1. PR を出す(エージェント)
 
-マージの前に検証ゲートを止めるのは、手順 2 で敷いたものである。public なら PR で回る CI、private なら pre-push(`setup-ci` は private の CI を main への push 後にだけ回す)。GitHub Actions の CI は、支払いの状態によっては始まらない。そのときは手元で `verification-loop` スキルのクリーンランを取り、結果を PR 本文に貼る。
+マージの前に検証ゲートを止めるのは、テンプレートの pre-push(lefthook)である。public なら、手順 2 で敷いた CI も PR で回る(`setup-ci` は private の CI を main への push 後にだけ回す)。GitHub Actions の CI は、支払いの状態によっては始まらない。そのときは手元で `verification-loop` スキルのクリーンランを取り、結果を PR 本文に貼る。
 
 完了基準: PR が出て、pre-push か PR の CI か手元のクリーンランで検証ゲートが通った。
 

@@ -41,12 +41,12 @@ description: スマホでも遊べるブラウザゲームを、kjfsm の構成(
 
 - **Durable Objects** — 部屋の DO を partyserver で載せる → `partyserver-on-durable-objects` スキル。経路の置き場所とテストでの export は [NETCODE.md](NETCODE.md) にある
 - **E2E** — 手順 3 のシームの「画面は Playwright で3台を駆動する」に要る → `setup-playwright` スキル。`webServer` のポートは環境変数(`E2E_PORT`)で替えられるようにする(手順 5 で並べるセッションが使う)
-- **CI と pre-push** — テンプレートはどちらも持たない(lefthook は pre-commit で整形するだけ)。検証ゲートを強制する仕組みが無いので敷く → `setup-ci` スキル。private のリポジトリでは CI がマージ前に回らないので、pre-push も敷く → `setup-hooks` スキル
+- **CI** — テンプレートは lefthook の pre-push で検証ゲートを回すが、CI は持たない → `setup-ci` スキル。private のリポジトリでは CI がマージ前に回らないので、止めるのは pre-push のままである。E2E を足したら、pre-push のゲートにも足す(テンプレートの `docs/agents/verification.md` は「ゲートを足したら両方に書く」)
 
 README に無いことは次のとおり。
 
 - 開発サーバーのポートはテンプレートで 8808 に固定してある(`vite.config.ts` の `strictPort`)。「フォークしたら」に沿って替える前に、`grep -rhoE 'port: ?[0-9]{4}' ~/github/kjfsm/*/vite.config.ts` で空きを探す
-- ログインを入れないなら、`setup-cf-app` の D1 と認証先の切り替えは飛ばし、RP・D1・開発用の入口をここで外す。残すと、使わない secret と D1 が、本番に出す前提として残る。外し方は [ACCOUNT.md](ACCOUNT.md) の「外す」の 1〜4
+- ログインを入れないなら、「フォークしたら」の D1 を作る手順と認証先の切り替えは飛ばし、RP・D1・開発用の入口をここで外す。残すと、使わない secret と D1 が、本番に出す前提として残る。外し方は [ACCOUNT.md](ACCOUNT.md) の「外す」の 1〜4
 
 完了基準: 名前・slug・ポートを置き換え、DO・E2E・CI を足して、検証ゲートが緑のままコミットした。
 

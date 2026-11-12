@@ -1,6 +1,6 @@
 ---
 name: updating-emdash
-description: "EmDash サイトの EmDash を新しい版へ上げる。`create emdash` で作った直後の初回と、手を入れたサイトでの2度目以降の両方を扱う。`setup-emdash-site` から引き継いだとき、「EmDash を上げて」と言われたときに使う。"
+description: "EmDash サイトの EmDash を新しい版へ上げる。`create emdash` で作った直後の初回と、手を入れたサイトでの2度目以降の両方を扱う。`setup-emdash-site` から引き継いだとき、「EmDash を上げて」と言われたとき、依存をまとめて最新に上げる中で EmDash も上がるときに使う。"
 ---
 
 # EmDash を上げる
@@ -33,16 +33,18 @@ pnpm why emdash
 
 初回で EmDash 以外が上がって型チェックかビルドが壊れたら、その依存だけテンプレートの版へ戻してよい。戻した理由はコミットメッセージへ。
 
-2度目以降は、`emdash`・`@emdash-cms/admin`・`@emdash-cms/cloudflare` を同じ版に上げ、`@emdash-cms/plugin-*` はそれぞれの最新に上げる(プラグインは別の版の系列で、同じ番号の版は無い)。ほかの依存も一緒に上げてよいが、壊れたものは前の版に留め、その理由を PR 本文に書く — 手を入れたサイトには、戻せばよいテンプレートの版がもう無い。
+2度目以降は、サイトの `patchedDependencies` に EmDash のパッチがあれば、上げる前にそのキーとパッチファイルを外す。版付きのキーは新しい版に当たらず、残したままでは install が落ちる。外したパッチは手順 2 で作り直す。
+
+そのうえで、`emdash`・`@emdash-cms/admin`・`@emdash-cms/cloudflare` を同じ版に上げ、`@emdash-cms/plugin-*` はそれぞれの最新に上げる(プラグインは別の版の系列で、同じ番号の版は無い)。ほかの依存も一緒に上げてよいが、壊れたものは前の版に留め、その理由を PR 本文に書く — 手を入れたサイトには、戻せばよいテンプレートの版がもう無い。
 
 - **ワークスペースのプラグイン(`plugins/*/package.json`)の peer も同じ版へ上げる。** 古いままだと `emdash` が2つの版で入る。
-- `pnpm-workspace.yaml` の `minimumReleaseAge` を使っているなら、公開されたばかりの版は `pnpm outdated` に出ず、`pnpm up` でも入らない。待たずに上げる理由(上流のセキュリティ修正など)があるときだけ `minimumReleaseAgeExclude` に足す。足した版の行は今の版だけにする — `pnpm add` は `1.0.1 || 1.2.0` の形で前の版を残して追記することがある。
+- `pnpm-workspace.yaml` の `minimumReleaseAge` を使っているなら、公開されたばかりの版は `pnpm outdated` に出ず、`pnpm up` でも入らない。EmDash 系の公開直後の版を追いかけるなら、`minimumReleaseAgeExclude` に EmDash 系を入れる。pnpm は上げるたびに解決した版をこのリストへ追記し、前の版の行も残す(`1.0.1 || 1.2.0` の形になることもある)ので、上げたら今の版の行に整理する。
 
 **完了基準:** `pnpm why emdash` が1つの版だけを出す。`package.json`(ワークスペースのプラグインを含む)・`pnpm-workspace.yaml`・`pnpm-lock.yaml` をコミットする。
 
-### 2. パッチを合わせる(2度目以降)
+### 2. パッチを作り直す(2度目以降)
 
-サイトの `patchedDependencies` に EmDash のパッチがあれば、`patching-emdash` スキルの「EmDash を上げるとき」に従って1本ずつ外すか作り直す。版付きのキーは新しい版に当たらず、作り直しには新しい版の `dist/` が要る。手順 1 の install がキーの不一致で落ちたら、古いキーを外して install を通し、パッチはそのあとで作り直す。完了の基準はあちらが持つ。
+手順 1 で外したパッチを、`patching-emdash` スキルの「EmDash を上げるとき」に従って、上流で直っていればそのまま外し、直っていなければ新しい版の `dist/` に対して作り直す。依存の更新と同じコミットにしてよい。完了の基準はあちらが持つ。
 
 ### 3. 越えた版の変更履歴を読む
 
@@ -53,7 +55,7 @@ gh release view emdash@<版> -R emdash-cms/emdash --json body -q .body
 gh release view @emdash-cms/cloudflare@<版> -R emdash-cms/emdash --json body -q .body
 ```
 
-サイトのコードか本番の設定に効く変更を控える(手順 4・5 で使う)。管理画面の機能のうち、サイトの設定(`astro.config.mjs` の `admin`、`seed/seed.json`)で選べるものは、入れるかを決める。`seed/seed.json` の変更は本番の DB へは流れないので、本番にも要るなら管理画面で同じことをする作業として控える。
+サイトのコードか本番の設定に効く変更を控える(手順 4・5 で使う)。コアのマイグレーション(DB のスキーマ)が増えた版も控える — デプロイのあとに本番で当たったかを確かめる(`emdash migrate --check`)。管理画面の機能のうち、サイトの設定(`astro.config.mjs` の `admin`、`seed/seed.json`)で選べるものは、入れるかを決める。`seed/seed.json` の変更は本番の DB へは流れないので、本番にも要るなら管理画面で同じことをする作業として控える。
 
 入れないと決めた変更は、理由とともに控える(手順 7 でユーザーに示し、2度目以降は PR 本文にも残す)。次に上げる人が同じ変更を読み直さずに済む。
 
@@ -62,7 +64,7 @@ gh release view @emdash-cms/cloudflare@<版> -R emdash-cms/emdash --json body -q
 [CHECKLIST.md](CHECKLIST.md) を読み、判定を上から順に流す:
 
 - **初回は版に関係なく全項目。** 雛形の版が何であっても、テンプレートのコードは依存より古い。`blog-cloudflare` から作ったなら、冒頭の表から手を付ける。
-- **2度目以降は、前に上げた版より新しい節だけ。** それより古い節と「版に依らない」節は、前の版上げで判定済みである。
+- **2度目以降は、前に上げた版より新しい節だけ。** それより古い節と「版に依らない」節は、前の版上げで判定済みである。ただしこのスキルを通さずに上げてきたサイトでは、どこまで判定したかが分からないので、初回と同じく全項目を判定する。
 
 各項目で:
 
@@ -75,7 +77,7 @@ gh release view @emdash-cms/cloudflare@<版> -R emdash-cms/emdash --json body -q
 
 ### 5. リストに無い変更を足す
 
-手順 3 で控えた変更に対応し、**同じ変更を CHECKLIST.md に項目として足す**。次に上げるサイトは、履歴を読み直さずに済む。
+手順 3 で控えた変更に対応し、**CHECKLIST.md にまだ無ければ、同じ変更を項目として足す**。次に上げるサイトは、履歴を読み直さずに済む。
 
 - 項目は判定・対応・本番の3つで書く。**判定** は、サイトで機械的に流せる grep かコマンドにする。
 - 足した項目が `blog-cloudflare` にも当たるかを判定し、冒頭の表を更新する(`git clone --depth 1 https://github.com/emdash-cms/templates` をスクラッチに置いて流す)。表の版と日付も、そのとき同期されている版に書き換える。
@@ -95,6 +97,6 @@ gh release view @emdash-cms/cloudflare@<版> -R emdash-cms/emdash --json body -q
 
 - 対応した項目の一覧(版つき)と、未確認のもの
 - 入れないと決めた変更と、その理由
-- **デプロイのあとにやること:** 手順 3・4 で控えた「本番」の作業と、手順 6 で「未観測」とした効果
+- **デプロイのあとにやること:** 手順 3・4 で控えた「本番」の作業(コアのマイグレーションが当たったかを含む)と、手順 6 で「未観測」とした効果
 
 **完了基準:** 上の3つが示されていて、CHECKLIST.md に足した項目があればその PR が出ている(または項目をユーザーに渡した)。

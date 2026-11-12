@@ -20,6 +20,6 @@ claude plugin install kjfsm-emdash@kjfsm --scope project
 - **[local-mcp-access](./local-mcp-access/SKILL.md)** — ローカルのEmDash devサーバーのMCPエンドポイント(/_emdash/api/mcp)をブラウザなしで叩く(dev-bypass経由でPATを発行、Bearer専用)。`emdash-site-local`コネクタが401/未認証のときの復旧もこれ。プラグイン自身の管理設定をBlock Kitの`form_submit`/`block_action`経由で読み書きする方法、および`wrangler d1 execute`(ローカル/`--remote`)でMCPが公開していない情報を直接SQLで読む方法もカバーする。
 - **[patching-emdash](./patching-emdash/SKILL.md)** — EmDash 本体(`emdash`・`@emdash-cms/*`)の不具合を、サイト側の pnpm パッチ(`patchedDependencies`)で直す。原因が node_modules の EmDash のコードにあると分かったとき、パッチを当てるか上げるか回避するか決めるとき、EmDash を上げて `ERR_PNPM_PATCH_FAILED` や版付きキーの不一致で install が落ちたとき、既存のパッチがまだ要るか確かめるときに使う。
 - **[setup-emdash-site](./setup-emdash-site/SKILL.md)** — 新しい EmDash サイトを Cloudflare Workers 向けに `create emdash` で作り、手元で動かして本番へ出すところまで進める。「EmDash のサイトを作りたい」「EmDash をセットアップ」「create emdash」「EmDash で新しいブログ/ポートフォリオを始める」、EmDash を初めてデプロイするときに使う。作ったあとの版上げは `updating-emdash` へ引き継ぐ。
-- **[updating-emdash](./updating-emdash/SKILL.md)** — `create emdash` で作った直後の EmDash サイトを、初回だけ最新の EmDash に上げ、テンプレートから引き継いだ古い書き方のコードを追いつかせる。`setup-emdash-site` から引き継いだとき、雛形のまま手を入れていないサイトでテンプレートの遅れを取り戻したいときに使う。2度目以降の版上げは扱わない。
+- **[updating-emdash](./updating-emdash/SKILL.md)** — EmDash サイトの EmDash を新しい版へ上げる。`create emdash` で作った直後の初回と、手を入れたサイトでの2度目以降の両方を扱う。`setup-emdash-site` から引き継いだとき、「EmDash を上げて」と言われたときに使う。
 
 <!-- catalog:end -->

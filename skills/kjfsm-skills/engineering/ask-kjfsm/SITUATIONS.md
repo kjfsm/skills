@@ -37,7 +37,7 @@
 
 ## ロジックを変えない機械的な変更
 
-ディレクトリ再編、大量リネーム、import の一括付け替え → **`/kjfsm-skills:ai-efficiency`**。1ファイルずつ Read/Edit せず、シェルで一括処理して、抜けは typecheck で拾う。
+概念の改名、コードの中の呼び名の統一、ディレクトリやファイルの移動、import の付け替え → **`/kjfsm-skills:mechanical-rename`**。
 
 ## Worker を公開したが、経路が守られていない
 

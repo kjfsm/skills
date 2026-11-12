@@ -5,7 +5,7 @@ description: 新規の Cloudflare Workers フルスタックアプリを、GitHu
 
 # テンプレートを写してアプリを立ち上げる
 
-テンプレート `kjfsm/cf-workers-free-template` は標準構成を組み終え、`/kjfsm-skills:setup-repo` も済ませた状態で保ってある。**ここでは構成を組み直さない** — 構成を変えたいときはテンプレートを直し、次に写すアプリから効かせる。
+テンプレート `kjfsm/cf-workers-free-template` は標準構成を組み終え、`/kjfsm-skills:setup-repo` の工程のうち CI を除いたもの(検証ゲート・rules・フック)を済ませた状態で保ってある。**ここでは構成を組み直さない** — 構成を変えたいときはテンプレートを直し、次に写すアプリから効かせる。
 
 ## 1. 決める
 

@@ -49,15 +49,32 @@ pnpm exec wrangler d1 execute kjfsm-shared-db --remote --command \
 
 どれも本番の共有 D1 に触る。始める前に、この節の手順と、対象のテーブルの一覧(`<slug>_` の表・インデックスと `d1_migrations_<slug>`)をユーザーに見せ、まとめて確認を取る。
 
+**`wrangler d1 export --remote` は、終わるまで DB をロックする**(公式の D1 のデバッグの節)。共有 D1 では、相乗りしている他のサービスもその間止まる。export は書き込みの少ない時間に行い、そのことも確認に含める。
+
 ### 専用の D1 へ移す
 
 1. **専用の D1 を作る。** `CLOUDFLARE_ACCOUNT_ID` を付けて `pnpm exec wrangler d1 create <名前>`。出力の `database_id` を控える
-2. **自分のテーブルを取り出す。** 対象は `select name from sqlite_master where type = 'table' and (name like '<slug>\_%' escape '\' or name = 'd1_migrations_<slug>')` を共有 D1 に `--remote` で引いて列挙する — 漏れたテーブルは移した先に無いまま、6 で消える。`pnpm exec wrangler d1 export kjfsm-shared-db --remote --output shared.sql --table <slug>_a --table <slug>_b … --table d1_migrations_<slug>`。**`d1_migrations_<slug>` も一緒に取り出す** — 移した先の履歴が空だと、`migrations apply` が最初のファイルから当て直し、既にあるテーブルで落ちる
-3. **専用の D1 に入れる。** `pnpm exec wrangler d1 execute <名前> --remote --file shared.sql`。行数を元と比べる
-4. **`wrangler.jsonc` の `database_name` と `database_id` を替える。** `migrations_table` は `d1_migrations_<slug>` のまま残す(2 で運んだ履歴がその名前にある)。`package.json` の `db:migrate:*` の DB 名を替え、`wrangler types` で型を作り直す。prefix は残してよい — 外すのはスキーマとマイグレーションの作り直しになる
+2. **自分のテーブルを取り出す。** 対象は `select name from sqlite_master where type = 'table' and (name like '<slug>\_%' escape '\' or name = 'd1_migrations_<slug>')` を共有 D1 に `--remote` で引いて列挙する — 漏れたテーブルは移した先に無いまま、6 で消える。`pnpm exec wrangler d1 export kjfsm-shared-db --remote --output shared.sql --table <slug>_a --table <slug>_b … --table d1_migrations_<slug>`。**`d1_migrations_<slug>` も一緒に取り出す** — 移した先の履歴が空だと、`migrations apply` が最初のファイルから当て直し、既にあるテーブルで落ちる。**`--table` を付けた export はインデックスを含まない**(wrangler 4.156 で確かめた)ので、`select sql from sqlite_master where type = 'index' and tbl_name like '<slug>\_%' escape '\' and sql is not null` の結果を `indexes.sql` に控える
+3. **専用の D1 に入れる。** `pnpm exec wrangler d1 execute <名前> --remote --file shared.sql`、続けて `--file indexes.sql`。テーブルごとの行数と、インデックスの数を元と比べる
+4. **`wrangler.jsonc` の `database_name` と `database_id` を替える。** `env` ごとに `d1_databases` を持っているなら、その全部を替える。`migrations_table` は `d1_migrations_<slug>` のまま残す(2 で運んだ履歴がその名前にある)。`package.json` の `db:migrate:*` の DB 名を替え、`wrangler types` で型を作り直す。`database_id` を替えると手元(`--local`)の D1 も別物になるので、`pnpm db:migrate:local` をやり直す。prefix は残してよい — 外すのはスキーマとマイグレーションの作り直しになる
 5. **切り替えをデプロイする。** 2 の取り出しからこのデプロイまでの間に共有 D1 へ入った書き込みは、新しい D1 に入らない。アプリに書き込みを止める仕組み(メンテナンス表示・読み取り専用)があれば止めてから、無ければ書き込みの少ない時間を選び、2〜5 を続けて行う
 6. **新しい D1 で動くことを見てから、共有 D1 の自分の分を消す**(次の「畳む」)
 
 ### 畳む
 
-自分の `<slug>_` テーブル・インデックスと `d1_migrations_<slug>` を消す。残すと、誰も使わなくなったデータが、共有 D1 を bind している他の Worker から読めるまま残る。消す前に一覧を人間に見せる。
+自分の `<slug>_` テーブル・インデックスと `d1_migrations_<slug>` を消す。残すと、誰も使わなくなったデータが、共有 D1 を bind している他の Worker から読めるまま残る。
+
+bind を外したあとはマイグレーションで消せないので、ここだけは「DDL を手打ちしない」の例外として `wrangler d1 execute --remote` で消す。ユーザーの許可を取ってから、次の順で行う。
+
+1. 消す一覧を `sqlite_master` から引いて見せる(手順 2 のクエリ)
+2. 残す控えを取る: 一覧の export と、`pnpm exec wrangler d1 time-travel info kjfsm-shared-db` の bookmark
+3. 子(参照している側)のテーブルから先に消す。親を先に `DROP` すると、参照している行が暗黙に `DELETE` される(`/kjfsm-skills:migrate-d1`)
+
+   ```sh
+   pnpm exec wrangler d1 execute kjfsm-shared-db --remote --command \
+     "DROP TABLE <slug>_child; DROP TABLE <slug>_parent; DROP TABLE d1_migrations_<slug>;"
+   ```
+
+   テーブルを消すとそのインデックスも消える。
+
+4. 手順 1 のクエリを取り直し、0 行になったことを確かめる

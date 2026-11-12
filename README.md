@@ -99,17 +99,19 @@ Claude Code のプラグインとして配るエージェントスキル(スラ�
 
 ### サブエージェント
 
-プラグインには5体の[サブエージェント](https://code.claude.com/docs/en/sub-agents)が同梱されている。どれもスキルから起動される — 名前を覚えて呼ぶものではない。
+プラグインには7体の[サブエージェント](https://code.claude.com/docs/en/sub-agents)が同梱されている。どれもスキルから起動される — 名前を覚えて呼ぶものではない。
 
-| エージェント         | 呼ぶスキル                        | 何を押し出すか                                   |
-| -------------------- | --------------------------------- | ------------------------------------------------ |
-| `verifier`           | `/kjfsm-skills:verification-loop` | 型チェック・lint・テスト・ビルドの生ログ         |
-| `standards-reviewer` | `/kjfsm-skills:two-axis-review`   | Standards 軸(明文化された標準、スメル、Why not)  |
-| `spec-reviewer`      | `/kjfsm-skills:two-axis-review`   | Spec 軸(元のイシュー/PRD との突き合わせ)         |
-| `comment-pruner`     | `/kjfsm-skills:prune-comments`    | 触れたファイルのコメントを6段のルールで削る1パス |
-| `test-auditor`       | `/kjfsm-skills:prune-tests`       | テストの棚卸しと削除・統合・層・欠けの判定       |
+| エージェント         | 呼ぶスキル                                | 何を押し出すか                                   |
+| -------------------- | ----------------------------------------- | ------------------------------------------------ |
+| `verifier`           | `/kjfsm-skills:verification-loop`         | 型チェック・lint・テスト・ビルドの生ログ         |
+| `standards-reviewer` | `/kjfsm-skills:two-axis-review`           | Standards 軸(明文化された標準、スメル、Why not)  |
+| `spec-reviewer`      | `/kjfsm-skills:two-axis-review`           | Spec 軸(元のイシュー/PRD との突き合わせ)         |
+| `comment-pruner`     | `/kjfsm-skills:prune-comments`            | 触れたファイルのコメントを6段のルールで削る1パス |
+| `test-auditor`       | `/kjfsm-skills:prune-tests`               | テストの棚卸しと削除・統合・層・欠けの判定       |
+| `codebase-reviewer`  | `/kjfsm-skills:review-codebase`           | 担当領域のプロダクションコードの通読と指摘の表   |
+| `fix-implementer`    | `/kjfsm-skills:fix-on-integration-branch` | 割り当てられた項目の実装と統合ブランチ向けの PR  |
 
-理由は並列化ではなく **押し出し** である — 中間のツール結果は子のコンテキストに留まり、親に戻るのは要約だけになる。`verifier` が `Edit` も `Write` も持たないのは意図で、ゲートを回す側がゲートを動かせてはならない。`comment-pruner` を分けてあるのは、**直前に自分で書いたコメントは目的が思い出せてしまう分だけ残る**からである。`test-auditor` を分けてあるのは、数百のテストファイルを1つのコンテキストで読むと後半ほど判定が雑になるからで、`Write` は棚卸し表と欠けの表を書き出すためにだけ持つ。二軸のレビュアーを2体に分けてあるのも同じく意図で、**互いのコンテキストを汚染しないこと自体が成果物である。**
+理由は並列化ではなく **押し出し** である — 中間のツール結果は子のコンテキストに留まり、親に戻るのは要約だけになる。`verifier` が `Edit` も `Write` も持たないのは意図で、ゲートを回す側がゲートを動かせてはならない。`comment-pruner` を分けてあるのは、**直前に自分で書いたコメントは目的が思い出せてしまう分だけ残る**からである。`test-auditor` を分けてあるのは、数百のテストファイルを1つのコンテキストで読むと後半ほど判定が雑になるからで、`Write` は棚卸し表と欠けの表を書き出すためにだけ持つ。`codebase-reviewer` も同じ理由で領域ごとに分けてあり、`Write` は指摘の表のためにだけ持つ。`fix-implementer` を分けてあるのは、PR ごとの実装の文脈を子に留め、まとめ役の手元に差分を読んで統合ブランチへ入れる関門だけを残すためである。二軸のレビュアーを2体に分けてあるのも同じく意図で、**互いのコンテキストを汚染しないこと自体が成果物である。**
 
 ## これらのスキルが存在する理由
 
@@ -148,12 +150,14 @@ Claude Code のプラグインとして配るエージェントスキル(スラ�
 - **[d1-bound-parameters](./skills/kjfsm-skills/engineering/d1-bound-parameters/SKILL.md)** — Cloudflare D1 へ多数の値を渡すクエリの規律 — bound parameter は1文あたり100個まで。`D1_ERROR: too many SQL variables` が出たとき、D1 へ大量の行を INSERT するとき、`inArray` / `IN (...)` に長い ID の列を渡すとき、`db.batch()` で分割するときに使う。
 - **[dev-bypass-sign-in](./skills/kjfsm-skills/engineering/dev-bypass-sign-in/SKILL.md)** — 叩くだけでサインイン済みになる開発・E2E 用の入口(dev bypass)を作るか、成果物に戸を置かずに済ませる。成果物から開発用の戸を無くしたいとき、ログインの要る画面を E2E やエージェントから駆動したいとき、dev サーバーでソーシャルログインやパスワード登録を踏まずに座りたいとき、better-auth の `testUtils` の使いどころを決めるとき、既存の bypass の戸が本番の成果物に残っていないか確かめたいとき、他のスキルが認証済みのセッションを必要とするときに使う。
 - **[drizzle-generate-non-interactive](./skills/kjfsm-skills/engineering/drizzle-generate-non-interactive/SKILL.md)** — TTY の無いところで `drizzle-kit generate` を完走させる。エージェント・フック・CI から generate を回すとき、`Interactive prompts require a TTY terminal` で落ちたとき、`missing_hints` で exit 2 したとき、rename を含むスキーマ変更のマイグレーションを生成するときに使う。
+- **[fix-on-integration-branch](./skills/kjfsm-skills/engineering/fix-on-integration-branch/SKILL.md)** — レビューの一覧にある多数の項目を、統合ブランチへ向けた PR に割って実装役に並列で直させ、1本ずつ差分を読んで検証してから統合ブランチへ入れ、最後に既定ブランチ向けの PR を1本出して止まる。指摘の一覧をまとめて直してと頼まれたとき、ユーザーが見ていない間(夜間など)に多数の修正を進めておくとき、他のスキルが一覧の項目をまとめて直す進行を必要とするときに使う。
 - **[launch-implementation-session](./skills/kjfsm-skills/engineering/launch-implementation-session/SKILL.md)** — 設計を詰め終えたあとの実装を、別のセッションで `/kjfsm-skills:implement-and-review` に走らせ、終わったら立てた側へ知らせるよう最初の入力で伝える。grill や to-spec・to-tickets を終えて作業を始めるとき、「別セッションで実装して」と言われたとき、gh stack の層を別セッションで積むとき、他のスキルがチケットの実装セッションを立てる必要があるときに使う。
 - **[make-installable-pwa](./skills/kjfsm-skills/engineering/make-installable-pwa/SKILL.md)** — Web アプリ(主に Cloudflare Workers の Vite React SPA)を、ホーム画面へインストールできる PWA にする — manifest・アイコン・iOS 向けの meta を足し、Service Worker は既定で入れない。「PWA にして」「ホーム画面に追加できるように」「アプリとしてインストールできるように」と頼まれたとき、manifest やアプリのアイコンを作るとき、Service Worker を入れるか決めるとき、インストールできない・`Page.getInstallabilityErrors` が空にならないときに使う。standalone での見た目(safe area・100vh・ステータスバー)は `mobile-native` が持つ。
 - **[migrate-d1](./skills/kjfsm-skills/engineering/migrate-d1/SKILL.md)** — Cloudflare D1 のスキーマを変えるときの規律。drizzle-kit などが `PRAGMA foreign_keys=OFF` と `DROP TABLE` を含むマイグレーションを生成したとき、列を NOT NULL にしたいとき、CHECK 制約や複合ユニークを足したいとき、本番に `--remote` でマイグレーションを当てる前に使う。**D1 では `PRAGMA foreign_keys=OFF` が効かないので、生成物をそのまま流すと参照している側のテーブルが空になる。**
 - **[partyserver-on-durable-objects](./skills/kjfsm-skills/engineering/partyserver-on-durable-objects/SKILL.md)** — partyserver(`Server`)を Durable Object の上に載せるときの、公式ドキュメントに載っていない挙動。stub の取り方でリクエスト数が2倍になるとき、`onStart` に初期化や移行を置くとき、WebSocket のハイバネーションと keepalive を組むとき、RPC メソッドを足すか `onRequest` のままにするか決めるときに使う。素の Durable Objects の API は公式の `durable-objects` スキルが持つ。
 - **[prune-comments](./skills/kjfsm-skills/engineering/prune-comments/SKILL.md)** — 書かれてしまったコメントを1パスで削る。コミットや PR を出す直前、コメントが冗長・AI が書いたように見える・整理したいとき、他のスキルがコメントの掃除を必要とするときに使う。順序の決まった6段のルールと非対称の残す基準を当て、実行ごとのばらつきを潰す。
 - **[prune-tests](./skills/kjfsm-skills/engineering/prune-tests/SKILL.md)** — 既存のテストを全層まとめて読み、削除・統合・層の移動の候補と欠け(テストの無い分岐)を「どんな現実的な不具合を見逃すか」で洗い出して報告する。テストが多すぎる・遅い・振る舞いを変えない変更のたびに大量に落ちるとき、テストスイートを過不足なく整理したいとき、テストの層を整理したいとき、他のスキルが削れるテストの判定を必要とするときに使う。
+- **[review-codebase](./skills/kjfsm-skills/engineering/review-codebase/SKILL.md)** — コードベース全体(または指定した範囲)のプロダクションコードを領域に切って1ファイルも飛ばさずに読み、バグ・改善案・イマイチな実装・簡素化できる箇所を裏取りして、ID 付きの一覧にして止まる。差分ではなく既にあるコード全体をレビューしたいとき、「バグや改善点を洗い出して」「リファクタリングの候補を列挙して」と頼まれたとき、他のスキルがコードベース全体の指摘の一覧を必要とするときに使う。
 - **[scaffold-cf-app](./skills/kjfsm-skills/engineering/scaffold-cf-app/SKILL.md)** — 新規の Cloudflare Workers フルスタックアプリを、公式の `vite-react-template` から Free プランに収まる標準構成(Vite の React SPA + Hono の API Worker)へ層ごとに積んで組む。「環境構築」「新規プロジェクト」「新しいアプリを作る」「スキャフォールド」、`/kjfsm-personal:setup-cf-app` が写す元のテンプレートを見つけられなかったとき、テンプレート自体を公式の更新に合わせて作り直すときに使う。`/kjfsm-personal:setup-cf-app` が入っていれば、新規作成はそちらが先である。
 - **[setup-cf-access](./skills/kjfsm-skills/engineering/setup-cf-access/SKILL.md)** — Cloudflare Access を Worker・ホスト名・パスに、いつもの3層ルール(人間=指定メール / 機械=サービストークン / アプリ側に認証があるパス=bypass)で掛ける。「Access を掛ける」「認証を必要にする」「workers.dev が素通り」「Zero Trust のアプリを作る」で参照する。
 - **[setup-ci](./skills/kjfsm-skills/engineering/setup-ci/SKILL.md)** — 記録された検証ゲートを CI に敷き、ローカルの規律を機構に変える。ゲートを強制する仕組みがまだ無いとき（CI が無い、あるいは誰も走らせていない）、CI が `docs/agents/verification.md` とずれてきたとき、`/kjfsm-skills:setup-repo` の工程 C として使う。

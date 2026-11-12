@@ -1,6 +1,6 @@
 ---
 name: build-browser-game
-description: スマホでも遊べるブラウザゲームを、kjfsm の構成(Workers・Durable Objects。要るならログインと共有 D1)で新しく作って本番に出すまでの手順。「ゲームを作って」と頼まれたとき、リアルタイム対戦を Durable Objects で組むとき、放置や売り買いのように画面を閉じても進むゲームを DO に組むとき、ゲームの数(強さ・勝負の長さ)を調整するとき、対戦で幽霊の人・遅れて鳴る演出・誤った引き分けが出たときに使う。
+description: スマホでも遊べるブラウザゲームを、kjfsm の構成(Workers・Durable Objects。要るならログインと D1)で新しく作って本番に出すまでの手順。「ゲームを作って」と頼まれたとき、リアルタイム対戦を Durable Objects で組むとき、放置や売り買いのように画面を閉じても進むゲームを DO に組むとき、ゲームの数(強さ・勝負の長さ)を調整するとき、対戦で幽霊の人・遅れて鳴る演出・誤った引き分けが出たときに使う。
 ---
 
 # ブラウザゲームを作る
@@ -27,7 +27,7 @@ description: スマホでも遊べるブラウザゲームを、kjfsm の構成(
 
 5つはリアルタイムの対戦に合わせて書いてある。放置・ターン制・売り買いのように同じ瞬間に場にいなくてよいゲームを選んだら、[ASYNC.md](ASYNC.md) の「読み替え」で意図に沿って読み、以後の手順は NETCODE.md と SLICES.md の代わりに ASYNC.md を足す。
 
-ログインとランキングを入れるかも、ここでゲーム性から決める。通算の成績を競うことが遊ぶ目当てになるなら入れ、一区切りごとの優勝で足りるなら入れない。入れると、ログインの手間と、IdP・共有 D1 の維持がついてくる。遊んだユーザーが、入れたものを不要と判断して外すこともある。
+ログインとランキングを入れるかも、ここでゲーム性から決める。通算の成績を競うことが遊ぶ目当てになるなら入れ、一区切りごとの優勝で足りるなら入れない。入れると、ログインの手間と、IdP・D1 の維持がついてくる。遊んだユーザーが、入れたものを不要と判断して外すこともある。
 
 ユーザーが「任せる」と言っていれば自分で決める。ユーザーが自分で決めたいなら、土台を起こしたあとに `/mattpocock-skills:grill-with-docs` で詰める。決めた語は `CONTEXT.md` に置く。
 
@@ -35,13 +35,14 @@ description: スマホでも遊べるブラウザゲームを、kjfsm の構成(
 
 ## 2. 土台を起こす
 
-`cf-workers-full-stack-template` から起こす。手順はテンプレートの README「フォークしたら」にある。`/kjfsm-skills:setup-repo` が敷くもの(検証ゲート・rules・CI・lefthook・イシュートラッカー)と、kjfsm-auth の RP・共有 D1 の相乗りがそろっている。README に無いことは次のとおり。
+`cf-workers-full-stack-template` から起こす。手順はテンプレートの README「フォークしたら」にある。`/kjfsm-skills:setup-repo` が敷くもの(検証ゲート・rules・CI・lefthook・イシュートラッカー)と、kjfsm-auth の RP と D1 がそろっている。README に無いことは次のとおり。
 
 - 写す前に `git fetch` し、`git archive origin/main | tar -x -C <新しいリポジトリ>` で写す。手元の clone は古いことがある
 - テンプレートが `kjfsm/cf-workers-full-stack-template#11` より前の版なら、README の置き換えは `git grep` ではなく `grep -r --exclude-dir=node_modules` で探し、`check:migrations` を #11 の `existsAt` の形に直す。写した直後のファイルは未追跡で `git grep` に拾われず、origin/main に無い `wrangler.jsonc` で `git show` が落ちる
+- テンプレートの D1 は共有 D1(`kjfsm-shared-db`)を bind している。共有 D1 には入らないので、「フォークしたら」の slug の空きの確認は飛ばす。ログインを入れるなら、本番の前に専用の D1 へ替える([ACCOUNT.md](ACCOUNT.md) の「本番」の 1)
 - 手元のポートは `grep -rhoE 'port: ?[0-9]{4}' ~/github/kjfsm/*/vite.config.ts` で空きを探す
 - `.gitignore` に `.claude/worktrees/` を足す。テンプレートには無く、本体のチェックアウトで worktree が未追跡に出る
-- ログインを入れないなら、RP・D1・開発用の入口をここで外す。残すと、使わない secret と共有 D1 の相乗りが、本番に出す前提として残る。外し方は [ACCOUNT.md](ACCOUNT.md) の「外す」の 1〜4
+- ログインを入れないなら、RP・D1・開発用の入口をここで外す。残すと、使わない secret と D1 が、本番に出す前提として残る。外し方は [ACCOUNT.md](ACCOUNT.md) の「外す」の 1〜4
 
 完了基準: 名前・slug・ポートを置き換え、テンプレートの検証ゲートが緑のままコミットした。
 

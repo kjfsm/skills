@@ -1,6 +1,6 @@
 ---
 name: scaffold-cf-app
-description: 新規の Cloudflare Workers フルスタックアプリを、公式の `vite-react-template` から アクセスの速い標準構成(Vite の React SPA + Hono の API Worker)へ層ごとに積んで組む。「環境構築」「新規プロジェクト」「新しいアプリを作る」「スキャフォールド」、`/kjfsm-personal:setup-cf-app` が写す元のテンプレートを見つけられなかったとき、テンプレート自体を公式の更新に合わせて作り直すときに使う。`/kjfsm-personal:setup-cf-app` が入っていれば、新規作成はそちらが先である。
+description: 新規の Cloudflare Workers フルスタックアプリを、公式の `vite-react-template` からアクセスの速い標準構成(Vite の React SPA + Hono の API Worker)へ層ごとに積んで組む。「環境構築」「新規プロジェクト」「新しいアプリを作る」「スキャフォールド」、`/kjfsm-personal:setup-cf-app` が写す元のテンプレートを見つけられなかったとき、テンプレート自体を公式の更新に合わせて作り直すときに使う。`/kjfsm-personal:setup-cf-app` が入っていれば、新規作成はそちらが先である。
 ---
 
 # 公式テンプレートから標準構成を組む

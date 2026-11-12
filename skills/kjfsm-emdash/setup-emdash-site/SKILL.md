@@ -31,7 +31,7 @@ cd <名前> && git init && git add -A && git commit -m "create emdash の雛形"
 ```
 
 - **`--yes` を外すと、フラグで渡していない項目を対話で聞き、TTY の無いところでは止まる。** 逆に `--yes` 付きでは、省いた項目が黙って既定値(`cloudflare`・`blog`)で埋まる — 手順 1 で決めた値は全部フラグで渡す。`--template` は `cloudflare:<テンプレート>` の形で、プラットフォームも一緒に決める。
-- **サンドボックスのプラグインは既定で無効にする(`--no-sandboxed-plugins`)。** 有効にするには Worker Loader の binding が要るが、`sandboxed: [...]` で登録するプラグインがまだ無いので、無効のままにする。`--yes` だけでも無効になるが、あとから読んで意図が分かるように明示する。無効にしても `astro.config.mjs` の `sandboxed: [...]` は残り、そこに並んだプラグインは読み込まれない — 片付けは手順 5 のやることリストが扱う。使うと決めたら、あとから [Plugin Sandbox](https://docs.emdashcms.com/deployment/plugin-sandbox/) の手順で有効にする。
+- **サンドボックスのプラグインは既定で無効にする(`--no-sandboxed-plugins`)。** 有効にするには Worker Loader の binding が要り、それを使えないアカウントでは初回のデプロイが落ちる。`--yes` だけでも無効になるが、あとから読んで意図が分かるように明示する。無効にしても `astro.config.mjs` の `sandboxed: [...]` は残り、そこに並んだプラグインは読み込まれない — 片付けは手順 5 のやることリストが扱う。使うと決めたら、あとから [Plugin Sandbox](https://docs.emdashcms.com/deployment/plugin-sandbox/) の手順で有効にする。
 - **git は初期化されない。** 手を入れる前の雛形だけのコミットを作っておくと、あとで `git diff <そのコミット>` がそのまま「テンプレートからどこを変えたか」になる — `updating-emdash` がテンプレート由来のコードを直すときの足場になる。
 - `.env` に `EMDASH_ENCRYPTION_KEY` が書かれる(gitignore 済み)。**パスワードマネージャーへ控えるようユーザーに伝える。** 失うと、暗号化して保存された設定値が読めなくなる。
 

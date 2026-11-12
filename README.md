@@ -101,15 +101,15 @@ Claude Code のプラグインとして配るエージェントスキル(スラ�
 
 プラグインには7体の[サブエージェント](https://code.claude.com/docs/en/sub-agents)が同梱されている。どれもスキルから起動される — 名前を覚えて呼ぶものではない。
 
-| エージェント         | 呼ぶスキル                                | 何を押し出すか                                   |
-| -------------------- | ----------------------------------------- | ------------------------------------------------ |
-| `verifier`           | `/kjfsm-skills:verification-loop`         | 型チェック・lint・テスト・ビルドの生ログ         |
-| `standards-reviewer` | `/kjfsm-skills:two-axis-review`           | Standards 軸(明文化された標準、スメル、Why not)  |
-| `spec-reviewer`      | `/kjfsm-skills:two-axis-review`           | Spec 軸(元のイシュー/PRD との突き合わせ)         |
-| `comment-pruner`     | `/kjfsm-skills:prune-comments`            | 触れたファイルのコメントを6段のルールで削る1パス |
-| `test-auditor`       | `/kjfsm-skills:prune-tests`               | テストの棚卸しと削除・統合・層・欠けの判定       |
-| `codebase-reviewer`  | `/kjfsm-skills:review-codebase`           | 担当領域のプロダクションコードの通読と指摘の表   |
-| `fix-implementer`    | `/kjfsm-skills:fix-on-integration-branch` | 割り当てられた項目の実装と統合ブランチ向けの PR  |
+| エージェント         | 呼ぶスキル                                | 何を押し出すか                                    |
+| -------------------- | ----------------------------------------- | ------------------------------------------------- |
+| `verifier`           | `/kjfsm-skills:verification-loop`         | 型チェック・lint・テスト・ビルドの生ログ          |
+| `standards-reviewer` | `/kjfsm-skills:two-axis-review`           | Standards 軸(標準、スメル、Why not、食い違う記述) |
+| `spec-reviewer`      | `/kjfsm-skills:two-axis-review`           | Spec 軸(元のイシュー/PRD との突き合わせ)          |
+| `comment-pruner`     | `/kjfsm-skills:prune-comments`            | 触れたファイルのコメントを6段のルールで削る1パス  |
+| `test-auditor`       | `/kjfsm-skills:prune-tests`               | テストの棚卸しと削除・統合・層・欠けの判定        |
+| `codebase-reviewer`  | `/kjfsm-skills:review-codebase`           | 担当領域のプロダクションコードの通読と指摘の表    |
+| `fix-implementer`    | `/kjfsm-skills:fix-on-integration-branch` | 割り当てられた項目の実装と統合ブランチ向けの PR   |
 
 理由は並列化ではなく **押し出し** である — 中間のツール結果は子のコンテキストに留まり、親に戻るのは要約だけになる。`verifier` が `Edit` も `Write` も持たないのは意図で、ゲートを回す側がゲートを動かせてはならない。`comment-pruner` を分けてあるのは、**直前に自分で書いたコメントは目的が思い出せてしまう分だけ残る**からである。`test-auditor` を分けてあるのは、数百のテストファイルを1つのコンテキストで読むと後半ほど判定が雑になるからで、`Write` は棚卸し表と欠けの表を書き出すためにだけ持つ。`codebase-reviewer` も同じ理由で領域ごとに分けてあり、`Write` は指摘の表のためにだけ持つ。`fix-implementer` を分けてあるのは、PR ごとの実装の文脈を子に留め、まとめ役の手元に差分を読んで統合ブランチへ入れる関門だけを残すためである。二軸のレビュアーを2体に分けてあるのも同じく意図で、**互いのコンテキストを汚染しないこと自体が成果物である。**
 
@@ -165,7 +165,7 @@ Claude Code のプラグインとして配るエージェントスキル(スラ�
 - **[setup-playwright](./skills/kjfsm-skills/engineering/setup-playwright/SKILL.md)** — Playwright の E2E を入れ、ブラウザをどの層で用意するか決める。E2E をこれから入れるとき、`Executable doesn't exist` や `Missing system dependencies` が出たとき、コンテナやクラウドのサンドボックスに置いてあるブラウザと Playwright が要求するビルド番号がずれたとき、CI でだけブラウザの取得に失敗するとき、`playwright install` をセットアップスクリプト・SessionStart フック・CI のどこに置くか決めるときに使う。
 - **[setup-rules](./skills/kjfsm-skills/engineering/setup-rules/SKILL.md)** — このリポジトリのルールを `.claude/rules/` と `AGENTS.md` の2層に敷く — パスに応じて自動注入されるパス別ルールと、全セッションに効く絶対ルール。Claude Code を使うリポジトリを初めて設定するとき、`.claude/rules/` がまだ無いとき、同じ指摘を2回以上受けてルールに落としたいとき、`/kjfsm-skills:setup-repo` の工程 B として使う。
 - **[setup-skills](./skills/kjfsm-skills/engineering/setup-skills/SKILL.md)** — このリポジトリをエンジニアリング系スキル向けに設定する — イシュートラッカー、トリアージラベルの語彙、ドメインドキュメントの配置、検証ゲート、応答と記述の規約。`docs/agents/` がまだ無いとき、他のエンジニアリング系スキルを初めて使う前、`/kjfsm-skills:setup-repo` の工程 A として使う。
-- **[two-axis-review](./skills/kjfsm-skills/engineering/two-axis-review/SKILL.md)** — まだコミットしていない編集と新規ファイルまで含めて、差分を kjfsm のレビュアー2体で並列にレビューする — Standards(明文化された標準、Fowler のスメル、書かれなかった Why not)と Spec(元のイシュー/PRD)。範囲は固定した基点(コミット、ブランチ、タグ)とのマージベースから作業ツリーまで。コミット前の作業をレビューしたいとき、ブランチ・PR・進行中の変更をレビューしたいとき、「X 以降をレビューして」と求めたとき、他のスキルが差分のレビューを必要とするときに使う。
+- **[two-axis-review](./skills/kjfsm-skills/engineering/two-axis-review/SKILL.md)** — まだコミットしていない編集と新規ファイルまで含めて、差分を kjfsm のレビュアー2体で並列にレビューする — Standards(明文化された標準、Fowler のスメル、書かれなかった Why not、実装と食い違う記述)と Spec(元のイシュー/PRD)。範囲は固定した基点(コミット、ブランチ、タグ)とのマージベースから作業ツリーまで。コミット前の作業をレビューしたいとき、ブランチ・PR・進行中の変更をレビューしたいとき、「X 以降をレビューして」と求めたとき、他のスキルが差分のレビューを必要とするときに使う。
 - **[verification-loop](./skills/kjfsm-skills/engineering/verification-loop/SKILL.md)** — 変更が本当に動くことを、記録された検証ゲートのクリーンラン — 型チェック、lint、テスト、ビルド、そして実際に動かしての観測 — で確かめる。ユーザーが動作確認や検証を求めたとき、変更を完了と宣言する前(コミットや PR を出す直前)、他のスキルが作業の検証を必要とするときに使う。
 - **[where-to-write-what](./skills/kjfsm-skills/engineering/where-to-write-what/SKILL.md)** — コード・テスト・コメント・JSDoc・コミットメッセージ・PR 本文・ADR・docs のどこに何を書くかを決めるルーティング規律 — コードには How、テストには What、コミットログには Why、コメントには Why not。コメントを書くか消すか判断するとき、JSDoc に何を載せるか決めるとき、コミットメッセージや PR 本文を書くとき、README を足すか迷ったとき、実装の背景や設計判断をどこに残すか迷ったときに使う。
 - **[workers-tests](./skills/kjfsm-skills/engineering/workers-tests/SKILL.md)** — Cloudflare Workers のプロジェクトでテストスイートを作る・立て直すときの規律。テストが1本も無いところから始めるとき、vitest.config が複雑すぎる・テストが遅い・OOM する・vi.mock だらけで信用できないとき、@cloudflare/vitest-plugin(旧 @cloudflare/vitest-pool-workers)を上げたら壊れたとき、React Router などの SSR を `main` に載せていて1ファイルに十数秒かかる・`applyD1Migrations` が遅い・`createTestHarness` で HTTP の層を作るとき、Workers / D1 / Durable Objects / Queues にテストを入れたいときに使う。

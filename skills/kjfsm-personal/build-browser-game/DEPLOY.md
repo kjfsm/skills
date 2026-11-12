@@ -28,7 +28,7 @@ non-production branches を入れると、PR ごとに `npx wrangler preview` �
 
 連携を人間の手順にしているのは、本番へ確認なしに流れる設定だからである。エージェントが Builds API でトリガーを作ろうとしても、auto mode の判定に止められる。GitHub App は kjfsm のアカウントに入っていて、新しいリポジトリも読める。Builds API の `config_autofill` が通れば、読めている。
 
-続けて、Settings → Domains & Routes で `<app>.kjfsm.net` を付ける。ドメインを `wrangler.json` の `routes` に書かないのは、ログインを入れた日に手元の dev で better-auth が 403 を返すからである(→ `/kjfsm-personal:connect-kjfsm-auth`)。
+続けて、`<app>.kjfsm.net` を付ける。テンプレートの README「本番に出す前の準備」のとおり `wrangler.json` の `routes` に custom domain を足すか、Settings → Domains & Routes で付ける。`routes` に書いたなら、ログインを入れた日に手元の dev で better-auth が 403 を返さないかを確かめる(→ `/kjfsm-personal:connect-kjfsm-auth`。vite-plugin の dev サーバーでは未確認)。README の同じ節にある `pnpm deploy` と `pnpm db:migrate:remote` は人間が手で出すときの手順で、ここでは使わない。
 
 完了基準: 最初のビルドが成功し、カスタムドメインで開ける。
 

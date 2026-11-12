@@ -29,4 +29,4 @@ partyserver そのものの挙動は `/kjfsm-skills:partyserver-on-durable-objec
 
 - **音は pointerdown だけでなく、pointerup・click・keydown でも解禁を試す。** iOS の Safari は pointerdown を利用者の操作に数えない
 - **Wake Lock は start で取り、表に戻るたびに取り直す。** destroy のあとに解決した lock は release する
-- **プレイヤー名などの localStorage は `useSyncExternalStore` で読み、サーバー側では null を返す。** サーバーで描かれうる部品が描画中に直接読むと、ハイドレーションで食い違う
+- **プレイヤー名などの localStorage は `useSyncExternalStore` で読む。** 別のタブで名前を変えたときの `storage` イベントも同じ購読で拾え、描画中に直接読む書き方より古い値が残らない

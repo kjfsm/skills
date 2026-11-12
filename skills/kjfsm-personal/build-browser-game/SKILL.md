@@ -39,11 +39,13 @@ description: スマホでも遊べるブラウザゲームを、kjfsm の構成(
 
 ゲームに要るもののうち、次の3つはテンプレートに無い。写したあと、最初のチケットより前にここで足す — チケットごとのセッションは、検証ゲートと E2E がそろっている前提で `implement-and-review` を回す。
 
-- **Durable Objects** — 部屋の DO を partyserver で載せる → `partyserver-on-durable-objects` スキル。経路の置き場所とテストでの export は [NETCODE.md](NETCODE.md) にある
+- **Durable Objects** — `wrangler.json` の `durable_objects` の束縛と `migrations`(`new_sqlite_classes`)の宣言は、公式の `durable-objects` スキル(cloudflare プラグイン)。その上に partyserver を挟むときの差分は `partyserver-on-durable-objects` スキル。経路の置き場所とテストでの export は [NETCODE.md](NETCODE.md) にある
 - **E2E** — 手順 3 のシームの「画面は Playwright で3台を駆動する」に要る → `setup-playwright` スキル。`webServer` のポートは環境変数(`E2E_PORT`)で替えられるようにする(手順 5 で並べるセッションが使う)
 - **CI** — テンプレートは lefthook の pre-push で検証ゲートを回すが、CI は持たない → `setup-ci` スキル。private のリポジトリでは CI がマージ前に回らないので、止めるのは pre-push のままである。E2E を足したら、pre-push のゲートにも足す(テンプレートの `docs/agents/verification.md` は「ゲートを足したら両方に書く」)
 
 README に無いことは次のとおり。
+
+- 「フォークしたら」の D1 を作る手順(`wrangler d1 create`)は本番のアカウントに書く。作る前にユーザーに確認を取る
 
 - 開発サーバーのポートはテンプレートで 8808 に固定してある(`vite.config.ts` の `strictPort`)。「フォークしたら」に沿って替える前に、`grep -rhoE 'port: ?[0-9]{4}' ~/github/kjfsm/*/vite.config.ts` で空きを探す
 - ログインを入れないなら、「フォークしたら」の D1 を作る手順と認証先の切り替えは飛ばし、RP・D1・開発用の入口をここで外す。残すと、使わない secret と D1 が、本番に出す前提として残る。外し方は [ACCOUNT.md](ACCOUNT.md) の「外す」の 1〜4
